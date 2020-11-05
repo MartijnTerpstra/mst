@@ -1,0 +1,11 @@
+
+For SIMD matrix implementations:
+
+//-------------------------------------------------------------------------------------
+// DirectXMathMatrix.inl -- SIMD C++ Math library
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+//
+// http://go.microsoft.com/fwlink/?LinkID=615560
+//-------------------------------------------------------------------------------------

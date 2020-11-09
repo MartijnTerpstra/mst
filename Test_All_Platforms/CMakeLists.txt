@@ -27,7 +27,7 @@ target_compile_options("test_${CATEGORY}_${TEST_NAME}"
 
 endif()
 
-#ParseAndAddCatchTests("test_${CATEGORY}_${TEST_NAME}")
+ParseAndAddCatchTests("test_${CATEGORY}_${TEST_NAME}")
 
 endmacro(add_mst_test)
 

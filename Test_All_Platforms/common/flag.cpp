@@ -35,6 +35,13 @@ enum class Flags : uint32_t
 	Value2
 };
 
+enum class PreshiftedFlags : uint32_t
+{
+	Value0 = 1 << 0,
+	Value1 = 1 << 1,
+	Value2 = 1 << 2
+};
+
 using mst::flag;
 
 TEST_CASE("flag_empty", "[common]")
@@ -114,4 +121,83 @@ TEST_CASE("flag_toggle", "[common]")
 	REQUIRE(!f.is_enabled(Flags::Value0));
 	REQUIRE(f.is_enabled(Flags::Value1));
 	REQUIRE(!f.is_enabled(Flags::Value2));
+}
+
+TEST_CASE("flag_preshifted_empty", "[common]")
+{
+	flag<PreshiftedFlags, mst::flag_traits_preshifted<PreshiftedFlags>> f;
+
+	REQUIRE(f.get() == 0);
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
+}
+
+TEST_CASE("flag_preshifted_enable_disable", "[common]")
+{
+	flag<PreshiftedFlags, mst::flag_traits_preshifted<PreshiftedFlags>> f;
+
+	REQUIRE(f.get() == 0);
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
+
+	f.enable(PreshiftedFlags::Value1);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
+
+	f.enable(PreshiftedFlags::Value2);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value2));
+
+	f.disable(PreshiftedFlags::Value1);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value2));
+
+	f.disable(PreshiftedFlags::Value2);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
+}
+
+TEST_CASE("flag_preshifted_toggle", "[common]")
+{
+	flag<PreshiftedFlags, mst::flag_traits_preshifted<PreshiftedFlags>> f;
+
+	REQUIRE(f.get() == 0);
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
+
+	f.toggle(PreshiftedFlags::Value1);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
+
+	f.toggle(PreshiftedFlags::Value1);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
+
+	f.toggle(PreshiftedFlags::Value1);
+	f.toggle(PreshiftedFlags::Value2);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value2));
+
+	f.toggle(PreshiftedFlags::Value2);
+
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value0));
+	REQUIRE(f.is_enabled(PreshiftedFlags::Value1));
+	REQUIRE(!f.is_enabled(PreshiftedFlags::Value2));
 }

@@ -1,7 +1,7 @@
 name: CMake Windows
 
 on:
-  push:
+  pull_request:
     branches: [ main, develop ]
 
 env:

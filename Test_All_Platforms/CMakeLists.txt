@@ -38,6 +38,7 @@ add_mst_test(algorithm container)
 add_mst_test(common common)
 add_mst_test(common compiletime)
 add_mst_test(common flag)
+ADD_MST_TEST(common hash)
 add_mst_test(common printf)
 add_mst_test(common uuid)
 

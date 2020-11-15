@@ -29,7 +29,8 @@ namespace mst {
 
 namespace _Details {
 
-_MST_CONSTEXPR17 uint32_t _Hash32(const char* _First, size_t _Count) noexcept
+template<typename IntegerType>
+_MST_CONSTEXPR17 uint32_t _Hash32(const IntegerType* _First, size_t _Count) noexcept
 {
 	const uint32_t _FNV_offset_basis = 2166136261UL;
 	const uint32_t _FNV_prime = 16777619UL;
@@ -37,14 +38,15 @@ _MST_CONSTEXPR17 uint32_t _Hash32(const char* _First, size_t _Count) noexcept
 	uint32_t _Hash = _FNV_offset_basis;
 	for(size_t _Next = 0; _Next < _Count; ++_Next)
 	{ // fold in another byte
-		_Hash ^= (uint32_t)_First[_Next];
+		_Hash ^= static_cast<uint32_t>(_First[_Next]);
 		_Hash *= _FNV_prime;
 	}
 
 	return _Hash;
 }
 
-_MST_CONSTEXPR17 uint64_t _Hash64(const char* _First, size_t _Count) noexcept
+template<typename IntegerType>
+_MST_CONSTEXPR17 uint64_t _Hash64(const IntegerType* _First, size_t _Count) noexcept
 {
 	const uint64_t _FNV_offset_basis = 14695981039346656037ULL;
 	const uint64_t _FNV_prime = 1099511628211ULL;
@@ -52,7 +54,7 @@ _MST_CONSTEXPR17 uint64_t _Hash64(const char* _First, size_t _Count) noexcept
 	uint64_t _Hash = _FNV_offset_basis;
 	for(uint64_t _Next = 0; _Next < _Count; ++_Next)
 	{ // fold in another byte
-		_Hash ^= (uint64_t)_First[_Next];
+		_Hash ^= static_cast<uint64_t>(_First[_Next]);
 		_Hash *= _FNV_prime;
 	}
 
@@ -138,7 +140,8 @@ inline ::std::string _Typename_of_impl(const char* _First)
 
 #elif _MST_USING_GCC_COMPILER
 
-_MST_CONSTEXPR17 size_t _Findstr(const char* _First, size_t _First_length, const char* _Needle) noexcept
+_MST_CONSTEXPR17 size_t _Findstr(
+	const char* _First, size_t _First_length, const char* _Needle) noexcept
 {
 	const size_t _Needle_length = std::char_traits<char>::length(_Needle);
 
@@ -201,7 +204,8 @@ inline ::std::string _Typename_of_impl(const char* _First)
 
 #elif _MST_USING_CLANG_COMPILER
 
-_MST_CONSTEXPR17 size_t _Findstr(const char* _First, size_t _First_length, const char* _Needle) noexcept
+_MST_CONSTEXPR17 size_t _Findstr(
+	const char* _First, size_t _First_length, const char* _Needle) noexcept
 {
 	const size_t _Needle_length = std::char_traits<char>::length(_Needle);
 

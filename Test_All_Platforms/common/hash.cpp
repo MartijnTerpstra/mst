@@ -44,11 +44,11 @@ TEST_CASE("hash64_literal_std_string_are_equal", "[common]")
 TEST_CASE("hash32_different_values_give_different_hashes", "[common]")
 {
 	REQUIRE(mst::hash32("1") != mst::hash32("2"));
-	REQUIRE(mst::hash32("test1") == mst::hash32(std::string("test2")));
+	REQUIRE(mst::hash32("test1") != mst::hash32(std::string("test2")));
 }
 
 TEST_CASE("hash64_different_values_give_different_hashes", "[common]")
 {
 	REQUIRE(mst::hash64("1") != mst::hash64("2"));
-	REQUIRE(mst::hash64("test1") == mst::hash64(std::string("test2")));
+	REQUIRE(mst::hash64("test1") != mst::hash64(std::string("test2")));
 }

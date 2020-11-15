@@ -100,8 +100,7 @@ inline uint32_t hash32(const ::std::string& stdString)
 
 inline uint32_t hash32(const ::std::wstring& stdString)
 {
-	return ::mst::_Details::_Hash32(
-		reinterpret_cast<const char*>(stdString.data()), stdString.length());
+	return ::mst::_Details::_Hash32(stdString.data(), stdString.length());
 }
 
 #ifdef _MDLL_STRING_H

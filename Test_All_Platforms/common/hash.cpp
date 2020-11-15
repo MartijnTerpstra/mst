@@ -23,16 +23,32 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-#include <mcore.h>
-#include <mstream.h>
+#include <mcommon.h>
+#include <string>
 
-namespace mst {
-
-class instream
+TEST_CASE("hash32_literal_std_string_are_equal", "[common]")
 {
+	REQUIRE(mst::hash32("") == mst::hash32(std::string("")));
+	REQUIRE(mst::hash32("test") == mst::hash32(std::string("test")));
+}
 
-}; // class instream
+TEST_CASE("hash64_literal_std_string_are_equal", "[common]")
+{
+	REQUIRE(mst::hash64("") == mst::hash64(std::string("")));
+	REQUIRE(mst::hash64("test") == mst::hash64(std::string("test")));
+}
 
-}; // namespace mst
+TEST_CASE("hash32_different_values_give_different_hashes", "[common]")
+{
+	REQUIRE(mst::hash32("1") != mst::hash32("2"));
+	REQUIRE(mst::hash32("test1") == mst::hash32(std::string("test2")));
+}
+
+TEST_CASE("hash64_different_values_give_different_hashes", "[common]")
+{
+	REQUIRE(mst::hash64("1") != mst::hash64("2"));
+	REQUIRE(mst::hash64("test1") == mst::hash64(std::string("test2")));
+}

@@ -67,7 +67,7 @@ public:
 
 		std::vector<Integer> randomVector;
 
-		const auto size = random_int(minSize, maxSize);
+		const auto size = scalar_int(minSize, maxSize);
 
 		randomVector.reserve(size);
 
@@ -84,7 +84,7 @@ public:
 	{
 		std::vector<Integer> randomVector;
 
-		const auto size = random_int(minSize, maxSize);
+		const auto size = scalar_int(minSize, maxSize);
 
 		randomVector.reserve(size);
 

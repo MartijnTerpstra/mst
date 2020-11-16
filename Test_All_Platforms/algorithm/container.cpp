@@ -42,6 +42,14 @@ void CheckIsSorted(const std::vector<int>& input)
 	}
 }
 
+void CheckIsReverseSorted(const std::vector<int>& input)
+{
+	for(auto it = input.begin(); it != input.end() - 1; ++it)
+	{
+		REQUIRE(*it >= *(it + 1));
+	}
+}
+
 TEST_CASE("algorithm_container_sort", "[algorithm][container]")
 {
 	random_data_generator rdg;
@@ -65,7 +73,7 @@ TEST_CASE("algorithm_container_sort_predictate", "[algorithm][container]")
 
 	mst::sort(input, [](int l, int r) { return r < l; });
 
-	CheckIsSorted(input);
+	CheckIsReverseSorted(input);
 }
 
 TEST_CASE("algorithm_container_find", "[algorithm][container]")

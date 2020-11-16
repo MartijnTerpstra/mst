@@ -295,13 +295,6 @@ private:
 					   oldIndex, index + 1, std::memory_order_acq_rel))
 					break;
 
-#if _MST_TESTING
-#if MST_DEBUGMODE
-				m_buffers[index].load(std::memory_order_relaxed)->check_empty();
-#endif
-#endif
-
-
 				buffer = m_buffers[index].exchange(nullptr, std::memory_order_relaxed);
 				assert(buffer);
 				delete buffer;
@@ -355,59 +348,6 @@ private:
 	alignas(64) std::atomic_uint32_t m_readerCounts[c_maxBufferCount];
 	alignas(64) std::atomic_uint32_t m_writerCounts[c_maxBufferCount];
 	alignas(64) std::atomic_uint32_t m_createBufferMutex;
-
-#if _MST_TESTING
-
-public:
-	void check_empty() const noexcept
-	{
-		for(auto& b : m_buffers)
-		{
-			const auto ptr = b.load();
-			if(ptr)
-				ptr->check_empty();
-		}
-	}
-
-	void export_states_and_values(const std::string& nameBase) const noexcept
-	{
-		std::ofstream outfile(nameBase + ".csv");
-		outfile << "Push Index;Pop Index" << std::endl;
-		outfile << m_pushIndex.load() << ';' << m_popIndex.load() << std::endl;
-
-		outfile << std::endl << "Reader Counts;Reader State;Reader References" << std::endl;
-		for(auto& r : m_readerCounts)
-		{
-			const auto rval = r.load();
-			outfile << rval << ';' << (rval >> 30) << ';' << (rval & 0x3FFFFFFF) << std::endl;
-		}
-
-		outfile << std::endl << "Writer Counts;Writer State;Writer References" << std::endl;
-		for(auto& w : m_writerCounts)
-		{
-			const auto wval = w.load();
-			outfile << wval << ';' << (wval >> 30) << ';' << (wval & 0x3FFFFFFF) << std::endl;
-		}
-
-		outfile << std::endl << "Buffer;State;Size;Capacity" << std::endl;
-		for(auto& b : m_buffers)
-		{
-			outfile << (&b - m_buffers) << ';';
-
-			const auto ptr = b.load();
-			if(ptr)
-			{
-				outfile << "alive" << ';' << ptr->size_approx() << ptr->capacity() << std::endl;
-				ptr->export_states_and_values(nameBase);
-			}
-			else
-			{
-				outfile << "null" << ';' << 0 << std::endl;
-			}
-		}
-	}
-
-#endif
 
 }; // class queue
 

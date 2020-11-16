@@ -229,8 +229,6 @@ void TestReadersWriters(bool sequential = false)
 			FAIL("Invalid visiting: " << i << " is visited " << isVisited[i].load() << " times");
 		}
 	}
-
-	q.check_empty();
 }
 
 TEST_CASE("lock_free_queue_multithreaded_spsc", "[lock_free][queue]")

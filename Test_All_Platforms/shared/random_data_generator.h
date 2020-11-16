@@ -23,69 +23,82 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#pragma once
 
-#include <random_data_generator.h>
-
-using namespace ::Catch::Generators;
-using namespace ::mst::tests;
-
-#include <malgorithm_container.h>
+#include <random>
 #include <vector>
 
-void CheckIsSorted(const std::vector<int>& input)
+namespace mst {
+namespace tests {
+
+class random_data_generator
 {
-	for(auto it = input.begin(); it != input.end() - 1; ++it)
+public:
+	template<typename Integer>
+	Integer scalar_int(Integer minValue, Integer maxValue)
 	{
-		REQUIRE(*it <= *(it + 1));
+		std::uniform_int_distribution<Integer> dist{ minValue, maxValue };
+
+		return dist(m_engine);
 	}
+
+	template<typename Integer>
+	std::vector<Integer> vector_int(size_t size, Integer minValue, Integer maxValue)
+	{
+		std::uniform_int_distribution<Integer> dist{ minValue, maxValue };
+
+		std::vector<Integer> randomVector;
+
+		randomVector.reserve(size);
+
+		for(size_t i = 0; i < size; ++i)
+		{
+			randomVector.push_back(dist(m_engine));
+		}
+
+		return randomVector;
+	}
+
+	template<typename Integer>
+	std::vector<Integer> vector_int(
+		size_t minSize, size_t maxSize, Integer minValue, Integer maxValue)
+	{
+		std::uniform_int_distribution<Integer> dist{ minValue, maxValue };
+
+		std::vector<Integer> randomVector;
+
+		const auto size = random_int(minSize, maxSize);
+
+		randomVector.reserve(size);
+
+		for(size_t i = 0; i < size; ++i)
+		{
+			randomVector.push_back(dist(m_engine));
+		}
+
+		return randomVector;
+	}
+
+	template<typename Integer>
+	std::vector<Integer> vector_int(size_t minSize, size_t maxSize, Integer value)
+	{
+		std::vector<Integer> randomVector;
+
+		const auto size = random_int(minSize, maxSize);
+
+		randomVector.reserve(size);
+
+		for(size_t i = 0; i < size; ++i)
+		{
+			randomVector.push_back(value);
+		}
+
+		return randomVector;
+	}
+
+private:
+	std::mt19937_64 m_engine;
+};
+
 }
-
-TEST_CASE("algorithm_container_sort", "[algorithm][container]")
-{
-	random_data_generator rdg;
-
-	const auto elemCount = GENERATE(range<size_t>(2, 1000));
-
-	auto input = rdg.vector_int(elemCount, INT_MIN, INT_MAX);
-
-	mst::sort(input);
-
-	CheckIsSorted(input);
-}
-
-TEST_CASE("algorithm_container_sort_predictate", "[algorithm][container]")
-{
-	random_data_generator rdg;
-
-	const auto elemCount = GENERATE(range<size_t>(2, 1000));
-
-	auto input = rdg.vector_int(elemCount, INT_MIN, INT_MAX);
-
-	mst::sort(input, [](int l, int r) { return r < l; });
-
-	CheckIsSorted(input);
-}
-
-TEST_CASE("algorithm_container_find", "[algorithm][container]")
-{
-	std::vector<int> input{ 3, 2, 5, 1, 4 };
-
-	const auto foundIt = mst::find(input, 1);
-
-	REQUIRE(foundIt != input.end());
-	REQUIRE(foundIt - input.begin() == 3);
-	REQUIRE(*foundIt == 1);
-}
-
-TEST_CASE("algorithm_container_find_if", "[algorithm][container]")
-{
-	std::vector<int> input{ 3, 2, 5, 1, 4 };
-
-	const auto foundIt = mst::find_if(input, [](int v) { return v > 4; });
-
-	REQUIRE(foundIt != input.end());
-	REQUIRE(foundIt - input.begin() == 2);
-	REQUIRE(*foundIt == 5);
 }

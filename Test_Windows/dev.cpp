@@ -395,8 +395,6 @@ void TestReadersWriters(size_t writerCount, size_t readerCount, bool sequential 
 
 				c = '_';
 			}
-
-			q.export_states_and_values(filename);
 		}
 
 		puts("Failure");
@@ -715,11 +713,6 @@ int main()
 			std::getline(std::cin, line);
 
 			return 0;
-		}
-		if(line == "export")
-		{
-			current_q->export_states_and_values("export_state");
-			std::cout << "export created" << std::endl;
 		}
 
 		if(line == "averages")

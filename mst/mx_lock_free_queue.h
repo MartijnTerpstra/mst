@@ -47,18 +47,18 @@ struct queue_elem_type
 template<typename T>
 struct queue_buffer
 {
-	//static_assert(ElemCount >= 4, "ElemCount should be at least 4");
-	//static_assert(is_power_of_2<ElemCount>::value, "ElemCount must be a power of two");
+	// static_assert(ElemCount >= 4, "ElemCount should be at least 4");
+	// static_assert(is_power_of_2<ElemCount>::value, "ElemCount must be a power of two");
 
-	//const static uint32_t CountMask = ElemCount - 1;
+	// const static uint32_t CountMask = ElemCount - 1;
 
 	static const uint32_t c_elemJump = 3;
 
 	queue_buffer(uint32_t elemCount)
-		: m_count(elemCount),
-		  m_countMask(elemCount - 1),
-		  m_countShift(get_shift_from_count(elemCount)),
-		  m_buffer(new queue_elem_type<T>[elemCount])
+		: m_count(elemCount)
+		, m_countMask(elemCount - 1)
+		, m_countShift(get_shift_from_count(elemCount))
+		, m_buffer(new queue_elem_type<T>[elemCount])
 	{
 		assert(elemCount >= 4);
 		assert(m_count != 0 && (m_count & (m_count - 1)) == 0);
@@ -72,7 +72,8 @@ struct queue_buffer
 	queue_buffer(const queue_buffer&) = delete;
 	queue_buffer& operator=(const queue_buffer&) = delete;
 
-	[[nodiscard]] inline bool try_push(const T& elem) noexcept(std::is_nothrow_copy_constructible<T>::value)
+	[[nodiscard]] inline bool try_push(const T& elem) noexcept(
+		std::is_nothrow_copy_constructible<T>::value)
 	{
 		uint64_t tmp, oldtail;
 		uint32_t tmpState;
@@ -91,18 +92,21 @@ struct queue_buffer
 				continue;
 			}
 
-		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(tmpState, state(tmp, 1), std::memory_order_acq_rel, std::memory_order_relaxed));
+		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(
+			tmpState, state(tmp, 1), std::memory_order_acq_rel, std::memory_order_relaxed));
 
 		m_tail.store(tmp + 1, std::memory_order_relaxed);
 
 		new(&get_impl(tmp)) T(elem);
 
-		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(state(tmp, 2), std::memory_order_release);
+		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(
+			state(tmp, 2), std::memory_order_release);
 
 		return true;
 	}
 
-	[[nodiscard]] inline bool try_push(T&& elem) noexcept(std::is_nothrow_move_constructible<T>::value)
+	[[nodiscard]] inline bool try_push(T&& elem) noexcept(
+		std::is_nothrow_move_constructible<T>::value)
 	{
 		uint64_t tmp, oldtail;
 		uint32_t tmpState;
@@ -121,13 +125,15 @@ struct queue_buffer
 				continue;
 			}
 
-		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(tmpState, state(tmp, 1), std::memory_order_acq_rel, std::memory_order_relaxed));
+		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(
+			tmpState, state(tmp, 1), std::memory_order_acq_rel, std::memory_order_relaxed));
 
 		m_tail.store(tmp + 1, std::memory_order_relaxed);
 
 		new(&get_impl(tmp)) T(std::move(elem));
 
-		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(state(tmp, 2), std::memory_order_release);
+		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(
+			state(tmp, 2), std::memory_order_release);
 
 		return true;
 	}
@@ -145,7 +151,8 @@ struct queue_buffer
 			if(!find_head(tmp, tmpState, moveHead))
 				return false;
 
-		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(tmpState, state(tmp, 3), std::memory_order_acq_rel, std::memory_order_relaxed));
+		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(
+			tmpState, state(tmp, 3), std::memory_order_acq_rel, std::memory_order_relaxed));
 
 		if(moveHead)
 			m_head.compare_exchange_weak(oldhead, tmp + 1, std::memory_order_relaxed);
@@ -154,7 +161,8 @@ struct queue_buffer
 
 		get_impl(tmp).~T();
 
-		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(next_state(tmp, 0), std::memory_order_release);
+		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(
+			next_state(tmp, 0), std::memory_order_release);
 
 		return true;
 	}
@@ -172,21 +180,23 @@ struct queue_buffer
 			if(!find_head(tmp, tmpState, moveHead))
 				return false;
 
-		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(tmpState, state(tmp, 3), std::memory_order_acq_rel, std::memory_order_relaxed));
+		} while(!m_buffer[(tmp * c_elemJump) & m_countMask].state.compare_exchange_weak(
+			tmpState, state(tmp, 3), std::memory_order_acq_rel, std::memory_order_relaxed));
 
 		if(moveHead)
 			m_head.compare_exchange_weak(oldhead, tmp + 1, std::memory_order_relaxed);
 
 		get_impl(tmp).~T();
 
-		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(next_state(tmp, 0), std::memory_order_release);
+		m_buffer[(tmp * c_elemJump) & m_countMask].state.store(
+			next_state(tmp, 0), std::memory_order_release);
 
 		return true;
 	}
 
 	[[nodiscard]] inline bool confirm_empty() const noexcept
 	{
-		//atomic_thread_fence(std::memory_order_acquire);
+		// atomic_thread_fence(std::memory_order_acquire);
 		for(uint32_t i = 0; i < m_count; ++i)
 		{ // m_buffer,m_count
 			const auto dataState = m_buffer[i].state.load(std::memory_order_acquire) >> 30;
@@ -221,7 +231,8 @@ private:
 
 		while(true)
 		{
-			const uint32_t bufferState = m_buffer[(tmp * c_elemJump) & m_countMask].state.load(std::memory_order_relaxed);
+			const uint32_t bufferState =
+				m_buffer[(tmp * c_elemJump) & m_countMask].state.load(std::memory_order_relaxed);
 			tmpState = state(tmp, 0);
 
 			const uint32_t bufferGen = generation_from_state(bufferState);
@@ -251,7 +262,8 @@ private:
 
 		while(true)
 		{
-			const uint32_t bufferState = m_buffer[(tmp * c_elemJump) & m_countMask].state.load(std::memory_order_relaxed);
+			const uint32_t bufferState =
+				m_buffer[(tmp * c_elemJump) & m_countMask].state.load(std::memory_order_relaxed);
 			tmpState = state(tmp, 2);
 
 			const uint32_t bufferGen = generation_from_state(bufferState);
@@ -266,7 +278,7 @@ private:
 
 			if(bufferGen < tmpGen)
 				return false;
-			//moveHead = false;
+			// moveHead = false;
 
 			if(bufferGen <= tmpGen && bufferGen < prev)
 				return false;
@@ -326,47 +338,6 @@ private:
 	alignas(64) std::atomic_uint64_t m_head{ 0 };
 	alignas(64) std::atomic_uint64_t m_tail{ 0 };
 	queue_elem_type<T>* const m_buffer;
-
-#if _MST_TESTING
-
-public:
-	inline void check_empty() noexcept
-	{
-		for(uint32_t i = 0; i < m_count; ++i)
-		{ // m_buffer,m_count
-			const auto dataState = m_buffer[i].state.load() >> 30;
-
-			INFO("State: " << dataState);
-			INFO("Value: " << get_impl(i));
-			CHECK(dataState == 0);
-		}
-	}
-
-	inline void export_states_and_values(const std::string& nameBase) const noexcept
-	{
-		std::ofstream outfile(nameBase + std::to_string(m_count) + ".csv");
-		outfile << "Index;State;Generation;Value" << std::endl;
-		for(uint32_t i = 0; i < m_count; ++i)
-		{
-			auto& e = m_buffer[i];
-			const auto state = e.state.load();
-			outfile << i << ';' << datastate_from_state(state) << ';' << generation_from_state(state) << ';' << get_impl(i) << std::endl;
-		}
-
-		outfile << std::endl
-				<< "Current Head;Current Tail;Head Index;Tail Index" << std::endl;
-		outfile << generate_idx_gen(m_head.load()) << ';' << generate_idx_gen(m_tail.load()) << ';' << m_head.load() << ';' << m_tail.load() << std::endl;
-	}
-
-	std::string generate_idx_gen(uint64_t idx) const noexcept
-	{
-		if(idx == UINT64_MAX)
-			return "-";
-
-		return std::to_string(idx & m_countMask) + "_" + std::to_string(generation_from_index(idx));
-	}
-
-#endif
 };
 
 }

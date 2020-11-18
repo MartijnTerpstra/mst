@@ -12,7 +12,7 @@ target_compile_definitions("test_${CATEGORY}_${TEST_NAME}"
 	PRIVATE _MST_TESTING=1)
 
 target_include_directories("test_${CATEGORY}_${TEST_NAME}"
-	PUBLIC ${PROJECT_SOURCE_DIR}/Test_All_Platforms/shared
+	PUBLIC ${PROJECT_SOURCE_DIR}/Test_All_Platforms/testing
 )
 
 if (WIN32)
@@ -27,7 +27,7 @@ target_compile_options("test_${CATEGORY}_${TEST_NAME}"
 
 endif()
 
-ParseAndAddCatchTests("test_${CATEGORY}_${TEST_NAME}")
+catch_discover_tests("test_${CATEGORY}_${TEST_NAME}")
 
 endmacro(add_mst_test)
 
@@ -60,5 +60,7 @@ add_mst_test(memory aligned_malloc)
 add_mst_test(memory memory_view)
 
 add_mst_test(simd vector)
+
+add_mst_test(testing random_data_generator)
 
 add_mst_test(threading slim_event)

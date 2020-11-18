@@ -26,27 +26,56 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <random_data_generator.h>
+
+using namespace ::Catch::Generators;
+using namespace ::mst::tests;
+
 #include <malgorithm_container.h>
 #include <vector>
 
+void CheckIsSorted(const std::vector<int>& input)
+{
+	for(auto it = input.begin(); it != input.end() - 1; ++it)
+	{
+		REQUIRE(*it <= *(it + 1));
+	}
+}
+
+void CheckIsReverseSorted(const std::vector<int>& input)
+{
+	for(auto it = input.begin(); it != input.end() - 1; ++it)
+	{
+		REQUIRE(*it >= *(it + 1));
+	}
+}
+
 TEST_CASE("algorithm_container_sort", "[algorithm][container]")
 {
-	std::vector<int> input{ 3, 2, 5, 1, 4 };
-	std::vector<int> expectedResult{ 1, 2, 3, 4, 5 };
+	random_data_generator rdg{ true };
+	INFO("Seed" << rdg.seed());
+
+	const auto elemCount = GENERATE(range<size_t>(2, 1000));
+
+	auto input = rdg.vector_int(elemCount, INT_MIN, INT_MAX);
 
 	mst::sort(input);
 
-	REQUIRE(input == expectedResult);
+	CheckIsSorted(input);
 }
 
 TEST_CASE("algorithm_container_sort_predictate", "[algorithm][container]")
 {
-	std::vector<int> input{ 3, 2, 5, 1, 4 };
-	std::vector<int> expectedResult{ 5, 4, 3, 2, 1 };
+	random_data_generator rdg{ true };
+	INFO("Seed" << rdg.seed());
+
+	const auto elemCount = GENERATE(range<size_t>(2, 1000));
+
+	auto input = rdg.vector_int(elemCount, INT_MIN, INT_MAX);
 
 	mst::sort(input, [](int l, int r) { return r < l; });
 
-	REQUIRE(input == expectedResult);
+	CheckIsReverseSorted(input);
 }
 
 TEST_CASE("algorithm_container_find", "[algorithm][container]")

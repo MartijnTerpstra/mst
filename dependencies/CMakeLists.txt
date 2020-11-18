@@ -8,7 +8,3 @@ FetchContent_Declare(
   GIT_TAG        v2.13.1)
 
 FetchContent_MakeAvailable(Catch2)
-
-list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
-
-include (ParseAndAddCatchTests)

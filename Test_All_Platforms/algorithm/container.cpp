@@ -52,7 +52,8 @@ void CheckIsReverseSorted(const std::vector<int>& input)
 
 TEST_CASE("algorithm_container_sort", "[algorithm][container]")
 {
-	random_data_generator rdg;
+	random_data_generator rdg{ true };
+	INFO("Seed" << rdg.seed());
 
 	const auto elemCount = GENERATE(range<size_t>(2, 1000));
 
@@ -65,7 +66,8 @@ TEST_CASE("algorithm_container_sort", "[algorithm][container]")
 
 TEST_CASE("algorithm_container_sort_predictate", "[algorithm][container]")
 {
-	random_data_generator rdg;
+	random_data_generator rdg{ true };
+	INFO("Seed" << rdg.seed());
 
 	const auto elemCount = GENERATE(range<size_t>(2, 1000));
 

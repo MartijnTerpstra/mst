@@ -34,9 +34,21 @@ namespace tests {
 class random_data_generator
 {
 public:
+	random_data_generator(bool randomSeed)
+		: random_data_generator(create_seed(randomSeed))
+	{ }
+
+	random_data_generator(std::mt19937_64::result_type specificSeed)
+		: m_engine(specificSeed)
+		, m_seed(specificSeed)
+	{ }
+
 	template<typename Integer>
 	Integer scalar_int(Integer minValue, Integer maxValue)
 	{
+		if(minValue > maxValue)
+			throw std::invalid_argument("minValue > maxValue");
+
 		std::uniform_int_distribution<Integer> dist{ minValue, maxValue };
 
 		return dist(m_engine);
@@ -45,6 +57,9 @@ public:
 	template<typename Integer>
 	std::vector<Integer> vector_int(size_t size, Integer minValue, Integer maxValue)
 	{
+		if(minValue > maxValue)
+			throw std::invalid_argument("minValue > maxValue");
+
 		std::uniform_int_distribution<Integer> dist{ minValue, maxValue };
 
 		std::vector<Integer> randomVector;
@@ -63,6 +78,12 @@ public:
 	std::vector<Integer> vector_int(
 		size_t minSize, size_t maxSize, Integer minValue, Integer maxValue)
 	{
+		if(minSize > maxSize)
+			throw std::invalid_argument("minSize > maxSize");
+
+		if(minValue > maxValue)
+			throw std::invalid_argument("minValue > maxValue");
+
 		std::uniform_int_distribution<Integer> dist{ minValue, maxValue };
 
 		std::vector<Integer> randomVector;
@@ -82,6 +103,9 @@ public:
 	template<typename Integer>
 	std::vector<Integer> vector_int(size_t minSize, size_t maxSize, Integer value)
 	{
+		if(minSize > maxSize)
+			throw std::invalid_argument("minSize > maxSize");
+
 		std::vector<Integer> randomVector;
 
 		const auto size = scalar_int(minSize, maxSize);
@@ -96,8 +120,27 @@ public:
 		return randomVector;
 	}
 
+	std::mt19937_64::result_type seed() const
+	{
+		return m_seed;
+	}
+
+private:
+	static std::mt19937_64::result_type create_seed(bool randomSeed)
+	{
+		if(randomSeed)
+		{
+			return std::random_device()();
+		}
+		else
+		{
+			return std::mt19937_64::default_seed;
+		}
+	}
+
 private:
 	std::mt19937_64 m_engine;
+	const std::mt19937_64::result_type m_seed;
 };
 
 }

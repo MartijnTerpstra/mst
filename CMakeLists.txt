@@ -30,6 +30,10 @@ include(CTest)
 
 add_subdirectory(dependencies)
 
+list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
+
+include (Catch)
+
 add_subdirectory("Test_All_Platforms")
 add_subdirectory("Test_${platform_name}")
 

@@ -66,10 +66,8 @@ TEST_CASE("compiletime::strpos", "[compiletime]")
 	const char value[] = "TestValue";
 	const char value2[] = "TestValue2";
 
-	const auto values = strstr(value2, "lue2") - value;
-
 	REQUIRE(checker.IsSame(static_cast<size_t>(strstr(value, "lue") - value)));
-	REQUIRE(checker2.IsSame(static_cast<size_t>(strstr(value2, "lue2") - value)));
+	REQUIRE(checker2.IsSame(static_cast<size_t>(strstr(value2, "lue2") - value2)));
 	REQUIRE(checker.IsSame(checker2));
 	REQUIRE(!checker.IsSame(checker3));
 }

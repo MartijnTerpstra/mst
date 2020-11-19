@@ -38,34 +38,57 @@ constexpr size_t compiletime_strlen(const char* cString)
 	return compiletime_strlen_iterator(cString, 0);
 }
 
-constexpr size_t compiletime_strpos_compare_iterator(const char* cString, const char* cSearch, size_t offset, size_t index, size_t strLenString, size_t strLenSearch)
+constexpr size_t compiletime_strpos_compare_iterator(const char* cString, const char* cSearch,
+	size_t offset, size_t index, size_t strLenString, size_t strLenSearch)
 {
-	return (index == strLenSearch) ? offset : (cString[offset + index] != cSearch[index] ? -1 : compiletime_strpos_compare_iterator(cString, cSearch, offset, index + 1, strLenString, strLenSearch));
+	return (index == strLenSearch) ? offset
+								   : (cString[offset + index] != cSearch[index]
+											 ? SIZE_MAX
+											 : compiletime_strpos_compare_iterator(cString, cSearch,
+												   offset, index + 1, strLenString, strLenSearch));
 }
 
-constexpr size_t compiletime_strpos_iterator(const char* cString, const char* cSearch, size_t index, size_t strLenString, size_t strLenSearch)
+constexpr size_t compiletime_strpos_iterator(const char* cString, const char* cSearch, size_t index,
+	size_t strLenString, size_t strLenSearch)
 {
-	return (index > size_t(strLenString - strLenSearch)) ? -1 : (compiletime_strpos_compare_iterator(cString, cSearch, index, 0, strLenString, strLenSearch) != 0xFFFFFFFFU ? compiletime_strpos_compare_iterator(cString, cSearch, index, 0, strLenString, strLenSearch) : compiletime_strpos_iterator(cString, cSearch, index + 1, strLenString, strLenSearch));
+	return (index > size_t(strLenString - strLenSearch))
+			   ? SIZE_MAX
+			   : (compiletime_strpos_compare_iterator(
+					  cString, cSearch, index, 0, strLenString, strLenSearch) != SIZE_MAX
+						 ? compiletime_strpos_compare_iterator(
+							   cString, cSearch, index, 0, strLenString, strLenSearch)
+						 : compiletime_strpos_iterator(
+							   cString, cSearch, index + 1, strLenString, strLenSearch));
 }
 
-constexpr size_t compiletime_strpos_impl(const char* cString, const char* cSearch, size_t strLenString, size_t strLenSearch)
+constexpr size_t compiletime_strpos_impl(
+	const char* cString, const char* cSearch, size_t strLenString, size_t strLenSearch)
 {
-	return (strLenSearch > strLenString) ? -1 : compiletime_strpos_iterator(cString, cSearch, 0, strLenString, strLenSearch);
+	return (strLenSearch > strLenString)
+			   ? SIZE_MAX
+			   : compiletime_strpos_iterator(cString, cSearch, 0, strLenString, strLenSearch);
 }
 
 constexpr size_t compiletime_strpos(const char* cString, const char* cSearch)
 {
-	return compiletime_strpos_impl(cString, cSearch, compiletime_strlen(cString), compiletime_strlen(cSearch));
+	return compiletime_strpos_impl(
+		cString, cSearch, compiletime_strlen(cString), compiletime_strlen(cSearch));
 }
 
-constexpr uint32_t compiletime_hash32_interator(const char* cString, size_t strLen, size_t index, uint32_t currentHash)
+constexpr uint32_t compiletime_hash32_interator(
+	const char* cString, size_t strLen, size_t index, uint32_t currentHash)
 {
-	return (strLen <= index) ? currentHash : compiletime_hash32_interator(cString, strLen, index + 1, (currentHash ^ ((uint32_t)cString[index])) * 16777619U);
+	return (strLen <= index) ? currentHash
+							 : compiletime_hash32_interator(cString, strLen, index + 1,
+								   (currentHash ^ ((uint32_t)cString[index])) * 16777619U);
 }
 
-constexpr uint64_t compiletime_hash64_interator(const char* cString, size_t strLen, size_t index, uint64_t currentHash)
+constexpr uint64_t compiletime_hash64_interator(
+	const char* cString, size_t strLen, size_t index, uint64_t currentHash)
 {
-	return (strLen <= index) ? (currentHash ^ (currentHash >> 32)) : compiletime_hash64_interator(cString, strLen, index + 1, (currentHash ^ ((uint64_t)cString[index])) * 1099511628211ULL);
+	return (strLen <= index) ? (currentHash ^ (currentHash >> 32))
+							 : compiletime_hash64_interator(cString, strLen, index + 1,
+								   (currentHash ^ ((uint64_t)cString[index])) * 1099511628211ULL);
 }
 
 
@@ -81,36 +104,51 @@ constexpr uint64_t compiletime_hash64(const char* cString, size_t offset, size_t
 
 #if _MST_USING_VC_COMPILER
 
-constexpr size_t compiletime_hash_of_forward_iterator2(const char* cString, size_t index, size_t notFoundIndex)
+constexpr size_t compiletime_hash_of_forward_iterator2(
+	const char* cString, size_t index, size_t notFoundIndex)
 {
-	return (index == compiletime_strlen(cString)) ? notFoundIndex : (cString[index] == ' ') ? index + 1 : compiletime_hash_of_forward_iterator2(cString, index + 1, notFoundIndex);
+	return (index == compiletime_strlen(cString))
+			   ? notFoundIndex
+			   : (cString[index] == ' ')
+					 ? index + 1
+					 : compiletime_hash_of_forward_iterator2(cString, index + 1, notFoundIndex);
 }
 
 constexpr size_t compiletime_hash_of_forward_iterator(const char* cString, size_t index)
 {
-	return (cString[index] == '<') ? compiletime_hash_of_forward_iterator2(cString, index + 1, index + 1) : compiletime_hash_of_forward_iterator(cString, index + 1);
+	return (cString[index] == '<')
+			   ? compiletime_hash_of_forward_iterator2(cString, index + 1, index + 1)
+			   : compiletime_hash_of_forward_iterator(cString, index + 1);
 }
 
 constexpr size_t compiletime_hash_of_backward_iterator(const char* cString, size_t index)
 {
-	return (cString[index] == '>') ? index : compiletime_hash_of_backward_iterator(cString, index - 1);
+	return (cString[index] == '>') ? index
+								   : compiletime_hash_of_backward_iterator(cString, index - 1);
 }
 
 constexpr uint32_t compiletime_hash_of32_impl(const char* cString)
 {
-	return compiletime_hash32(cString, compiletime_hash_of_forward_iterator(cString, 0), compiletime_hash_of_backward_iterator(cString, compiletime_strlen(cString) - 1));
+	return compiletime_hash32(cString, compiletime_hash_of_forward_iterator(cString, 0),
+		compiletime_hash_of_backward_iterator(cString, compiletime_strlen(cString) - 1));
 }
 
 constexpr uint64_t compiletime_hash_of64_impl(const char* cString)
 {
-	return compiletime_hash64(cString, compiletime_hash_of_forward_iterator(cString, 0), compiletime_hash_of_backward_iterator(cString, compiletime_strlen(cString) - 1));
+	return compiletime_hash64(cString, compiletime_hash_of_forward_iterator(cString, 0),
+		compiletime_hash_of_backward_iterator(cString, compiletime_strlen(cString) - 1));
 }
 
 #elif _MST_USING_CLANG_COMPILER
 
-constexpr size_t compiletime_hash_of_forward_iterator2(const char* cString, size_t index, size_t notFoundIndex)
+constexpr size_t compiletime_hash_of_forward_iterator2(
+	const char* cString, size_t index, size_t notFoundIndex)
 {
-	return (index == compiletime_strlen(cString)) ? notFoundIndex : (cString[index] == ' ') ? index + 1 : compiletime_hash_of_forward_iterator2(cString, index + 1, notFoundIndex);
+	return (index == compiletime_strlen(cString))
+			   ? notFoundIndex
+			   : (cString[index] == ' ')
+					 ? index + 1
+					 : compiletime_hash_of_forward_iterator2(cString, index + 1, notFoundIndex);
 }
 
 constexpr size_t compiletime_hash_of_forward_iterator(const char* cString, size_t index)
@@ -120,24 +158,35 @@ constexpr size_t compiletime_hash_of_forward_iterator(const char* cString, size_
 
 constexpr size_t compiletime_hash_of_backward_iterator(const char* cString, size_t index)
 {
-	return (cString[index] == ';' || cString[index] == ']') ? index : compiletime_hash_of_backward_iterator(cString, index + 1);
+	return (cString[index] == ';' || cString[index] == ']')
+			   ? index
+			   : compiletime_hash_of_backward_iterator(cString, index + 1);
 }
 
 constexpr uint32_t compiletime_hash_of32_impl(const char* cString)
 {
-	return compiletime_hash32(cString, compiletime_hash_of_forward_iterator(cString, 0), compiletime_hash_of_backward_iterator(cString, compiletime_hash_of_forward_iterator(cString, 0)));
+	return compiletime_hash32(cString, compiletime_hash_of_forward_iterator(cString, 0),
+		compiletime_hash_of_backward_iterator(
+			cString, compiletime_hash_of_forward_iterator(cString, 0)));
 }
 
 constexpr uint64_t compiletime_hash_of64_impl(const char* cString)
 {
-	return compiletime_hash64(cString, compiletime_hash_of_forward_iterator(cString, 0), compiletime_hash_of_backward_iterator(cString, compiletime_hash_of_forward_iterator(cString, 0)));
+	return compiletime_hash64(cString, compiletime_hash_of_forward_iterator(cString, 0),
+		compiletime_hash_of_backward_iterator(
+			cString, compiletime_hash_of_forward_iterator(cString, 0)));
 }
 
 #elif _MST_USING_GCC_COMPILER
 
-constexpr size_t compiletime_hash_of_forward_iterator2(const char* cString, size_t index, size_t notFoundIndex)
+constexpr size_t compiletime_hash_of_forward_iterator2(
+	const char* cString, size_t index, size_t notFoundIndex)
 {
-	return (index == compiletime_strlen(cString)) ? notFoundIndex : (cString[index] == ' ') ? index + 1 : compiletime_hash_of_forward_iterator2(cString, index + 1, notFoundIndex);
+	return (index == compiletime_strlen(cString))
+			   ? notFoundIndex
+			   : (cString[index] == ' ')
+					 ? index + 1
+					 : compiletime_hash_of_forward_iterator2(cString, index + 1, notFoundIndex);
 }
 
 constexpr size_t compiletime_hash_of_forward_iterator(const char* cString, size_t index)
@@ -147,17 +196,23 @@ constexpr size_t compiletime_hash_of_forward_iterator(const char* cString, size_
 
 constexpr size_t compiletime_hash_of_backward_iterator(const char* cString, size_t index)
 {
-	return (cString[index] == ';' || cString[index] == ']') ? index : compiletime_hash_of_backward_iterator(cString, index + 1);
+	return (cString[index] == ';' || cString[index] == ']')
+			   ? index
+			   : compiletime_hash_of_backward_iterator(cString, index + 1);
 }
 
 constexpr uint32_t compiletime_hash_of32_impl(const char* cString)
 {
-	return compiletime_hash32(cString, compiletime_hash_of_forward_iterator(cString, 0), compiletime_hash_of_backward_iterator(cString, compiletime_hash_of_forward_iterator(cString, 0)));
+	return compiletime_hash32(cString, compiletime_hash_of_forward_iterator(cString, 0),
+		compiletime_hash_of_backward_iterator(
+			cString, compiletime_hash_of_forward_iterator(cString, 0)));
 }
 
 constexpr uint64_t compiletime_hash_of64_impl(const char* cString)
 {
-	return compiletime_hash64(cString, compiletime_hash_of_forward_iterator(cString, 0), compiletime_hash_of_backward_iterator(cString, compiletime_hash_of_forward_iterator(cString, 0)));
+	return compiletime_hash64(cString, compiletime_hash_of_forward_iterator(cString, 0),
+		compiletime_hash_of_backward_iterator(
+			cString, compiletime_hash_of_forward_iterator(cString, 0)));
 }
 
 #else

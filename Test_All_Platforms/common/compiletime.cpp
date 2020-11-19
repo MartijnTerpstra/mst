@@ -37,18 +37,59 @@ public:
 	{
 		return CompiletimeHash == runtimeValue;
 	}
+
+	template<ValueType OtherCompiletimeHash>
+	bool IsSame(Checker<ValueType, OtherCompiletimeHash>) const
+	{
+		return CompiletimeHash == OtherCompiletimeHash;
+	}
 };
 
-TEST_CASE("compiletime_hash32", "[compiletime]")
+TEST_CASE("compiletime::strlen", "[compiletime]")
 {
-	Checker<uint32_t, mst::compiletime::hash32("TestValue")> checker;
+	Checker<size_t, mst::compiletime::strlen("TestValue")> checker;
+	Checker<size_t, mst::compiletime::strlen("TestValue2")> checker2;
+	Checker<size_t, mst::compiletime::strlen("")> checkerEmpty;
 
-	REQUIRE(checker.IsSame(mst::hash32("TestValue")));
+	REQUIRE(checker.IsSame(strlen("TestValue")));
+	REQUIRE(checker2.IsSame(strlen("TestValue2")));
+	REQUIRE(!checker.IsSame(checker2));
+	REQUIRE(checkerEmpty.IsSame(0));
 }
 
-TEST_CASE("compiletime_hash64", "[compiletime]")
+TEST_CASE("compiletime::strpos", "[compiletime]")
+{
+	Checker<size_t, mst::compiletime::strpos("TestValue", "lue")> checker;
+	Checker<size_t, mst::compiletime::strpos("TestValue2", "lue2")> checker2;
+	Checker<size_t, mst::compiletime::strpos("TestValue3", "ue3")> checker3;
+
+	const char value[] = "TestValue";
+	const char value2[] = "TestValue2";
+
+	const auto values = strstr(value2, "lue2") - value;
+
+	REQUIRE(checker.IsSame(static_cast<size_t>(strstr(value, "lue") - value)));
+	REQUIRE(checker2.IsSame(static_cast<size_t>(strstr(value2, "lue2") - value)));
+	REQUIRE(checker.IsSame(checker2));
+	REQUIRE(!checker.IsSame(checker3));
+}
+
+TEST_CASE("compiletime::hash32", "[compiletime]")
+{
+	Checker<uint32_t, mst::compiletime::hash32("TestValue")> checker;
+	Checker<uint32_t, mst::compiletime::hash32("TestValue2")> checker2;
+
+	REQUIRE(checker.IsSame(mst::hash32("TestValue")));
+	REQUIRE(checker2.IsSame(mst::hash32("TestValue2")));
+	REQUIRE(!checker.IsSame(checker2));
+}
+
+TEST_CASE("compiletime::hash64", "[compiletime]")
 {
 	Checker<uint64_t, mst::compiletime::hash64("TestValue")> checker;
+	Checker<uint64_t, mst::compiletime::hash64("TestValue2")> checker2;
 
 	REQUIRE(checker.IsSame(mst::hash64("TestValue")));
+	REQUIRE(checker2.IsSame(mst::hash64("TestValue2")));
+	REQUIRE(!checker.IsSame(checker2));
 }

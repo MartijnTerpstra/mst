@@ -149,12 +149,14 @@ inline const char* typename_of()
 template<typename _Traits, typename _Alloc>
 struct is_string_type<::std::basic_string<char, _Traits, _Alloc>>
 	: public ::std::integral_constant<bool, true>
-{ };
+{
+};
 
 template<typename _Traits, typename _Alloc>
 struct is_wstring_type<::std::basic_string<wchar_t, _Traits, _Alloc>>
 	: public ::std::integral_constant<bool, true>
-{ };
+{
+};
 
 template<typename _Elem, typename... Args>
 inline int printf(const _Elem* format, Args&&... args)

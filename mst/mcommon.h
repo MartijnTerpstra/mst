@@ -159,25 +159,25 @@ struct is_wstring_type<::std::basic_string<wchar_t, _Traits, _Alloc>>
 template<typename _Elem, typename... Args>
 inline int printf(const _Elem* format, Args&&... args)
 {
-	::std::basic_string<_Elem, ::std::char_traits<_Elem>, ::std::allocator<_Elem>> result =
+	const auto result =
 		::mst::_Details::_Printf<_Elem, ::std::char_traits<_Elem>, ::std::allocator<_Elem>>(
 			format, ::std::forward<Args>(args)...);
 
 	::mst::_Details::_Print_to_cout(result);
 
-	return (int)result.length();
+	return static_cast<int>(result.length());
 }
 
 template<typename _Elem, typename... Args>
 inline int sprintf(_Elem* buffer, const _Elem* format, Args&&... args)
 {
-	::std::basic_string<_Elem, ::std::char_traits<_Elem>, ::std::allocator<_Elem>> result =
+	const auto result =
 		::mst::_Details::_Printf<_Elem, ::std::char_traits<_Elem>, ::std::allocator<_Elem>>(
 			format, ::std::forward<Args>(args)...);
 
 	::std::char_traits<_Elem>::copy(buffer, result.c_str(), result.length() + 1);
 
-	return (int)result.length();
+	return static_cast<int>(int>(result.length());
 }
 
 template<typename _Elem, typename... Args>

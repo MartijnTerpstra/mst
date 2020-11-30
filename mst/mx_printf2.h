@@ -34,6 +34,8 @@ namespace mst {
 
 namespace _Details {
 
+#define _MST_FORMAT_STRING_SIZE (512)
+
 template<typename T>
 inline const char* _To_char_pointer_impl(const T& _Val, ::std::false_type)
 {
@@ -165,7 +167,7 @@ inline bool _Is_last_format_char(wchar_t _Val)
 template<typename _Elem, char charValue>
 struct _Char_type
 {
-	static const char value = charValue;
+	static const _Elem value = static_cast<_Elem>(charValue);
 };
 
 #if _MST_USING_VC_COMPILER
@@ -185,16 +187,16 @@ struct _Char_type
 #error "No sprintf support defined"
 #endif
 
-template<typename Arg>
-inline void _To_string(char (&buffer)[32], const char* formatString, Arg&& arg)
+template<typename Arg, size_t StrSize>
+inline void _To_string(char (&buffer)[StrSize], const char* formatString, Arg&& arg)
 {
-	_MST_SPRINTF(buffer, 32, formatString, std::forward<Arg>(arg));
+	_MST_SPRINTF(buffer, StrSize, formatString, std::forward<Arg>(arg));
 }
 
-template<typename Arg>
-inline void _To_string(wchar_t (&buffer)[32], const wchar_t* formatString, Arg&& arg)
+template<typename Arg, size_t StrSize>
+inline void _To_string(wchar_t (&buffer)[StrSize], const wchar_t* formatString, Arg&& arg)
 {
-	_MST_SWPRINTF(buffer, 32, formatString, std::forward<Arg>(arg));
+	_MST_SWPRINTF(buffer, StrSize, formatString, std::forward<Arg>(arg));
 }
 
 inline size_t _Strlen(const char* arg)
@@ -502,23 +504,15 @@ template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
 	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::true_type)
 {
-	_Elem fmt[32] = {};
+	// Double can get quite big
+	_Elem fmt[512] = {};
 
 	if(stringLength >= 2)
 	{
 		switch(formatString[stringLength - 2])
 		{
 		case 'L': // '%Lf' or '%LF' or '%Lg' or '%LG' or '%La' or '%LA' => long double type
-			if(arg >= LDBL_MIN && arg <= LDBL_MAX)
-			{
-				_To_string(fmt, formatString, static_cast<long double>(arg));
-				buffer.append(fmt);
-				return;
-			}
-			else
-			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
-			}
+			ERROR_MESG("Long double not supported");
 			return;
 		default:
 			break;
@@ -526,7 +520,7 @@ inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, 
 	}
 
 	// '%f' or '%F' or '%g' or '%G' or '%a' or '%A' => double type
-	if(arg >= DBL_MIN && arg <= DBL_MAX)
+	if(arg >= -DBL_MAX && arg <= DBL_MAX)
 	{
 		_To_string(fmt, formatString, static_cast<double>(arg));
 		buffer.append(fmt);
@@ -647,8 +641,6 @@ inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>&
 		ERROR_MESG("'%ls' or '%s' argument expected");
 	}
 
-	//_Elem fmt[32];
-
 	size_t _Startpos = buffer.length();
 	size_t _Len;
 
@@ -743,7 +735,7 @@ template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_argument(
 	::std::basic_string<_Elem, _Traits, _Alloc>& buffer, const _Elem*& format, Arg&& arg)
 {
-	_Elem formatString[32] = { '%' };
+	_Elem formatString[_MST_FORMAT_STRING_SIZE] = { '%' };
 	size_t index = 1;
 
 	do

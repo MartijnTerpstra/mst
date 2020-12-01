@@ -40,7 +40,7 @@ template<typename T>
 inline const char* _To_char_pointer_impl(const T& _Val, ::std::false_type)
 {
 	_MST_UNUSED(_Val);
-	ERROR_MESG("Value does not convert to a string pointer");
+	MST_FATAL_ERROR("Value does not convert to a string pointer");
 	return nullptr;
 }
 
@@ -77,7 +77,7 @@ template<typename T>
 inline const wchar_t* _To_wchar_t_pointer_impl(const T& _Val, std::false_type)
 {
 	_MST_UNUSED(_Val);
-	ERROR_MESG("Value does not convert to a string pointer");
+	MST_FATAL_ERROR("Value does not convert to a string pointer");
 	return nullptr;
 }
 
@@ -235,7 +235,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 		case _Char_type<_Elem, 'h'>::value: // '%hhd' or '%hhi' => signed char type
 			if(formatString[stringLength - 2] != 'h')
 			{
-				ERROR_MESG("Invalid format specifier");
+				MST_FATAL_ERROR("Invalid format specifier");
 			}
 			if(arg >= SCHAR_MIN && arg <= SCHAR_MAX)
 			{
@@ -245,13 +245,13 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'l': // '%lld' or '%lli' => long long int type
 			if(formatString[stringLength - 2] != 'l')
 			{
-				ERROR_MESG("Invalid format specifier");
+				MST_FATAL_ERROR("Invalid format specifier");
 			}
 			if(arg >= LLONG_MIN && arg <= LLONG_MAX)
 			{
@@ -261,7 +261,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		default:
@@ -281,7 +281,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'l': // '%ld' or '%li' => long int type
@@ -293,7 +293,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'j': // '%jd' or '%ji' => intmax_t type
@@ -305,7 +305,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'z': // '%zd' or '%zi' => size_t type
@@ -317,7 +317,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 't': // '%td' or '%ti' => ptrdiff_t type
@@ -329,7 +329,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		default:
@@ -346,7 +346,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 	}
 	else
 	{
-		ERROR_MESG("Argument could not be contained by this format specifier");
+		MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 	}
 }
 
@@ -358,7 +358,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 	_MST_UNUSED(formatString);
 	_MST_UNUSED(stringLength);
 	_MST_UNUSED(arg);
-	ERROR_MESG("Argument could not be converted to this format specifier");
+	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
@@ -374,7 +374,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 		case 'h': // '%hhu' or '%hho' or '%hhx' or '%hhX' => unsigned char type
 			if(formatString[stringLength - 2] != 'h')
 			{
-				ERROR_MESG("Invalid format specifier");
+				MST_FATAL_ERROR("Invalid format specifier");
 			}
 			if(arg >= 0 && arg <= UCHAR_MAX)
 			{
@@ -384,13 +384,13 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'l': // '%llu' or '%llo' or '%llx' or '%llX' => unsigned long long int type
 			if(formatString[stringLength - 2] != 'l')
 			{
-				ERROR_MESG("Invalid format specifier");
+				MST_FATAL_ERROR("Invalid format specifier");
 			}
 			if(arg >= 0 && arg <= ULLONG_MAX)
 			{
@@ -400,7 +400,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		default:
@@ -420,7 +420,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'l': // '%lu' or '%lo' or '%lx' or '%lX' => unsigned long int type
@@ -432,7 +432,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'j': // '%ju' or '%jo' or '%jx' or '%jX' => uintmax_t type
@@ -444,7 +444,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 'z': // '%zu' or '%zo' or '%zx' or '%zX' => size_t type
@@ -456,7 +456,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		case 't': // '%tu' or '%to' or '%tx' or '%tX' => ptrdiff_t type
@@ -468,7 +468,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		default:
@@ -485,7 +485,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 	}
 	else
 	{
-		ERROR_MESG("Argument could not be contained by this format specifier");
+		MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 	}
 }
 
@@ -497,7 +497,7 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 	_MST_UNUSED(formatString);
 	_MST_UNUSED(stringLength);
 	_MST_UNUSED(arg);
-	ERROR_MESG("Argument could not be converted to this format specifier");
+	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
@@ -512,7 +512,7 @@ inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, 
 		switch(formatString[stringLength - 2])
 		{
 		case 'L': // '%Lf' or '%LF' or '%Lg' or '%LG' or '%La' or '%LA' => long double type
-			ERROR_MESG("Long double not supported");
+			MST_FATAL_ERROR("Long double not supported");
 			return;
 		default:
 			break;
@@ -528,7 +528,7 @@ inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, 
 	}
 	else
 	{
-		ERROR_MESG("Argument could not be contained by this format specifier");
+		MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 	}
 }
 
@@ -540,13 +540,14 @@ inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, 
 	_MST_UNUSED(formatString);
 	_MST_UNUSED(stringLength);
 	_MST_UNUSED(arg);
-	ERROR_MESG("Argument could not be converted to this format specifier");
+	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_pointer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
 	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::true_type)
 {
+	_MST_UNUSED(stringLength);
 	_Elem fmt[32] = {};
 
 	// '%p' => pointer type
@@ -558,7 +559,7 @@ inline void _Append_pointer_argument(::std::basic_string<_Elem, _Traits, _Alloc>
 	}
 	else
 	{
-		ERROR_MESG("Argument could not be contained by this format specifier");
+		MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 	}
 }
 
@@ -570,7 +571,7 @@ inline void _Append_pointer_argument(::std::basic_string<_Elem, _Traits, _Alloc>
 	_MST_UNUSED(formatString);
 	_MST_UNUSED(stringLength);
 	_MST_UNUSED(arg);
-	ERROR_MESG("Argument could not be converted to this format specifier");
+	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
@@ -592,7 +593,7 @@ inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Allo
 			}
 			else
 			{
-				ERROR_MESG("Argument could not be contained by this format specifier");
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 			}
 			return;
 		default:
@@ -609,7 +610,7 @@ inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Allo
 	}
 	else
 	{
-		ERROR_MESG("Argument could not be contained by this format specifier");
+		MST_FATAL_ERROR("Argument could not be contained by this format specifier");
 	}
 }
 
@@ -621,7 +622,7 @@ inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Allo
 	_MST_UNUSED(formatString);
 	_MST_UNUSED(stringLength);
 	_MST_UNUSED(arg);
-	ERROR_MESG("Argument could not be converted to this format specifier");
+	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
@@ -630,15 +631,15 @@ inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>&
 {
 	if(stringLength > 3 && stringLength <= 1)
 	{
-		ERROR_MESG("Argument could not be converted to this format specifier");
+		MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 	}
 	else if(stringLength == 3 && (formatString[1] != (_Elem)'l' && formatString[2] != (_Elem)'s'))
 	{
-		ERROR_MESG("'%ls' or '%s' argument expected");
+		MST_FATAL_ERROR("'%ls' or '%s' argument expected");
 	}
 	else if(stringLength == 2 && formatString[1] != (_Elem)'s')
 	{
-		ERROR_MESG("'%ls' or '%s' argument expected");
+		MST_FATAL_ERROR("'%ls' or '%s' argument expected");
 	}
 
 	size_t _Startpos = buffer.length();
@@ -648,7 +649,7 @@ inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>&
 	{
 		switch(formatString[stringLength - 2])
 		{
-		case 'l': // '%ls' => const w_char_t* type
+		case L'l': // '%ls' => const w_char_t* type
 
 			_Len = _Strlen(_To_wchar_t_pointer(arg)) + 1;
 
@@ -727,7 +728,7 @@ inline void _Append_argument_impl(::std::basic_string<_Elem, _Traits, _Alloc>& b
 	case L'n':
 		MST_BREAKPOINT;
 	default:
-		ERROR_MESG("Invalid format specifier");
+		MST_FATAL_ERROR("Invalid format specifier");
 	}
 }
 
@@ -744,7 +745,7 @@ inline void _Append_argument(
 
 		if(*format == (_Elem)'*')
 		{
-			ERROR_MESG("'*' not supported");
+			MST_FATAL_ERROR("'*' not supported");
 			return;
 		}
 
@@ -763,7 +764,7 @@ inline void _Printf_impl(::std::basic_string<_Elem, _Traits, _Alloc>& buffer, co
 	{
 		if(_Is_format_char(*format) && !_Is_format_char(*(++format)))
 		{
-			ERROR_MESG("Argument encountered where non where provided");
+			MST_FATAL_ERROR("Argument encountered where non where provided");
 		}
 
 		buffer.push_back(*format);
@@ -792,7 +793,7 @@ inline void _Printf_impl(::std::basic_string<_Elem, _Traits, _Alloc>& buffer, co
 		++format;
 	}
 
-	ERROR_MESG("Provided argument not encountered");
+	MST_FATAL_ERROR("Provided argument not encountered");
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename... Args>

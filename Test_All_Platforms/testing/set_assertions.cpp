@@ -23,63 +23,21 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <mlogger.h>
-#include <fstream>
-#include <sys/file.h>
-#include <unistd.h>
-#include <thread>
-#include <iostream>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-using namespace mst;
+#include <set_assertions.h>
 
-std::string CreatePath()
+TEST_CASE("MST_ASSERT: true", "[testing]")
 {
-	static int g_fileCounter = 0;
-
-	return "/tmp/mst.logger" + std::to_string(g_fileCounter++) + ".log";
+	MST_ASSERT(true);
 }
 
-static std::string g_path = CreatePath();
-
-void logger::_Log(const ::std::string& str)
+TEST_CASE("MST_ASSERT: false", "[!shouldfail][testing]")
 {
-	int fd = open("/var/lock/mst.logger.lock", O_CREAT, S_IRWXU);
-	if(fd == -1)
-		return;
-
-	int lock = flock(fd, LOCK_SH);
-
-	while(lock == -1)
-	{
-		lock = flock(fd, LOCK_SH);
-
-		std::this_thread::yield();
-	}
-
-	std::cout << str << std::endl;
-
-	std::ofstream logStream(g_path, std::ios::app | std::ios::ate);
-
-	if(logStream.fail())
-		return;
-
-	while(logStream.tellp() > 1024 * 1024 * 10)
-	{
-		logStream.close();
-
-		g_path = CreatePath();
-
-		logStream.open(g_path, std::ios::app | std::ios::ate);
-
-		if(logStream.fail())
-			return;
-	}
-
-	logStream << str;
-
-	logStream.close();
-
-	flock(fd, LOCK_UN); // Unlock the file . . .
-
-	close(fd);
+	MST_ASSERT(false);
+}
+TEST_CASE("MST_FATAL_ERROR", "[!shouldfail][testing]")
+{
+	MST_FATAL_ERROR();
 }

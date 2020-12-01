@@ -56,8 +56,8 @@ _MST_CONSTEXPR17 quaternion<_Value_type>::quaternion(
 	, y(_Normalized_axis.y)
 	, z(_Normalized_axis.z)
 {
-	CHECK_IF_ARG(fabs(_Normalized_axis.length() - 1) > (_Value_type)_MST_QUATERNION_EPSILON,
-		"quaternion needs to be normalized again", _Normalized_axis.length());
+	MST_ASSERT(fabs(_Normalized_axis.length() - 1) <= (_Value_type)_MST_QUATERNION_EPSILON,
+		"quaternion needs to be normalized again: ", _Normalized_axis.length());
 	w *= sin(_Angle / 2);
 }
 

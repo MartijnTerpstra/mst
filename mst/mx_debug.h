@@ -37,7 +37,3 @@
 #else
 #error "implement breakpoint"
 #endif
-
-#if MST_DEBUGMODE || defined(MST_DEBUG_CHECKS) // for assertions
-
-#endif /* MST_DEBUGMODE || defined(MST_DEBUG_CHECKS) */

@@ -26,6 +26,8 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+
 #include "helpers.h"
 
 //#define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1

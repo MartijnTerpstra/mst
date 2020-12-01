@@ -162,7 +162,7 @@ _MST_CONSTEXPR17 _Value_type&
 _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::operator[](
 	size_t _Idx) noexcept
 {
-	CHECK_ARR_RANGE(_Idx, _Elems, "index out of range");
+	MST_ASSERT(_Idx < _Elems, "index out of range");
 	return (&this->x)[_Idx];
 }
 
@@ -171,7 +171,7 @@ constexpr const _Value_type&
 _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::operator[](
 	size_t _Idx) const noexcept
 {
-	CHECK_ARR_RANGE(_Idx, _Elems, "index out of range");
+	MST_ASSERT(_Idx < _Elems, "index out of range");
 	return (&this->x)[_Idx];
 }
 

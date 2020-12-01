@@ -26,6 +26,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
 #include <random_data_generator.h>
 
 using namespace ::Catch::Generators;

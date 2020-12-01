@@ -23,57 +23,12 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <mlogger.h>
-#include <Windows.h>
-#include <fstream>
+#pragma once
 
-using namespace mst;
+#define MST_ASSERT(x, ...)                                                                         \
+	(x || [&] {                                                                                    \
+		FAIL("Assertion failed: " #x);                                                             \
+		return true;                                                                               \
+	}())
 
-std::string CreatePath()
-{
-	char* buffer = nullptr;
-	size_t count = _MAX_PATH;
-
-	auto err = _dupenv_s(&buffer, &count, "localappdata");
-	if(err || buffer == nullptr)
-		return "mst.logger.log";
-
-	std::string retval{ buffer };
-
-	free(buffer);
-
-	static int g_fileCounter = 0;
-
-	return move(retval) + "\\mst.logger." + std::to_string(g_fileCounter++) + ".log";
-}
-
-static const HANDLE g_mutex = CreateMutexA(nullptr, FALSE, "__mst__logger_mutex");
-static std::string g_path = CreatePath();
-
-void logger::_Log(const std::string& str)
-{
-	WaitForSingleObject(g_mutex, INFINITE);
-
-	std::ofstream logStream(g_path, std::ios::app | std::ios::ate);
-
-	if(logStream.fail())
-		return;
-
-	while(logStream.tellp() > 1024 * 1024 * 10)
-	{
-		logStream.close();
-
-		g_path = CreatePath();
-
-		logStream.open(g_path, std::ios::app | std::ios::ate);
-
-		if(logStream.fail())
-			return;
-	}
-
-	logStream << str;
-
-	logStream.close();
-
-	ReleaseMutex(g_mutex);
-}
+#define MST_FATAL_ERROR(...) [&] { FAIL("Fatal error"); }()

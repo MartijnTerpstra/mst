@@ -183,7 +183,7 @@ void recursive_mutex::signal() const
 {
 	uint32_t count = --_Mycount;
 
-	CHECK_IF(count == 0xFFFFFFFF, "error in RecursiveMutex");
+	MST_ASSERT(count != 0xFFFFFFFF, "error in RecursiveMutex");
 
 	if(count == 0)
 	{

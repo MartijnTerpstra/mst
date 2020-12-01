@@ -26,6 +26,8 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+
 #include <maligned_malloc.h>
 
 TEST_CASE("aligned_malloc_alignments", "[memory][allocator]")

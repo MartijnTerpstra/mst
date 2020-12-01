@@ -12,7 +12,6 @@
 #include <thread>
 
 #include <mplatform.h>
-#include <mlogger.h>
 #include <mcommon.h>
 
 int main(void)

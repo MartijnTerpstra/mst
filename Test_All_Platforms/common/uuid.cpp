@@ -26,6 +26,9 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+
+#include <set_assertions.h>
 #include <muuid.h>
 
 TEST_CASE("uuid_creation", "[uuid]")

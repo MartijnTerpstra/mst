@@ -91,7 +91,7 @@ public:
 
 	[[nodiscard]] inline const T& operator[](size_t index) const
 	{
-		CHECK_ARR_RANGE(index, _Mysize, "index out of range");
+		MST_ASSERT(index < _Mysize, "index out of range");
 		return _Mybegin[index];
 	}
 

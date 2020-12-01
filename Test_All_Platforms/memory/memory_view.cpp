@@ -26,6 +26,8 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+
 #include <mmemory_view.h>
 
 TEST_CASE("memory_view_empty", "[memory_view]")

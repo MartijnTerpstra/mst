@@ -156,40 +156,40 @@ public:
 
 	mapped_type& front()
 	{
-		CHECK_IF(empty(), "cannot call front() on empty container");
+		MST_ASSERT(!empty(), "cannot call front() on empty container");
 
 		return _Get_cont().front().second;
 	}
 
 	const mapped_type& front() const
 	{
-		CHECK_IF(empty(), "cannot call front() on empty container");
+		MST_ASSERT(!empty(), "cannot call front() on empty container");
 
 		return _Get_cont().front().second;
 	}
 
 	mapped_type& back()
 	{
-		CHECK_IF(empty(), "cannot call back() on empty container");
+		MST_ASSERT(!empty(), "cannot call back() on empty container");
 
 		return _Get_cont().back().second;
 	}
 
 	const mapped_type& back() const
 	{
-		CHECK_IF(empty(), "cannot call back() on empty container");
+		MST_ASSERT(!empty(), "cannot call back() on empty container");
 
 		return _Get_cont().back().second;
 	}
 
 	inline mapped_type& at(const key_type& key)
 	{
-		CHECK_IF(empty(), "cannot call at() on empty containers");
+		MST_ASSERT(!empty(), "cannot call at() on empty containers");
 
 		_Cont_iter it = _Lower_bound(key);
 		if(it == _Get_end() || _Get_comp()(key, it->first))
 		{
-			throw std::out_of_range("key not found");
+			MST_FATAL_ERROR("key not found");
 		}
 
 		return it->second;
@@ -197,7 +197,7 @@ public:
 
 	inline const mapped_type& at(const key_type& key) const
 	{
-		CHECK_IF(empty(), "cannot call at() on empty containers");
+		MST_ASSERT(!empty(), "cannot call at() on empty containers");
 
 		_Cont_const_iter it = _Lower_bound(key);
 		if(it == _Get_end() || _Get_comp()(key, it->first) /*_MST_INVALID_KEY(it, key)*/)
@@ -280,7 +280,7 @@ public:
 
 	inline void erase(const key_type& key)
 	{
-		CHECK_IF(empty(), "cannot call erase on empty container");
+		MST_ASSERT(!empty(), "cannot call erase on empty container");
 
 		_Cont_iter it = _Lower_bound(key);
 
@@ -291,8 +291,9 @@ public:
 
 	inline iterator erase(iterator iter)
 	{
-		CHECK_IF(empty(), "cannot call erase on empty container");
-		CHECK_ITER_RANGE(_From_extern(iter), _Get_begin(), _Get_end(), "iterator out of range");
+		MST_ASSERT(!empty(), "cannot call erase on empty container");
+		MST_ASSERT(_From_extern(iter) >= _Get_begin() && _From_extern(iter) < _Get_end(),
+			"iterator out of range");
 
 		return _Erase(iter);
 	}
@@ -399,7 +400,7 @@ private:
 
 			if(_Get_comp()(middleIter->first, key))
 			{
-				CHECK_IF(_Get_comp()(key, middleIter->first), "invalid comparison operations");
+				MST_ASSERT(!_Get_comp()(key, middleIter->first), "invalid comparison operations");
 				beginIter = middleIter + 1;
 				range -= halfRange + 1;
 			}
@@ -426,7 +427,7 @@ private:
 
 			if(_Get_comp()(middleIter->first, key))
 			{
-				CHECK_IF(_Get_comp()(key, middleIter->first), "invalid comparison operations");
+				MST_ASSERT(!_Get_comp()(key, middleIter->first), "invalid comparison operations");
 				beginIter = middleIter + 1;
 				range -= halfRange + 1;
 			}
@@ -453,7 +454,7 @@ private:
 
 			if(_Get_comp()(key, middleIter->first))
 			{
-				CHECK_IF(_Get_comp()(middleIter->first, key), "invalid comparison operations");
+				MST_ASSERT(!_Get_comp()(middleIter->first, key), "invalid comparison operations");
 				range = halfRange;
 			}
 			else
@@ -480,7 +481,7 @@ private:
 
 			if(_Get_comp()(middleIter->first, key))
 			{
-				CHECK_IF(_Get_comp()(key, middleIter->first), "invalid comparison operations");
+				MST_ASSERT(!_Get_comp()(key, middleIter->first), "invalid comparison operations");
 				beginIter = middleIter + 1;
 				range -= halfRange + 1;
 			}
@@ -507,7 +508,7 @@ private:
 
 			if(_Get_comp()(key, middleIter->first))
 			{
-				CHECK_IF(_Get_comp()(middleIter->first, key), "invalid comparison operations");
+				MST_ASSERT(!_Get_comp()(middleIter->first, key), "invalid comparison operations");
 				range = halfRange;
 			}
 			else

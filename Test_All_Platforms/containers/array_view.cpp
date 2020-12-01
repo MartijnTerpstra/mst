@@ -26,6 +26,8 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+
 #include <marray_view.h>
 
 TEST_CASE("array_view_empty", "[array_view]")

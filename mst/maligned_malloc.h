@@ -51,7 +51,7 @@ inline void* aligned_malloc(size_t size, size_t alignment)
 
 	if(alignment == 0 || ((alignment - 1) & alignment))
 	{
-		ERROR_MESG("bad alignment in mst::dll_safe::aligned_malloc(): must be a power of 2");
+		MST_FATAL_ERROR("bad alignment in mst::dll_safe::aligned_malloc(): must be a power of 2");
 
 		// bad alignment
 #if _MST_HAS_EXCEPTIONS

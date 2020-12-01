@@ -26,20 +26,24 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+
 #include <msparse_set.h>
 #include <random>
 
 using mst::sparse_set;
 
-TEST_CASE("sparse_set<E,I>_creation", "[sparse_set]")
+TEST_CASE("sparse_set<E,I>: creation", "[sparse_set]")
 {
 	sparse_set<int, int> intint;
+	const auto& cintint = intint;
 
 	intint.emplace(100, 1000);
 
 	REQUIRE(intint.size() == 1);
 	REQUIRE(intint.contains(100));
 	REQUIRE(intint.at(100) == 1000);
+	REQUIRE(cintint.at(100) == 1000);
 
 	REQUIRE(intint.cbegin()->second == 1000);
 
@@ -51,15 +55,17 @@ TEST_CASE("sparse_set<E,I>_creation", "[sparse_set]")
 	REQUIRE(!intint.contains(100));
 }
 
-TEST_CASE("sparse_set<E,I>_erasion", "[sparse_set]")
+TEST_CASE("sparse_set<E,I>: erasion", "[sparse_set]")
 {
 	sparse_set<int, int> intint;
+	const auto& cintint = intint;
 
 	intint.emplace(100, 1000);
 
 	REQUIRE(intint.size() == 1);
 	REQUIRE(intint.contains(100));
 	REQUIRE(intint.at(100) == 1000);
+	REQUIRE(cintint.at(100) == 1000);
 
 	REQUIRE(intint.cbegin()->second == 1000);
 

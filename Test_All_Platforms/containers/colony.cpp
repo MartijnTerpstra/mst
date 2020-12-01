@@ -26,11 +26,14 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+#include <random_data_generator.h>
+
 #include <vector>
 #include <mcolony.h>
-#include <random>
 
 using mst::colony;
+using namespace mst::tests;
 
 TEST_CASE("colony<T>_creation", "[colony]")
 {
@@ -42,49 +45,63 @@ TEST_CASE("colony<T>_creation", "[colony]")
 	colony<data> container;
 }
 
-TEST_CASE("colony<T>_expand_and_clear", "[colony]")
+TEST_CASE("colony<T>: expand and clear", "[colony]")
 {
+	random_data_generator rdg{ true };
+	INFO("Seed" << rdg.seed());
+
 	struct data
 	{
 		int data[4];
 	};
 
-	colony<data> intint;
-
+	colony<data> datas;
 	std::vector<colony<data>::iterator> iters;
-	iters.reserve(8192 * 2);
 
-	for(int i = 0; i < 8192 * 2; ++i)
+	SECTION("Fill the colony with data and store iterators")
 	{
-		iters.push_back(intint.emplace());
+		const auto elemCount = 8192 * 2;
 
-		intint.check_freelist();
-	}
+		iters.reserve(elemCount);
 
-	std::mt19937 rand;
+		for(int i = 0; i < elemCount; ++i)
+		{
+			iters.push_back(datas.emplace());
+		}
 
-	int32_t loopIndex = 0;
+		REQUIRE(datas.size() == elemCount);
 
-	while(iters.size() > 8192)
-	{
-		std::uniform_int_distribution<> range(0, (int)iters.size() - 1);
+		SECTION("Clear the colony by erasing random items")
+		{
+			while(!iters.empty())
+			{
+				const auto iterIndex = rdg.scalar_int<size_t>(0, iters.size() - 1);
 
-		auto iterIndex = range(rand);
+				datas.erase(iters[(size_t)iterIndex]);
 
-		intint.erase(iters[(size_t)iterIndex]);
+				iters.erase(iters.begin() + iterIndex);
+			}
 
-		iters.erase(iters.begin() + iterIndex);
+			REQUIRE(datas.empty());
+			REQUIRE(datas.size() == 0);
 
-		intint.check_freelist();
+			for(auto& item : datas)
+			{
+				FAIL("Should be empty: ");
+			}
 
-		++loopIndex;
-	}
+			SECTION("Fill the colony with data again")
+			{
+				const size_t reserveSize = 8192 * 4 + 1;
 
-	for(int i = 0; i < 8192; ++i)
-	{
-		intint.emplace();
+				for(int i = 0; i < reserveSize; ++i)
+				{
+					datas.emplace();
+				}
 
-		intint.check_freelist();
+				REQUIRE(datas.size() == reserveSize);
+			}
+		}
 	}
 }
 
@@ -118,8 +135,6 @@ TEST_CASE("colony<T>_element_construction_destruction", "[colony]")
 		for(int i = 0; i < 8192 * 2; ++i)
 		{
 			iters.push_back(intint.emplace());
-
-			intint.check_freelist();
 		}
 
 		std::mt19937 rand;
@@ -136,23 +151,19 @@ TEST_CASE("colony<T>_element_construction_destruction", "[colony]")
 
 			iters.erase(iters.begin() + iterIndex);
 
-			intint.check_freelist();
-
 			++loopIndex;
 		}
 
 		for(int i = 0; i < 8192; ++i)
 		{
 			intint.emplace();
-
-			intint.check_freelist();
 		}
 	}
 
 	REQUIRE(createdCount == 0);
 }
 
-TEST_CASE("colony<T>_clear", "[colony]")
+TEST_CASE("colony<T>::clear()", "[colony]")
 {
 	struct data
 	{
@@ -161,23 +172,51 @@ TEST_CASE("colony<T>_clear", "[colony]")
 
 	colony<data> intint;
 
-	std::vector<colony<data>::iterator> iters;
-	iters.reserve(8192 * 2);
-
-	for(int i = 0; i < 8192 * 2; ++i)
+	SECTION("Fill the colony with data")
 	{
-		iters.push_back(intint.emplace());
+		for(int i = 0; i < 8192 * 2; ++i)
+		{
+			intint.emplace();
+		}
 
-		intint.check_freelist();
-	}
+		size_t elemsEncountered = 0;
+		for(auto& item : intint)
+		{
+			++elemsEncountered;
+		}
 
-	intint.clear();
-	intint.check_freelist();
+		REQUIRE(elemsEncountered == intint.size());
 
-	for(int i = 0; i < 8192; ++i)
-	{
-		intint.emplace();
+		SECTION("Clear should leave behind an empty container")
+		{
+			intint.clear();
 
-		intint.check_freelist();
+			REQUIRE(intint.empty());
+			REQUIRE(intint.size() == 0);
+
+			size_t elemsEncountered = 0;
+			for(auto& item : intint)
+			{
+				++elemsEncountered;
+			}
+
+			REQUIRE(elemsEncountered == intint.size());
+
+			SECTION("Fill the colony with data after clear()")
+			{
+				for(int i = 0; i < 8192; ++i)
+				{
+					intint.emplace();
+				}
+
+				size_t elemsEncountered = 0;
+				for(auto item : intint)
+				{
+					++elemsEncountered;
+				}
+
+				REQUIRE(elemsEncountered == intint.size());
+			}
+		}
 	}
 }

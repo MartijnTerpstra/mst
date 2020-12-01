@@ -62,5 +62,6 @@ add_mst_test(memory memory_view)
 add_mst_test(simd vector)
 
 add_mst_test(testing random_data_generator)
+add_mst_test(testing set_assertions)
 
 add_mst_test(threading slim_event)

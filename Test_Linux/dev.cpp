@@ -26,7 +26,7 @@ int main(void)
 
 	std::this_thread::sleep_for(std::chrono::seconds(5));
 
-	mst::logger::info("platform: " + mst::platform::full_name());
+	std::cout << "platform: " << mst::platform::full_name()) << std::endl;
 
 	Display* display;
 	Window window;

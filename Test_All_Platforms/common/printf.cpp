@@ -101,7 +101,7 @@ TEST_CASE("printf: pointer", "[common]")
 	const void* pNull = nullptr;
 
 	const auto ptrStr = mst::to_printf_string("%p", pNull);
-	REQUIRE(ptrStr == ToPtrStr(0) || ptrStr == "(nil)");
+	REQUIRE((ptrStr == ToPtrStr(0) || ptrStr == "(nil)"));
 }
 
 TEST_CASE("printf: int8_t", "[common]")

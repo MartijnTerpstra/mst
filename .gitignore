@@ -31,5 +31,11 @@
 *.out
 *.app
 
-#Visual Studio
-.vs
+# Visual Studio
+.vs/
+
+# Visual Studio Code
+.vscode/
+
+# CMake
+build/

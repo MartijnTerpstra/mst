@@ -33,7 +33,7 @@
 
 using mst::arraymap;
 
-TEST_CASE("arraymap<K,V>_creation", "[arraymap]")
+TEST_CASE("arraymap<K,V>: creation", "[arraymap]")
 {
 	arraymap<int, int> intint;
 

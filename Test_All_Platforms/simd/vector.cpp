@@ -32,5 +32,5 @@
 
 using namespace mst::simd;
 
-TEST_CASE("vector", "[simd]")
+TEST_CASE("simd::vector", "[simd]")
 { }

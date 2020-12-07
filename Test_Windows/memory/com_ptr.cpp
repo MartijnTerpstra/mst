@@ -92,7 +92,7 @@ void CreationFunc(IFakeIUnknown** outResult)
 	*outResult = new CFakeUnknown();
 }
 
-TEST_CASE("com_ptr_creation", "[memory][com_ptr]")
+TEST_CASE("com_ptr<T: creation", "[memory][com_ptr]")
 {
 	IFakeIUnknown* obj = new CFakeUnknown();
 
@@ -105,7 +105,7 @@ TEST_CASE("com_ptr_creation", "[memory][com_ptr]")
 	REQUIRE(obj->Release() == 0);
 }
 
-TEST_CASE("com_ptr_initialize", "[memory][com_ptr]")
+TEST_CASE("com_ptr<T>: initialize", "[memory][com_ptr]")
 {
 	IFakeIUnknown* obj = new CFakeUnknown();
 

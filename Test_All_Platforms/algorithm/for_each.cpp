@@ -31,7 +31,7 @@
 #include <malgorithm.h>
 #include <vector>
 
-TEST_CASE("algorithm_iterate_all", "[algorithm][iterate]")
+TEST_CASE("foreach: container", "[algorithm][iterate]")
 {
 	std::vector<int> input;
 	std::vector<int> iterated;
@@ -42,7 +42,7 @@ TEST_CASE("algorithm_iterate_all", "[algorithm][iterate]")
 	}
 
 	// remove even
-	mst::iterate(input, [&](int elem) { iterated.push_back(elem); });
+	mst::for_each(input, [&](int elem) { iterated.push_back(elem); });
 
 	REQUIRE(input == iterated);
 }

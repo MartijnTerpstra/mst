@@ -31,7 +31,7 @@
 #include <malgorithm.h>
 #include <vector>
 
-TEST_CASE("algorithm_iterate_remove_remove_odd", "[algorithm][iterate_remove]")
+TEST_CASE("for_each_remove_if: removing odd only", "[algorithm][iterate_remove]")
 {
 	std::vector<int> input;
 	std::vector<int> iterated;
@@ -44,7 +44,7 @@ TEST_CASE("algorithm_iterate_remove_remove_odd", "[algorithm][iterate_remove]")
 	auto temp = input;
 
 	// remove even
-	mst::iterate_remove(temp, [&](int elem) {
+	mst::for_each_remove_if(temp, [&](int elem) {
 		iterated.push_back(elem);
 		return (elem & 1) != 0;
 	});
@@ -53,7 +53,7 @@ TEST_CASE("algorithm_iterate_remove_remove_odd", "[algorithm][iterate_remove]")
 	REQUIRE(input == iterated);
 }
 
-TEST_CASE("algorithm_iterate_remove_no_change", "[algorithm][iterate_remove]")
+TEST_CASE("for_each_remove_if: all false", "[algorithm][iterate_remove]")
 {
 	std::vector<int> input;
 	std::vector<int> iterated;
@@ -66,7 +66,7 @@ TEST_CASE("algorithm_iterate_remove_no_change", "[algorithm][iterate_remove]")
 	auto temp = input;
 
 	// remove even
-	mst::iterate_remove(temp, [&](int elem) {
+	mst::for_each_remove_if(temp, [&](int elem) {
 		iterated.push_back(elem);
 		return false;
 	});
@@ -75,7 +75,7 @@ TEST_CASE("algorithm_iterate_remove_no_change", "[algorithm][iterate_remove]")
 	REQUIRE(input == iterated);
 }
 
-TEST_CASE("algorithm_iterate_remove_clear", "[algorithm][iterate_remove]")
+TEST_CASE("for_each_remove_if: all true", "[algorithm][iterate_remove]")
 {
 	std::vector<int> input;
 	std::vector<int> iterated;
@@ -88,7 +88,7 @@ TEST_CASE("algorithm_iterate_remove_clear", "[algorithm][iterate_remove]")
 	auto temp = input;
 
 	// remove even
-	mst::iterate_remove(temp, [&](int elem) {
+	mst::for_each_remove_if(temp, [&](int elem) {
 		iterated.push_back(elem);
 		return true;
 	});

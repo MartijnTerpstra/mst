@@ -37,7 +37,7 @@
 using namespace mst::math;
 using namespace mst;
 
-TEST_CASE("algorithm_is_pow_2", "[math][algorithm]")
+TEST_CASE("is_pow_2", "[math][algorithm]")
 {
 	for(uint32_t i = 0; i < 32; ++i)
 	{
@@ -63,7 +63,7 @@ TEST_CASE("algorithm_is_pow_2", "[math][algorithm]")
 	}
 }
 
-TEST_CASE("algorithm_to_bit_shift", "[math][algorithm]")
+TEST_CASE("to_bit_shift_cpp11", "[math][algorithm]")
 {
 	uint32_t value = 100;
 
@@ -91,6 +91,39 @@ TEST_CASE("algorithm_to_bit_shift", "[math][algorithm]")
 	REQUIRE(to_bit_shift_cpp11<uint32_t, 32768>::value == 15);
 	REQUIRE(to_bit_shift_cpp11<uint32_t, 65536>::value == 16);
 }
+
+#if _MST_HAS_TEMPLATE_AUTO
+
+TEST_CASE("to_bit_shift", "[math][algorithm]")
+{
+	uint32_t value = 100;
+
+	constexpr const uint32_t div = 8;
+	const auto divShift = to_bit_shift<div>::value;
+
+	REQUIRE(value / div == value >> divShift);
+	REQUIRE(value * div == value << divShift);
+
+	REQUIRE(to_bit_shift<1>::value == 0);
+	REQUIRE(to_bit_shift<2>::value == 1);
+	REQUIRE(to_bit_shift<4>::value == 2);
+	REQUIRE(to_bit_shift<8>::value == 3);
+	REQUIRE(to_bit_shift<16>::value == 4);
+	REQUIRE(to_bit_shift<32>::value == 5);
+	REQUIRE(to_bit_shift<64>::value == 6);
+	REQUIRE(to_bit_shift<128>::value == 7);
+	REQUIRE(to_bit_shift<256>::value == 8);
+	REQUIRE(to_bit_shift<512>::value == 9);
+	REQUIRE(to_bit_shift<1024>::value == 10);
+	REQUIRE(to_bit_shift<2048>::value == 11);
+	REQUIRE(to_bit_shift<4096>::value == 12);
+	REQUIRE(to_bit_shift<8192>::value == 13);
+	REQUIRE(to_bit_shift<16384>::value == 14);
+	REQUIRE(to_bit_shift<32768>::value == 15);
+	REQUIRE(to_bit_shift<65536>::value == 16);
+}
+
+#endif // _MST_HAS_TEMPLATE_AUTO
 
 TEST_CASE("algorithm_saturate_scalar", "[math][algorithm]")
 {

@@ -30,7 +30,7 @@
 
 #include <maligned_malloc.h>
 
-TEST_CASE("aligned_malloc_alignments", "[memory][allocator]")
+TEST_CASE("aligned_malloc: alignments", "[memory][allocator]")
 {
 	for(size_t alignment = 1; alignment <= 1024; alignment <<= 1)
 	{
@@ -44,7 +44,7 @@ TEST_CASE("aligned_malloc_alignments", "[memory][allocator]")
 	}
 }
 
-TEST_CASE("aligned_realloc_alignments", "[memory][allocator]")
+TEST_CASE("aligned_realloc: alignments", "[memory][allocator]")
 {
 	for(size_t alignment = 1; alignment <= 1024; alignment <<= 1)
 	{
@@ -61,7 +61,7 @@ TEST_CASE("aligned_realloc_alignments", "[memory][allocator]")
 }
 
 // Realloc with nullptr should behave like malloc
-TEST_CASE("aligned_realloc_malloc", "[memory][allocator]")
+TEST_CASE("aligned_realloc: malloc", "[memory][allocator]")
 {
 	for(size_t alignment = 1; alignment <= 1024; alignment <<= 1)
 	{
@@ -76,7 +76,7 @@ TEST_CASE("aligned_realloc_malloc", "[memory][allocator]")
 }
 
 // Realloc with nullptr should behave like malloc
-TEST_CASE("aligned_realloc_free", "[memory][allocator]")
+TEST_CASE("aligned_realloc: free", "[memory][allocator]")
 {
 	for(size_t alignment = 1; alignment <= 1024; alignment <<= 1)
 	{

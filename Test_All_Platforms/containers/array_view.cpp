@@ -30,7 +30,7 @@
 
 #include <marray_view.h>
 
-TEST_CASE("array_view_empty", "[array_view]")
+TEST_CASE("array_view<T>: empty", "[array_view]")
 {
 	const mst::array_view<int> arrview;
 	REQUIRE(arrview.size() == 0);
@@ -47,7 +47,7 @@ TEST_CASE("array_view_empty", "[array_view]")
 	}
 }
 
-TEST_CASE("array_view_single_value", "[array_view]")
+TEST_CASE("array_view<T>: single value", "[array_view]")
 {
 	int value = 21;
 	const mst::array_view<int> arrview(value);
@@ -68,7 +68,7 @@ TEST_CASE("array_view_single_value", "[array_view]")
 	REQUIRE(count == 1);
 }
 
-TEST_CASE("array_view_container_value", "[array_view]")
+TEST_CASE("array_view<T>: container value", "[array_view]")
 {
 	std::vector<int> value = { 21 };
 	const mst::array_view<int> arrview(value);
@@ -89,7 +89,7 @@ TEST_CASE("array_view_container_value", "[array_view]")
 	REQUIRE(count == 1);
 }
 
-TEST_CASE("array_view_pointer_to_array", "[array_view]")
+TEST_CASE("array_view<T>: pointer to array", "[array_view]")
 {
 	int* value = new int[1];
 	value[0] = 21;
@@ -111,7 +111,7 @@ TEST_CASE("array_view_pointer_to_array", "[array_view]")
 	REQUIRE(count == 1);
 }
 
-TEST_CASE("array_view_array", "[array_view]")
+TEST_CASE("array_view<T>: array", "[array_view]")
 {
 	int value[1]{ 21 };
 	const mst::array_view<int> arrview(value);
@@ -151,7 +151,7 @@ void ConsumeInitList(mst::array_view<int> arrview)
 	REQUIRE(count == 1);
 }
 
-TEST_CASE("array_view_initializer_list", "[array_view]")
+TEST_CASE("array_view<T>: std::initializer_list", "[array_view]")
 {
 	ConsumeInitList({ 21 });
 }

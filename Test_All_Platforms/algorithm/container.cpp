@@ -51,7 +51,7 @@ void CheckIsReverseSorted(const std::vector<int>& input)
 	}
 }
 
-TEST_CASE("algorithm_container_sort", "[algorithm][container]")
+TEST_CASE("sort: container", "[algorithm][container]")
 {
 	random_data_generator rdg{ true };
 	INFO("Seed" << rdg.seed());
@@ -65,7 +65,7 @@ TEST_CASE("algorithm_container_sort", "[algorithm][container]")
 	CheckIsSorted(input);
 }
 
-TEST_CASE("algorithm_container_sort_predictate", "[algorithm][container]")
+TEST_CASE("sort: container & predictate", "[algorithm][container]")
 {
 	random_data_generator rdg{ true };
 	INFO("Seed" << rdg.seed());
@@ -79,7 +79,7 @@ TEST_CASE("algorithm_container_sort_predictate", "[algorithm][container]")
 	CheckIsReverseSorted(input);
 }
 
-TEST_CASE("algorithm_container_find", "[algorithm][container]")
+TEST_CASE("find: container", "[algorithm][container]")
 {
 	std::vector<int> input{ 3, 2, 5, 1, 4 };
 
@@ -90,7 +90,7 @@ TEST_CASE("algorithm_container_find", "[algorithm][container]")
 	REQUIRE(*foundIt == 1);
 }
 
-TEST_CASE("algorithm_container_find_if", "[algorithm][container]")
+TEST_CASE("find_if: container", "[algorithm][container]")
 {
 	std::vector<int> input{ 3, 2, 5, 1, 4 };
 

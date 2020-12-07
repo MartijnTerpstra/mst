@@ -35,7 +35,7 @@
 using mst::colony;
 using namespace mst::tests;
 
-TEST_CASE("colony<T>_creation", "[colony]")
+TEST_CASE("colony<T>: creation", "[colony]")
 {
 	struct data
 	{
@@ -105,7 +105,7 @@ TEST_CASE("colony<T>: expand and clear", "[colony]")
 	}
 }
 
-TEST_CASE("colony<T>_element_construction_destruction", "[colony]")
+TEST_CASE("colony<T>: should call T constructor & destructor", "[colony]")
 {
 	static int32_t createdCount = 0;
 
@@ -163,7 +163,7 @@ TEST_CASE("colony<T>_element_construction_destruction", "[colony]")
 	REQUIRE(createdCount == 0);
 }
 
-TEST_CASE("colony<T>::clear()", "[colony]")
+TEST_CASE("colony<T>: clear and expand", "[colony]")
 {
 	struct data
 	{

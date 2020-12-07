@@ -44,7 +44,7 @@ void TestEmpty(T range)
 	}
 }
 
-TEST_CASE("range_empty", "[ranges]")
+TEST_CASE("range: empty", "[ranges]")
 {
 	std::vector<int> container;
 
@@ -58,7 +58,7 @@ TEST_CASE("range_empty", "[ranges]")
 	TestEmpty(mst::range(std::make_pair(ccontainer.begin(), ccontainer.end())));
 }
 
-TEST_CASE("crange_empty", "[ranges]")
+TEST_CASE("crang:eempty", "[ranges]")
 {
 	std::vector<int> container;
 
@@ -92,7 +92,7 @@ void TestOne(int value, T range)
 		FAIL("Container should contain one element");
 }
 
-TEST_CASE("range_one", "[ranges]")
+TEST_CASE("range: one", "[ranges]")
 {
 	std::vector<int> container = { 1 };
 	int arr[1] = { 1 };
@@ -110,7 +110,7 @@ TEST_CASE("range_one", "[ranges]")
 	TestOne(1, mst::range(carr));
 }
 
-TEST_CASE("crange_one", "[ranges]")
+TEST_CASE("crange: one", "[ranges]")
 {
 	std::vector<int> container = { 1 };
 	int arr[1] = { 1 };
@@ -145,7 +145,7 @@ void TestValues(T range)
 	REQUIRE(count == 10);
 }
 
-TEST_CASE("range_values", "[ranges]")
+TEST_CASE("range: _values", "[ranges]")
 {
 	std::vector<int> container = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	int arr[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

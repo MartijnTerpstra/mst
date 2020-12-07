@@ -38,7 +38,7 @@ using mst::math::vector;
 using mst::math::matrix;
 using mst::math::quaternion;
 
-TEST_CASE("matrix<V_C_R>_base_support", "[matrix][simd]")
+TEST_CASE("matrix<V,C,R>: type support", "[matrix][simd]")
 {
 	REQUIRE(matrix<float, 1, 1>(0)[0][0] == 0);
 	REQUIRE(matrix<float, 1, 2>(0)[0][0] == 0);
@@ -126,7 +126,7 @@ TEST_CASE("matrix<V_C_R>_base_support", "[matrix][simd]")
 	REQUIRE(matrix<int64_t, 4, 4>(0)[0][0] == 0);
 }
 
-TEST_CASE("matrix<V_C_R>_constructor", "[matrix][simd]")
+TEST_CASE("matrix<V,C,R>: constructor", "[matrix][simd]")
 {
 	vector<float, 3> fposition;
 	quaternion<float> fquaternion;

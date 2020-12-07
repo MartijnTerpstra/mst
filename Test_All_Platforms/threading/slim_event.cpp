@@ -32,12 +32,12 @@
 
 using mst::threading::slim::event;
 
-TEST_CASE("threading_slim_event_creation", "[thread][slim][event]")
+TEST_CASE("threading::slim::event: creation", "[thread][slim][event]")
 {
 	event e{ false, false };
 }
 
-TEST_CASE("threading_slim_event_single_thread", "[thread][slim][event]")
+TEST_CASE("threading::slim::event: single thread (manual)", "[thread][slim][event]")
 {
 	event e{ false, true };
 
@@ -47,6 +47,24 @@ TEST_CASE("threading_slim_event_single_thread", "[thread][slim][event]")
 
 	REQUIRE(e.try_wait());
 
+	e.reset();
+
+	REQUIRE(!e.try_wait());
+}
+
+TEST_CASE("threading::slim::event: single thread (auto)", "[thread][slim][event]")
+{
+	event e{ false, false };
+
+	REQUIRE(!e.try_wait());
+
+	e.set();
+
+	REQUIRE(e.try_wait());
+
+	REQUIRE(!e.try_wait());
+
+	e.set();
 	e.reset();
 
 	REQUIRE(!e.try_wait());

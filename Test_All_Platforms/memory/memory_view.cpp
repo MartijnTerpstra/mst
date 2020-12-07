@@ -30,7 +30,7 @@
 
 #include <mmemory_view.h>
 
-TEST_CASE("memory_view_empty", "[memory_view]")
+TEST_CASE("memory_view: empty", "[memory_view]")
 {
 	const mst::memory_view arrview{ nullptr, 0 };
 	REQUIRE(arrview.size() == 0);
@@ -47,7 +47,7 @@ TEST_CASE("memory_view_empty", "[memory_view]")
 	REQUIRE(count == 0);
 }
 
-TEST_CASE("memory_view_container_value", "[memory_view]")
+TEST_CASE("memory_view: container value", "[memory_view]")
 {
 	std::vector<int> value = { 21 };
 	const mst::memory_view arrview(value);
@@ -63,7 +63,7 @@ TEST_CASE("memory_view_container_value", "[memory_view]")
 	REQUIRE(count == sizeof(int));
 }
 
-TEST_CASE("memory_view_pointer_to_array", "[memory_view]")
+TEST_CASE("memory_view: pointer to array", "[memory_view]")
 {
 	int* value = new int[1];
 	value[0] = 21;
@@ -82,7 +82,7 @@ TEST_CASE("memory_view_pointer_to_array", "[memory_view]")
 	delete[] value;
 }
 
-TEST_CASE("memory_view_array", "[memory_view]")
+TEST_CASE("memory_view: array", "[memory_view]")
 {
 	int value[1]{ 21 };
 	const mst::memory_view arrview(value);

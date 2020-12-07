@@ -38,7 +38,7 @@
 
 using mst::math::vector;
 
-TEST_CASE("vector<V_E>_base_support", "[vector][simd]")
+TEST_CASE("vector<V,E>: base support", "[vector][simd]")
 {
 	REQUIRE(vector<float, 1>(0).x == 0);
 	REQUIRE(vector<float, 2>(0).x == 0);
@@ -159,7 +159,7 @@ void TestArithmetics()
 	}
 }
 
-TEST_CASE("vector<V_E>_SIMD_arithmetics", "[vector][simd]")
+TEST_CASE("vector<V,E>: SIMD arithmetics", "[vector][simd]")
 {
 	TestArithmetics<float, 1>();
 	TestArithmetics<float, 2>();

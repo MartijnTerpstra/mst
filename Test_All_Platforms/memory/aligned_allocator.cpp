@@ -64,7 +64,7 @@ void CheckType()
 	alloc.deallocate(ptrValue, 1);
 }
 
-TEST_CASE("aligned_allocator<T>_sizes", "[memory][allocator]")
+TEST_CASE("aligned_allocator<T>: sizes", "[memory][allocator]")
 {
 	CheckType<short>();
 
@@ -79,7 +79,7 @@ TEST_CASE("aligned_allocator<T>_sizes", "[memory][allocator]")
 	CheckType<packed64>();
 }
 
-TEST_CASE("aligned_allocator<T>_vector", "[memory][allocator]")
+TEST_CASE("aligned_allocator<T>: vector", "[memory][allocator]")
 {
 	const std::vector<packed16, mst::aligned_allocator<packed16, 64>> packed(1);
 

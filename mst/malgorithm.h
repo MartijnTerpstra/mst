@@ -32,19 +32,19 @@
 namespace mst {
 
 template<class _Container, typename _Function>
-inline void iterate_remove(_Container& _Cont, _Function _Func)
+inline void for_each_remove_if(_Container& _Cont, _Function _Func)
 {
 	_Cont.erase(::std::remove_if(_Cont.begin(), _Cont.end(), _Func), _Cont.end());
 }
 
 template<typename _Container, typename _Function>
-inline void iterate(const _Container& _Cont, _Function _Func)
+inline void for_each(const _Container& _Cont, _Function _Func)
 {
 	::std::for_each(_Cont.begin(), _Cont.end(), _Func);
 }
 
 template<typename _Iterator, typename _Function>
-inline void iterate(_Iterator _Begin, _Iterator _End, _Function _Func)
+inline void for_each(_Iterator _Begin, _Iterator _End, _Function _Func)
 {
 	::std::for_each(_Begin, _End, _Func);
 }

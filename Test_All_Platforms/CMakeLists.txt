@@ -31,9 +31,9 @@ catch_discover_tests("test_${CATEGORY}_${TEST_NAME}")
 
 endmacro(add_mst_test)
 
-add_mst_test(algorithm iterate)
-add_mst_test(algorithm iterate_remove)
 add_mst_test(algorithm container)
+add_mst_test(algorithm for_each)
+add_mst_test(algorithm for_each_remove_if)
 
 add_mst_test(common common)
 add_mst_test(common compiletime)

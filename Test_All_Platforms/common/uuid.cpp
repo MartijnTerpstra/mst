@@ -31,14 +31,14 @@
 #include <set_assertions.h>
 #include <muuid.h>
 
-TEST_CASE("uuid_creation", "[uuid]")
+TEST_CASE("uuid: creation", "[uuid]")
 {
 	auto zero = mst::create_zero_uuid();
 	auto random = mst::uuid::create();
 	REQUIRE(random != zero);
 }
 
-TEST_CASE("uuid_equality", "[uuid]")
+TEST_CASE("uuid: equality", "[uuid]")
 {
 	auto zero = mst::create_zero_uuid();
 	auto random = mst::uuid::create();
@@ -48,7 +48,7 @@ TEST_CASE("uuid_equality", "[uuid]")
 	REQUIRE(random2 == random);
 }
 
-TEST_CASE("uuid_string_conversions", "[uuid]")
+TEST_CASE("uuid: string conversions", "[uuid]")
 {
 	auto random = mst::uuid::create();
 	auto random2 = mst::create_zero_uuid();

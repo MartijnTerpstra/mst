@@ -30,7 +30,7 @@
 
 #include <Unknwn.h>
 
-TEST_CASE("platform_page_size", "[platform][memory]")
+TEST_CASE("platform::page_size", "[platform][memory]")
 {
 	uint32_t pageSize = mst::platform::page_size();
 

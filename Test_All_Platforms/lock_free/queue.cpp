@@ -62,12 +62,12 @@ struct Counter
 	}
 };
 
-TEST_CASE("lock_free_queue_creation", "[lock_free][queue]")
+TEST_CASE("lock_free::queue: creation", "[lock_free][queue]")
 {
 	queue<Counter> q;
 }
 
-TEST_CASE("lock_free_queue_single_thread", "[lock_free][queue]")
+TEST_CASE("lock_free::queue: single thread", "[lock_free][queue]")
 {
 	queue<int> q;
 
@@ -233,7 +233,7 @@ void TestReadersWriters(bool sequential = false)
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_spsc", "[lock_free][queue]")
+TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue]")
 {
 	for(int i = 0; i < 50; ++i)
 	{

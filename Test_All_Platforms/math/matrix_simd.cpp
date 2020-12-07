@@ -117,7 +117,7 @@ void TestMultiplication()
 	REQUIRE(memcmp(&vref, &vsimdresult, sizeof(vref)) == 0);
 }
 
-TEST_CASE("matrix<V_C_R>_matrix_hierarchy", "[matrix][simd]")
+TEST_CASE("matrix<V,C,R>: matrix hierarchy", "[matrix][simd]")
 {
 	typedef matrix<float, 4, 4> mat;
 	typedef mst::math::degrees<float> degrees;
@@ -139,7 +139,7 @@ TEST_CASE("matrix<V_C_R>_matrix_hierarchy", "[matrix][simd]")
 	INFO("position.z: " << pos.z);
 }
 
-TEST_CASE("matrix<V_C_R>_SIMD_multiplication", "[matrix][simd]")
+TEST_CASE("matrix<V,C,R>: SIMDmultiplication", "[matrix][simd]")
 {
 	TestMultiplication<float, 4>();
 	TestMultiplication<uint32_t, 4>();
@@ -206,7 +206,7 @@ void TestInverse()
 		mst::test::approx_equal(left, (ValueType)0.00001, (ValueType)0.00015));
 }
 
-TEST_CASE("matrix<V_C_R>_SIMD_inverse", "[matrix][simd]")
+TEST_CASE("matrix<V,C,R>: SIMD inverse", "[matrix][simd]")
 {
 	TestInverse<float>();
 	TestInverse<double>();

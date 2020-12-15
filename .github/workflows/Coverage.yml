@@ -4,6 +4,8 @@ name: Code Coverage
 on:
   pull_request:
     branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
 
 jobs:
 
@@ -44,4 +46,4 @@ jobs:
       run: |
         wget https://codecov.io/bash -O codecov
         chmod +x codecov
-        ./codecov -t $CODECOV_TOKEN -B $GITHUB_REF
+        ./codecov -t $CODECOV_TOKEN -B $GITHUB_REF -s .

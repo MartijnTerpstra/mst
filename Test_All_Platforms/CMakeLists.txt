@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.13)
 
 macro(add_mst_test CATEGORY TEST_NAME)
 
-message(STATUS ${CXXFLAGS})
+message(STATUS "CXXFLAGS: ${CXXFLAGS}")
 
 add_executable("test_${CATEGORY}_${TEST_NAME}" "${CATEGORY}/${TEST_NAME}.cpp")
 

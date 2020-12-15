@@ -25,7 +25,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
       env:
-        CXXFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+        CPPFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
         CC: gcc
         CXX: g++
 

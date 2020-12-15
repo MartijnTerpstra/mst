@@ -58,7 +58,7 @@ TEST_CASE("range: empty", "[ranges]")
 	TestEmpty(mst::range(std::make_pair(ccontainer.begin(), ccontainer.end())));
 }
 
-TEST_CASE("crang:eempty", "[ranges]")
+TEST_CASE("crange: empty", "[ranges]")
 {
 	std::vector<int> container;
 
@@ -145,7 +145,7 @@ void TestValues(T range)
 	REQUIRE(count == 10);
 }
 
-TEST_CASE("range: _values", "[ranges]")
+TEST_CASE("range: values", "[ranges]")
 {
 	std::vector<int> container = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	int arr[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
@@ -163,7 +163,7 @@ TEST_CASE("range: _values", "[ranges]")
 	TestValues(mst::range(carr));
 }
 
-TEST_CASE("crange_values", "[ranges]")
+TEST_CASE("crange: values", "[ranges]")
 {
 	std::vector<int> container = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	int arr[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

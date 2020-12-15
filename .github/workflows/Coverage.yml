@@ -7,7 +7,13 @@ on:
 
 jobs:
 
-  steps:
+   gcc-unit-tests:
+    name: GCC Unit Tests
+    
+    # Run on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
     - uses: actions/checkout@v2
 
     - name: Create Build Environment

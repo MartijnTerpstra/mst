@@ -7,11 +7,7 @@ on:
 
 jobs:
 
-  codecov:
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-
-    steps:
+  steps:
     - uses: actions/checkout@v2
 
     - name: Create Build Environment
@@ -21,11 +17,20 @@ jobs:
       shell: bash
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
+      env:
+        CXXFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+        CC: gcc
+        CXX: g++
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: cmake --build . --config $BUILD_TYPE --parallel 10
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -C $BUILD_TYPE -j 10 --output-on-failure
       
     - name: Upload coverage to Codecov
       working-directory: ${{runner.workspace}}/build

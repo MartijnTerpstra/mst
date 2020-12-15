@@ -23,9 +23,8 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True -DMST_COVERAGE=True
       env:
-        CPPFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
         CC: gcc
         CXX: g++
 

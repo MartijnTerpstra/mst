@@ -4,6 +4,8 @@ project (mst CXX)
 
 option(MST_RUN_TESTS "Build tests for mst utility library" False)
 
+option(MST_COVERAGE "Create coverage samples" False)
+
 if (UNIX)
 set(platform_name "Linux")
 

@@ -13,3 +13,14 @@ target_include_directories(mst
 
 target_compile_features(mst 
 	PUBLIC cxx_std_11)
+
+if(MST_COVERAGE)
+
+target_compile_options(mst
+	PUBLIC -O0
+	PUBLIC --coverage 
+	PUBLIC -fno-inline
+	PUBLIC -fno-inline-small-functions
+	PUBLIC -fno-default-inline)
+
+endif()

@@ -1,9 +1,11 @@
 cmake_minimum_required (VERSION 3.13)
 
+file(GLOB HEADERS ${PROJECT_SOURCE_DIR}/mst/*.h)
+
 set (SOURCES
 muuid.cpp)
 
-add_library (mst STATIC ${SOURCES})
+add_library (mst STATIC ${SOURCES} ${HEADERS})
 
 add_library(mst::mst ALIAS mst)
 

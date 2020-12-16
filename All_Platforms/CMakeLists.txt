@@ -23,4 +23,8 @@ target_compile_options(mst
 	PUBLIC -fno-inline-small-functions
 	PUBLIC -fno-default-inline)
 
+target_link_options(mst
+	PUBLIC -lgcov
+	PUBLIC --coverage)
+
 endif()

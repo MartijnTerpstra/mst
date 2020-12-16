@@ -23,7 +23,8 @@ target_compile_options(mst
 	PUBLIC --coverage 
 	PUBLIC -fno-inline
 	PUBLIC -fno-inline-small-functions
-	PUBLIC -fno-default-inline)
+	PUBLIC -fno-default-inline
+	PUBLIC -fkeep-inline-functions)
 
 target_link_options(mst
 	PUBLIC -lgcov

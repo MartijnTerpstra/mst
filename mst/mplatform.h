@@ -27,7 +27,7 @@
 
 #include <mcore.h>
 #include <string>
-#include <mflag.hpp>
+#include <mflag.h>
 #include <mx_platform.h>
 
 namespace mst {

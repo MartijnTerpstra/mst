@@ -28,7 +28,7 @@
 
 #include <set_assertions.h>
 
-#include <mflag.h>
+#include <mflag.hpp>
 
 enum class Flags : uint32_t
 {

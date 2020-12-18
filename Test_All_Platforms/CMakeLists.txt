@@ -25,21 +25,6 @@ elseif(UNIX)
 target_compile_options("test_${CATEGORY}_${TEST_NAME}"
 	PRIVATE -mavx2)
 
-	if(MST_COVERAGE)
-
-target_compile_options("test_${CATEGORY}_${TEST_NAME}"
-	PUBLIC -O0
-	PUBLIC --coverage 
-	PUBLIC -fno-inline
-	PUBLIC -fno-inline-small-functions
-	PUBLIC -fno-default-inline)
-
-target_link_options(mst
-	PUBLIC -lgcov
-	PUBLIC --coverage)
-
-endif()
-
 endif()
 
 catch_discover_tests("test_${CATEGORY}_${TEST_NAME}")

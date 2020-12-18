@@ -20,11 +20,10 @@ if(MST_COVERAGE)
 
 target_compile_options(mst
 	PUBLIC -O0
-	PUBLIC --coverage 
+	PRIVATE --coverage 
 	PUBLIC -fno-inline
 	PUBLIC -fno-inline-small-functions
-	PUBLIC -fno-default-inline
-	PUBLIC -fkeep-inline-functions)
+	PUBLIC -fno-default-inline)
 
 target_link_options(mst
 	PUBLIC -lgcov

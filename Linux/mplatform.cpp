@@ -216,7 +216,8 @@ static inline mst::flag<mst::platform::processor_feature_flags> processor_featur
 	return features;
 }
 
-mst::flag<mst::platform::cpu_feature> mst::platform::_Details::processor_features_impl() noexcept
+mst::flag<mst::platform::processor_feature_flags>
+mst::platform::_Details::processor_features_impl() noexcept
 {
 	static flag<processor_feature_flags> features = processor_features_init();
 

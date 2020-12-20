@@ -133,9 +133,9 @@ uint32_t mst::platform::_Details::get_page_size_impl() noexcept
 #define EBX_AVX512DQ_bit (1U << 17U) // 26 bit
 #define EBX_AVX512BW_bit (1U << 30U) // 26 bit
 
-static inline mst::flag<mst::platform::cpu_feature> processor_features_init() noexcept
+static inline mst::flag<mst::platform::processor_feature_flags> processor_features_init() noexcept
 {
-	using mst::platform::cpu_feature;
+	using mst::platform::processor_feature_flags;
 
 	uint32_t CPUInfo[4];
 	uint32_t dwECX = 0;
@@ -153,34 +153,34 @@ static inline mst::flag<mst::platform::cpu_feature> processor_features_init() no
 		dwEDX = static_cast<uint32_t>(CPUInfo[3]);
 	}
 
-	mst::flag<cpu_feature> features;
+	mst::flag<processor_feature_flags> features;
 
 	if(ECX_AES_bit & dwECX)
-		features.enable(cpu_feature::aes);
+		features.enable(processor_feature_flags::aes);
 
 	if(EDX_MMX_bit & dwEDX)
-		features.enable(cpu_feature::mmx);
+		features.enable(processor_feature_flags::mmx);
 
 	if(EDX_SSE_bit & dwEDX)
-		features.enable(cpu_feature::sse);
+		features.enable(processor_feature_flags::sse);
 
 	if(EDX_SSE2_bit & dwEDX)
-		features.enable(cpu_feature::sse2);
+		features.enable(processor_feature_flags::sse2);
 
 	if(ECX_SSE3_bit & dwECX)
-		features.enable(cpu_feature::sse3);
+		features.enable(processor_feature_flags::sse3);
 
 	if(ECX_SSSE3_bit & dwECX)
-		features.enable(cpu_feature::ssse3);
+		features.enable(processor_feature_flags::ssse3);
 
 	if(ECX_SSE41_bit & dwECX)
-		features.enable(cpu_feature::sse4_1);
+		features.enable(processor_feature_flags::sse4_1);
 
 	if(ECX_SSE42_bit & dwECX)
-		features.enable(cpu_feature::sse4_2);
+		features.enable(processor_feature_flags::sse4_2);
 
 	if(ECX_AVX_bit & dwECX)
-		features.enable(cpu_feature::avx);
+		features.enable(processor_feature_flags::avx);
 
 	const uint32_t ref = 43806655;
 
@@ -193,32 +193,32 @@ static inline mst::flag<mst::platform::cpu_feature> processor_features_init() no
 	}
 
 	if(EBX_AVX2_bit & dwEBX)
-		features.enable(cpu_feature::avx2);
+		features.enable(processor_feature_flags::avx2);
 
 	if(EBX_AVX512F_bit & dwEBX)
-		features.enable(cpu_feature::avx512f);
+		features.enable(processor_feature_flags::avx512f);
 
 	if(EBX_AVX512ER_bit & dwEBX)
-		features.enable(cpu_feature::avx512er);
+		features.enable(processor_feature_flags::avx512er);
 
 	if(EBX_AVX512PF_bit & dwEBX)
-		features.enable(cpu_feature::avx512pf);
+		features.enable(processor_feature_flags::avx512pf);
 
 	if(EBX_AVX512VL_bit & dwEBX)
-		features.enable(cpu_feature::avx512vl);
+		features.enable(processor_feature_flags::avx512vl);
 
 	if(EBX_AVX512DQ_bit & dwEBX)
-		features.enable(cpu_feature::avx512dq);
+		features.enable(processor_feature_flags::avx512dq);
 
 	if(EBX_AVX512BW_bit & dwEBX)
-		features.enable(cpu_feature::avx512bw);
+		features.enable(processor_feature_flags::avx512bw);
 
 	return features;
 }
 
 mst::flag<mst::platform::cpu_feature> mst::platform::_Details::processor_features_impl() noexcept
 {
-	static flag<cpu_feature> features = get_cpu_features_init();
+	static flag<processor_feature_flags> features = processor_features_init();
 
 	return features;
 }

@@ -26,17 +26,21 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
+
 #include <mplatform.h>
 
-#include <Unknwn.h>
-
-TEST_CASE("platform::page_size", "[platform][memory]")
+TEST_CASE("platform::name", "[platform]")
 {
-	uint32_t pageSize = mst::platform::page_size();
+	REQUIRE(mst::platform::name().length() > 0);
+}
 
-	SYSTEM_INFO info;
-	GetNativeSystemInfo(&info);
-	const auto nativeSize = info.dwPageSize;
+TEST_CASE("platform::version", "[platform]")
+{
+	REQUIRE(mst::platform::version().length() > 0);
+}
 
-	REQUIRE(pageSize == nativeSize);
+TEST_CASE("platform::full_name", "[platform]")
+{
+	REQUIRE(mst::platform::full_name().length() > 0);
 }

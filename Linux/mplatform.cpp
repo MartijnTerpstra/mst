@@ -133,7 +133,7 @@ uint32_t mst::platform::_Details::get_page_size_impl() noexcept
 #define EBX_AVX512DQ_bit (1U << 17U) // 26 bit
 #define EBX_AVX512BW_bit (1U << 30U) // 26 bit
 
-static inline mst::flag<mst::platform::cpu_feature> get_cpu_features_init() noexcept
+static inline mst::flag<mst::platform::cpu_feature> processor_features_init() noexcept
 {
 	using mst::platform::cpu_feature;
 
@@ -216,7 +216,7 @@ static inline mst::flag<mst::platform::cpu_feature> get_cpu_features_init() noex
 	return features;
 }
 
-mst::flag<mst::platform::cpu_feature> mst::platform::_Details::get_cpu_features_impl() noexcept
+mst::flag<mst::platform::cpu_feature> mst::platform::_Details::processor_features_impl() noexcept
 {
 	static flag<cpu_feature> features = get_cpu_features_init();
 

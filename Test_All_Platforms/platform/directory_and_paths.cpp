@@ -23,59 +23,66 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-#define MST_PLATFORM_WINDOWS 0
-#define MST_PLATFORM_LINUX	 0
-#define MST_PLATFORM_MAC	 0
-#define MST_PLATFORM_IOS	 0
-#define MST_PLATFORM_ANDROID 0
+#include <set_assertions.h>
 
-#if defined(__WINDOWS__) || defined(_WIN16) || defined(_WIN32)
-#undef MST_PLATFORM_WINDOWS
-#define MST_PLATFORM_WINDOWS 1
+#include <mplatform.h>
+#include <direct.h>
 
-#elif defined(__linux__) || defined(__unix) || defined(__linux)
+TEST_CASE("platform::newline", "[platform]")
+{
+	REQUIRE(mst::platform::newline().length() > 0);
+}
 
-#undef MST_PLATFORM_LINUX
-#define MST_PLATFORM_LINUX 1
+TEST_CASE("platform::directory_separator", "[platform]")
+{
+	REQUIRE(mst::platform::directory_separator() != 0);
+}
 
-#else
+TEST_CASE("platform::downloads_path", "[platform]")
+{
+	REQUIRE(mst::platform::downloads_path().length() > 0);
+}
 
-#error "Operating system not supported"
+TEST_CASE("platform::desktop_path", "[platform]")
+{
+	REQUIRE(mst::platform::downloads_path().length() > 0);
+}
 
-#endif
+TEST_CASE("platform::my_documents_path", "[platform]")
+{
+	REQUIRE(mst::platform::downloads_path().length() > 0);
+}
 
-namespace mst {
+TEST_CASE("platform::temp_path", "[platform]")
+{
+	REQUIRE(mst::platform::downloads_path().length() > 0);
+}
 
-namespace platform {
-enum class processor_feature_flags : uint32_t;
-} // namespace platform
+TEST_CASE("platform::recycle_bin_path", "[platform]")
+{
+	REQUIRE(mst::platform::downloads_path().length() > 0);
+}
 
-template<>
-struct flag_traits<platform::processor_feature_flags>
-	: public flag_traits_not_preshifted<platform::processor_feature_flags>
-{ };
+TEST_CASE("platform::current_directory", "[platform]")
+{
+	REQUIRE(mst::platform::current_directory().length() > 0);
+}
 
-namespace platform {
-namespace _Details {
+TEST_CASE("platform::set_current_directory", "[platform]")
+{
+	auto current = mst::platform::current_directory();
 
-const char* get_os_name_impl() noexcept;
+	current.push_back(mst::platform::directory_separator());
+	current.append("set_current_directory_test_dir");
 
-const char* get_os_version_string_impl() noexcept;
+	REQUIRE(mst::platform::current_directory() != current);
 
-bool get_downloads_folder_impl(char* path) noexcept;
-bool get_desktop_folder_impl(char* path) noexcept;
-bool get_mydocuments_folder_impl(char* path) noexcept;
-bool get_temp_folder_impl(char* path) noexcept;
-bool get_recycle_bin_folder_impl(char* path) noexcept;
-bool get_current_directory_impl(char* path) noexcept;
-bool set_current_directory_impl(const char* path) noexcept;
-uint32_t get_page_size_impl() noexcept;
-uint32_t get_processor_core_count_impl() noexcept;
-uint32_t get_processor_thread_count_impl() noexcept;
-mst::flag<processor_feature_flags> processor_features_impl() noexcept;
+	_mkdir(current.c_str());
 
-} // namespace _Details
-} // namespace platform
-} // namespace mst
+	mst::platform::set_current_directory(current);
+
+	REQUIRE(mst::platform::current_directory() == current);
+}

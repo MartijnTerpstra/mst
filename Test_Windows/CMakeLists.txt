@@ -2,8 +2,6 @@ cmake_minimum_required (VERSION 3.13)
 
 add_mst_test(memory com_ptr)
 
-add_mst_test(platform memory_configuration)
-
 
 
 

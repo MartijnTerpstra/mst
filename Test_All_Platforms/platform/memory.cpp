@@ -23,59 +23,20 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-#define MST_PLATFORM_WINDOWS 0
-#define MST_PLATFORM_LINUX	 0
-#define MST_PLATFORM_MAC	 0
-#define MST_PLATFORM_IOS	 0
-#define MST_PLATFORM_ANDROID 0
+#include <set_assertions.h>
 
-#if defined(__WINDOWS__) || defined(_WIN16) || defined(_WIN32)
-#undef MST_PLATFORM_WINDOWS
-#define MST_PLATFORM_WINDOWS 1
+#include <mplatform.h>
 
-#elif defined(__linux__) || defined(__unix) || defined(__linux)
+constexpr bool IsPow2(uint32_t value)
+{
+	return value != 0 && (value & (value - 1)) == 0;
+}
 
-#undef MST_PLATFORM_LINUX
-#define MST_PLATFORM_LINUX 1
-
-#else
-
-#error "Operating system not supported"
-
-#endif
-
-namespace mst {
-
-namespace platform {
-enum class processor_feature_flags : uint32_t;
-} // namespace platform
-
-template<>
-struct flag_traits<platform::processor_feature_flags>
-	: public flag_traits_not_preshifted<platform::processor_feature_flags>
-{ };
-
-namespace platform {
-namespace _Details {
-
-const char* get_os_name_impl() noexcept;
-
-const char* get_os_version_string_impl() noexcept;
-
-bool get_downloads_folder_impl(char* path) noexcept;
-bool get_desktop_folder_impl(char* path) noexcept;
-bool get_mydocuments_folder_impl(char* path) noexcept;
-bool get_temp_folder_impl(char* path) noexcept;
-bool get_recycle_bin_folder_impl(char* path) noexcept;
-bool get_current_directory_impl(char* path) noexcept;
-bool set_current_directory_impl(const char* path) noexcept;
-uint32_t get_page_size_impl() noexcept;
-uint32_t get_processor_core_count_impl() noexcept;
-uint32_t get_processor_thread_count_impl() noexcept;
-mst::flag<processor_feature_flags> processor_features_impl() noexcept;
-
-} // namespace _Details
-} // namespace platform
-} // namespace mst
+TEST_CASE("platform::page_size", "[platform]")
+{
+	REQUIRE(mst::platform::page_size() > 0);
+	REQUIRE(IsPow2(mst::platform::page_size()));
+}

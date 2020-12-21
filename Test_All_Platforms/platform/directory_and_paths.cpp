@@ -80,7 +80,7 @@ TEST_CASE("platform::set_current_directory", "[platform]")
 
 	REQUIRE(mst::platform::current_directory() != current);
 
-	_mkdir(current.c_str());
+	REQUIRE(mst::platform::create_directory(current.c_str()));
 
 	mst::platform::set_current_directory(current);
 

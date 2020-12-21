@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include <sys/utsname.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 static std::string get_os_name_init()
@@ -83,6 +84,11 @@ const char* mst::platform::_Details::get_os_version_string_impl() noexcept
 	static const ::std::string osversion = get_os_version_string_init();
 
 	return osversion.c_str();
+}
+
+bool mst::platform::_Details::create_directory_impl(const char* path) noexcept
+{
+	return mkdir(path) == 0;
 }
 
 bool mst::platform::_Details::get_current_directory_impl(char* path) noexcept

@@ -120,6 +120,11 @@ inline ::std::string recycle_bin_path() noexcept
 	return ::std::string();
 }
 
+inline bool create_directory(const ::std::string& path) noexcept
+{
+	return mst::platform::_Details::create_directory_impl(path.c_str());
+}
+
 inline ::std::string current_directory() noexcept
 {
 	char path[1024];

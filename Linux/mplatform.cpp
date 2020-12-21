@@ -90,7 +90,7 @@ struct SpecialFolderPaths
 static SpecialFolderPaths get_special_folders_init()
 {
 	const std::string home = std::getenv("HOME");
-	std::ifstream userDirs(home + ".config/user-dirs.dirs");
+	std::ifstream userDirs(home + "/.config/user-dirs.dirs");
 
 	if(userDirs.fail())
 		return SpecialFolderPaths{};
@@ -125,13 +125,8 @@ static SpecialFolderPaths get_special_folders_init()
 		recycleBin = home + "/.local/share/Trash/files";
 	}
 
-	return SpecialFolderPaths{ 
-		mappings["XDG_DOWNLOAD_DIR"],
-		mappings["XDG_DESKTOP_DIR"],
-		mappings["XDG_DOCUMENTS_DIR"],
-		temp,
-		recycleBin
-	 };
+	return SpecialFolderPaths{ mappings["XDG_DOWNLOAD_DIR"], mappings["XDG_DESKTOP_DIR"],
+		mappings["XDG_DOCUMENTS_DIR"], temp, recycleBin };
 }
 
 static const SpecialFolderPaths& get_special_folders_impl()
@@ -217,12 +212,12 @@ static ProcCpuInfo get_proc_cpuinfo_init() noexcept
 	while(!cpuinfo.eof())
 	{
 		std::getline(cpuinfo, line);
-		
+
 		if(line.find("processor") == 0)
 		{
 			++threadCount;
 		}
-		if(line.find("code id") == 0)
+		if(line.find("core id") == 0)
 		{
 			coreId = line.substr(line.find_first_of(':') + 1);
 			if(!pyhsicalId.empty())

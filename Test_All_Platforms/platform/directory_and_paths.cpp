@@ -47,22 +47,22 @@ TEST_CASE("platform::downloads_path", "[platform]")
 
 TEST_CASE("platform::desktop_path", "[platform]")
 {
-	REQUIRE(mst::platform::downloads_path().length() > 0);
+	REQUIRE(mst::platform::desktop_path().length() > 0);
 }
 
 TEST_CASE("platform::my_documents_path", "[platform]")
 {
-	REQUIRE(mst::platform::downloads_path().length() > 0);
+	REQUIRE(mst::platform::my_documents_path().length() > 0);
 }
 
 TEST_CASE("platform::temp_path", "[platform]")
 {
-	REQUIRE(mst::platform::downloads_path().length() > 0);
+	REQUIRE(mst::platform::temp_path().length() > 0);
 }
 
 TEST_CASE("platform::recycle_bin_path", "[platform]")
 {
-	REQUIRE(mst::platform::downloads_path().length() > 0);
+	REQUIRE(mst::platform::recycle_bin_path().length() > 0);
 }
 
 TEST_CASE("platform::current_directory", "[platform]")

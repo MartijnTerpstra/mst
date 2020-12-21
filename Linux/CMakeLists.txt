@@ -12,5 +12,8 @@ target_link_libraries(mst
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 target_compile_options(mst
-	PUBLIC -mavx)
+	PUBLIC 
+		-mavx
+		$<$<CONFIG:Debug>:-O0 -ggdb3>
+		$<$<CONFIG:Release>:-O2>)
 endif()

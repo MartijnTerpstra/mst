@@ -16,7 +16,7 @@
 
 int main(void)
 {
-	const auto features = mst::platform::get_cpu_features();
+	const auto features = mst::platform::processor_features();
 	// mst::printf(L"Test %hhd, or maybe say '%ls', %.2f, %u, %c", 111, std::wstring(L"Hello there
 	// 34523 45325 256 2465 1341345 1345 3154 315 135 31513"), 0.6512f, 2U, 'u');
 

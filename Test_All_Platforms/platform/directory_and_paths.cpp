@@ -23,20 +23,71 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
+//#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
+
+#include <set_assertions.h>
 
 #include <mplatform.h>
 
-#include <Unknwn.h>
-
-TEST_CASE("platform::page_size", "[platform][memory]")
+int main(int argc, char** argv)
 {
-	uint32_t pageSize = mst::platform::page_size();
+	Catch::Session().run(argc, argv);
+}
 
-	SYSTEM_INFO info;
-	GetNativeSystemInfo(&info);
-	const auto nativeSize = info.dwPageSize;
+TEST_CASE("platform::newline", "[platform]")
+{
+	REQUIRE(mst::platform::newline().length() > 0);
+}
 
-	REQUIRE(pageSize == nativeSize);
+TEST_CASE("platform::directory_separator", "[platform]")
+{
+	REQUIRE(mst::platform::directory_separator() != 0);
+}
+
+TEST_CASE("platform::downloads_path", "[platform]")
+{
+	REQUIRE(mst::platform::downloads_path().length() > 0);
+}
+
+TEST_CASE("platform::desktop_path", "[platform]")
+{
+	REQUIRE(mst::platform::desktop_path().length() > 0);
+}
+
+TEST_CASE("platform::my_documents_path", "[platform]")
+{
+	REQUIRE(mst::platform::my_documents_path().length() > 0);
+}
+
+TEST_CASE("platform::temp_path", "[platform]")
+{
+	REQUIRE(mst::platform::temp_path().length() > 0);
+}
+
+TEST_CASE("platform::recycle_bin_path", "[platform]")
+{
+	REQUIRE(mst::platform::recycle_bin_path().length() > 0);
+}
+
+TEST_CASE("platform::current_directory", "[platform]")
+{
+	REQUIRE(mst::platform::current_directory().length() > 0);
+}
+
+TEST_CASE("platform::set_current_directory", "[platform]")
+{
+	auto current = mst::platform::current_directory();
+
+	current.push_back(mst::platform::directory_separator());
+	current.append("set_current_directory_test_dir");
+
+	REQUIRE(mst::platform::current_directory() != current);
+
+	REQUIRE(mst::platform::create_directory(current.c_str()));
+
+	mst::platform::set_current_directory(current);
+
+	REQUIRE(mst::platform::current_directory() == current);
 }

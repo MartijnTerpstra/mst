@@ -32,6 +32,7 @@
 #include <Windows.h>
 #include <ShlObj.h>
 #include <VersionHelpers.h>
+#include <direct.h>
 
 #define WINDOWS_10_PLATFORM_DEFINE 0x0A00
 
@@ -191,7 +192,7 @@ const char* mst::platform::_Details::get_os_version_string_impl() noexcept
 	return "Unknown";
 }
 
-bool _Get_special_folder_impl(const KNOWNFOLDERID& folderID, char* path) noexcept
+static bool _Get_special_folder_impl(const KNOWNFOLDERID& folderID, char* path) noexcept
 {
 	PWSTR str;
 	if(FAILED(SHGetKnownFolderPath(folderID, 0, nullptr, &str)))
@@ -239,6 +240,11 @@ bool mst::platform::_Details::get_recycle_bin_folder_impl(char* path) noexcept
 	return _Get_special_folder_impl(FOLDERID_RecycleBinFolder, path);
 }
 
+bool mst::platform::_Details::create_directory_impl(const char* path) noexcept
+{
+	return _mkdir(path) == 0;
+}
+
 bool mst::platform::_Details::get_current_directory_impl(char* path) noexcept
 {
 	return GetCurrentDirectoryA(1024, path) != 0;
@@ -250,7 +256,7 @@ bool mst::platform::_Details::set_current_directory_impl(const char* path) noexc
 }
 
 
-static inline uint32_t get_page_size_init() noexcept
+static uint32_t get_page_size_init() noexcept
 {
 	SYSTEM_INFO info;
 
@@ -266,7 +272,7 @@ uint32_t mst::platform::_Details::get_page_size_impl() noexcept
 	return pageSize;
 }
 
-static inline uint32_t get_processor_core_count_init() noexcept
+static uint32_t get_processor_core_count_init() noexcept
 {
 	DWORD size = 0;
 
@@ -335,9 +341,9 @@ uint32_t mst::platform::_Details::get_processor_thread_count_impl() noexcept
 #define EBX_AVX512DQ_bit (1U << 17U) // 26 bit
 #define EBX_AVX512BW_bit (1U << 30U) // 26 bit
 
-static inline mst::flag<mst::platform::cpu_feature> get_cpu_features_init() noexcept
+static inline mst::flag<mst::platform::processor_feature_flags> processor_features_init() noexcept
 {
-	using mst::platform::cpu_feature;
+	using mst::platform::processor_feature_flags;
 
 	int CPUInfo[4];
 	uint32_t dwECX = 0;
@@ -355,34 +361,34 @@ static inline mst::flag<mst::platform::cpu_feature> get_cpu_features_init() noex
 		dwEDX = static_cast<uint32_t>(CPUInfo[3]);
 	}
 
-	mst::flag<cpu_feature> features;
+	mst::flag<processor_feature_flags> features;
 
 	if(ECX_AES_bit & dwECX)
-		features.enable(cpu_feature::aes);
+		features.enable(processor_feature_flags::aes);
 
 	if(EDX_MMX_bit & dwEDX)
-		features.enable(cpu_feature::mmx);
+		features.enable(processor_feature_flags::mmx);
 
 	if(EDX_SSE_bit & dwEDX)
-		features.enable(cpu_feature::sse);
+		features.enable(processor_feature_flags::sse);
 
 	if(EDX_SSE2_bit & dwEDX)
-		features.enable(cpu_feature::sse2);
+		features.enable(processor_feature_flags::sse2);
 
 	if(ECX_SSE3_bit & dwECX)
-		features.enable(cpu_feature::sse3);
+		features.enable(processor_feature_flags::sse3);
 
 	if(ECX_SSSE3_bit & dwECX)
-		features.enable(cpu_feature::ssse3);
+		features.enable(processor_feature_flags::ssse3);
 
 	if(ECX_SSE41_bit & dwECX)
-		features.enable(cpu_feature::sse4_1);
+		features.enable(processor_feature_flags::sse4_1);
 
 	if(ECX_SSE42_bit & dwECX)
-		features.enable(cpu_feature::sse4_2);
+		features.enable(processor_feature_flags::sse4_2);
 
 	if(ECX_AVX_bit & dwECX)
-		features.enable(cpu_feature::avx);
+		features.enable(processor_feature_flags::avx);
 
 	const uint32_t ref = 43806655;
 
@@ -393,32 +399,33 @@ static inline mst::flag<mst::platform::cpu_feature> get_cpu_features_init() noex
 	}
 
 	if(EBX_AVX2_bit & dwEBX)
-		features.enable(cpu_feature::avx2);
+		features.enable(processor_feature_flags::avx2);
 
 	if(EBX_AVX512F_bit & dwEBX)
-		features.enable(cpu_feature::avx512f);
+		features.enable(processor_feature_flags::avx512f);
 
 	if(EBX_AVX512ER_bit & dwEBX)
-		features.enable(cpu_feature::avx512er);
+		features.enable(processor_feature_flags::avx512er);
 
 	if(EBX_AVX512PF_bit & dwEBX)
-		features.enable(cpu_feature::avx512pf);
+		features.enable(processor_feature_flags::avx512pf);
 
 	if(EBX_AVX512VL_bit & dwEBX)
-		features.enable(cpu_feature::avx512vl);
+		features.enable(processor_feature_flags::avx512vl);
 
 	if(EBX_AVX512DQ_bit & dwEBX)
-		features.enable(cpu_feature::avx512dq);
+		features.enable(processor_feature_flags::avx512dq);
 
 	if(EBX_AVX512BW_bit & dwEBX)
-		features.enable(cpu_feature::avx512bw);
+		features.enable(processor_feature_flags::avx512bw);
 
 	return features;
 }
 
-mst::flag<mst::platform::cpu_feature> mst::platform::_Details::get_cpu_features_impl() noexcept
+mst::flag<mst::platform::processor_feature_flags>
+mst::platform::_Details::processor_features_impl() noexcept
 {
-	static flag<cpu_feature> features = get_cpu_features_init();
+	static flag<processor_feature_flags> features = processor_features_init();
 
 	return features;
 }

@@ -59,6 +59,11 @@ add_mst_test(memory aligned_allocator)
 add_mst_test(memory aligned_malloc)
 add_mst_test(memory memory_view)
 
+add_mst_test(platform directory_and_paths)
+add_mst_test(platform memory)
+add_mst_test(platform names_and_versions)
+add_mst_test(platform processor)
+
 add_mst_test(simd vector)
 
 add_mst_test(testing random_data_generator)

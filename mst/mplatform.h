@@ -120,6 +120,11 @@ inline ::std::string recycle_bin_path() noexcept
 	return ::std::string();
 }
 
+inline bool create_directory(const ::std::string& path) noexcept
+{
+	return mst::platform::_Details::create_directory_impl(path.c_str());
+}
+
 inline ::std::string current_directory() noexcept
 {
 	char path[1024];
@@ -151,7 +156,7 @@ inline uint32_t processor_thread_count() noexcept
 	return ::mst::platform::_Details::get_processor_thread_count_impl();
 }
 
-enum class cpu_feature : uint32_t
+enum class processor_feature_flags : uint32_t
 {
 	// Advanced Encryption Standard
 	aes,
@@ -202,9 +207,9 @@ enum class cpu_feature : uint32_t
 	avx512bw,
 };
 
-inline mst::flag<cpu_feature> get_cpu_features() noexcept
+inline mst::flag<processor_feature_flags> processor_features() noexcept
 {
-	return _Details::get_cpu_features_impl();
+	return _Details::processor_features_impl();
 }
 
 

@@ -32,6 +32,8 @@
 #include <sys/utsname.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fstream>
+#include <set>
 
 static std::string get_os_name_init()
 {
@@ -111,6 +113,72 @@ uint32_t mst::platform::_Details::get_page_size_impl() noexcept
 	static const uint32_t pageSize = get_page_size_init();
 
 	return pageSize;
+}
+
+struct ProcCpuInfo
+{
+	uint32_t coreCount;
+	uint32_t threadCount;
+};
+
+static inline ProcCpuInfo get_proc_cpuinfo_init() noexcept
+{
+	// parse /proc/cpuinfo
+	std::ifstream cpuinfo("/proc/cpuinfo");
+
+	std::set<std::string> cores;
+	uint32_t threadCount = 0;
+	std::string line;
+	std::string coreId;
+	std::string pyhsicalId;
+	while(true)
+	{
+		std::getline(cpuinfo, line);
+
+		if(line.find("processor") == 0)
+		{
+			++threadCount;
+		}
+		if(line.find("code id") == 0)
+		{
+			coreId = line.substr(line.find_first_of(':') + 1);
+			if(!pyhsicalId.empty())
+			{
+				cores.insert(pyhsicalId + ":" + coreId);
+				coreId.clear();
+				pyhsicalId.clear();
+			}
+		}
+		if(line.find("physical id") == 0)
+		{
+			pyhsicalId = line.substr(line.find_first_of(':') + 1);
+			if(!coreId.empty())
+			{
+				cores.insert(pyhsicalId + ":" + coreId);
+				coreId.clear();
+				pyhsicalId.clear();
+			}
+		}
+	}
+
+	return ProcCpuInfo{ static_cast<uint32_t>(cores.size()), threadCount };
+}
+
+static inline const ProcCpuInfo& get_proc_cpuinfo_impl() noexcept
+{
+	static ProcCpuInfo cpuInfo = get_proc_cpuinfo_init();
+
+	return cpuInfo;
+}
+
+uint32_t mst::platform::_Details::get_processor_core_count_impl() noexcept
+{
+	return get_proc_cpuinfo_impl().coreCount;
+}
+
+uint32_t mst::platform::_Details::get_processor_thread_count_impl() noexcept
+{
+	return get_proc_cpuinfo_impl().threadCount;
 }
 
 #define EDX_MMX_bit		 0x800000	// 23 bit

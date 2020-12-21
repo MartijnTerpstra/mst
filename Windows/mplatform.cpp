@@ -192,7 +192,7 @@ const char* mst::platform::_Details::get_os_version_string_impl() noexcept
 	return "Unknown";
 }
 
-bool _Get_special_folder_impl(const KNOWNFOLDERID& folderID, char* path) noexcept
+static bool _Get_special_folder_impl(const KNOWNFOLDERID& folderID, char* path) noexcept
 {
 	PWSTR str;
 	if(FAILED(SHGetKnownFolderPath(folderID, 0, nullptr, &str)))
@@ -256,7 +256,7 @@ bool mst::platform::_Details::set_current_directory_impl(const char* path) noexc
 }
 
 
-static inline uint32_t get_page_size_init() noexcept
+static uint32_t get_page_size_init() noexcept
 {
 	SYSTEM_INFO info;
 
@@ -272,7 +272,7 @@ uint32_t mst::platform::_Details::get_page_size_impl() noexcept
 	return pageSize;
 }
 
-static inline uint32_t get_processor_core_count_init() noexcept
+static uint32_t get_processor_core_count_init() noexcept
 {
 	DWORD size = 0;
 

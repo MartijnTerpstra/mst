@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <set>
+#include <map>
 
 static std::string get_os_name_init()
 {
@@ -52,17 +53,6 @@ const char* mst::platform::_Details::get_os_name_impl() noexcept
 
 	return osname.c_str();
 }
-
-/*void GetUbuntuVersions(const char* string, int& mayor, int& minor)
-{
-	string = strstr(string, "~") + 1;
-
-	mayor = std::atoi(string);
-
-	string = strstr(string, ".") + 1;
-
-	minor = std::atoi(string);
-}*/
 
 static std::string get_os_version_string_init()
 {
@@ -86,6 +76,99 @@ const char* mst::platform::_Details::get_os_version_string_impl() noexcept
 	static const ::std::string osversion = get_os_version_string_init();
 
 	return osversion.c_str();
+}
+
+struct SpecialFolderPaths
+{
+	std::string downloads;
+	std::string dektop;
+	std::string mydocuments;
+	std::string temp;
+	std::string recycleBin;
+};
+
+static SpecialFolderPaths get_special_folders_init()
+{
+	const std::string home = std::getenv("HOME");
+	std::ifstream userDirs(home + ".config/user-dirs.dirs");
+
+	if(userDirs.fail())
+		return SpecialFolderPaths{};
+
+	std::string line;
+	std::map<std::string, std::string> mappings;
+	while(!userDirs.eof())
+	{
+		std::getline(userDirs, line);
+
+		if(line.find("XDG_") == 0)
+		{
+			const auto midIdx = line.find_first_of('=');
+			const auto key = line.substr(0, midIdx);
+			auto value = line.substr(midIdx + 2, line.length() - 3 - midIdx);
+
+			if(value.find("$HOME/") == 0)
+			{
+				value = home + value.substr(5);
+			}
+
+			mappings[key] = std::move(value);
+		}
+	}
+
+	std::string temp = "/tmp";
+
+	std::string recycleBin;
+	struct stat st;
+	if(stat((home + "/.local/share/Trash/files").c_str(), &st) == 0 && S_ISDIR(st.st_mode))
+	{
+		recycleBin = home + "/.local/share/Trash/files";
+	}
+
+	return SpecialFolderPaths{ 
+		mappings["XDG_DOWNLOAD_DIR"],
+		mappings["XDG_DESKTOP_DIR"],
+		mappings["XDG_DOCUMENTS_DIR"],
+		temp,
+		recycleBin
+	 };
+}
+
+static const SpecialFolderPaths& get_special_folders_impl()
+{
+	static const SpecialFolderPaths paths = get_special_folders_init();
+
+	return paths;
+}
+
+bool mst::platform::_Details::get_downloads_folder_impl(char* path) noexcept
+{
+	strcpy(path, get_special_folders_impl().downloads.c_str());
+	return path[0] != 0;
+}
+
+bool mst::platform::_Details::get_desktop_folder_impl(char* path) noexcept
+{
+	strcpy(path, get_special_folders_impl().dektop.c_str());
+	return path[0] != 0;
+}
+
+bool mst::platform::_Details::get_mydocuments_folder_impl(char* path) noexcept
+{
+	strcpy(path, get_special_folders_impl().mydocuments.c_str());
+	return path[0] != 0;
+}
+
+bool mst::platform::_Details::get_temp_folder_impl(char* path) noexcept
+{
+	strcpy(path, get_special_folders_impl().temp.c_str());
+	return path[0] != 0;
+}
+
+bool mst::platform::_Details::get_recycle_bin_folder_impl(char* path) noexcept
+{
+	strcpy(path, get_special_folders_impl().recycleBin.c_str());
+	return path[0] != 0;
 }
 
 bool mst::platform::_Details::create_directory_impl(const char* path) noexcept
@@ -121,7 +204,7 @@ struct ProcCpuInfo
 	uint32_t threadCount;
 };
 
-static inline ProcCpuInfo get_proc_cpuinfo_init() noexcept
+static ProcCpuInfo get_proc_cpuinfo_init() noexcept
 {
 	// parse /proc/cpuinfo
 	std::ifstream cpuinfo("/proc/cpuinfo");
@@ -131,10 +214,10 @@ static inline ProcCpuInfo get_proc_cpuinfo_init() noexcept
 	std::string line;
 	std::string coreId;
 	std::string pyhsicalId;
-	while(true)
+	while(!cpuinfo.eof())
 	{
 		std::getline(cpuinfo, line);
-
+		
 		if(line.find("processor") == 0)
 		{
 			++threadCount;
@@ -164,9 +247,9 @@ static inline ProcCpuInfo get_proc_cpuinfo_init() noexcept
 	return ProcCpuInfo{ static_cast<uint32_t>(cores.size()), threadCount };
 }
 
-static inline const ProcCpuInfo& get_proc_cpuinfo_impl() noexcept
+static const ProcCpuInfo& get_proc_cpuinfo_impl() noexcept
 {
-	static ProcCpuInfo cpuInfo = get_proc_cpuinfo_init();
+	static const ProcCpuInfo cpuInfo = get_proc_cpuinfo_init();
 
 	return cpuInfo;
 }

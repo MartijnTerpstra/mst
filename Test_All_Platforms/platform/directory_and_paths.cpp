@@ -29,7 +29,6 @@
 #include <set_assertions.h>
 
 #include <mplatform.h>
-#include <direct.h>
 
 TEST_CASE("platform::newline", "[platform]")
 {

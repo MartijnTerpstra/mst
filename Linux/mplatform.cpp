@@ -88,7 +88,7 @@ const char* mst::platform::_Details::get_os_version_string_impl() noexcept
 
 bool mst::platform::_Details::create_directory_impl(const char* path) noexcept
 {
-	return mkdir(path) == 0;
+	return mkdir(path, 0777) == 0;
 }
 
 bool mst::platform::_Details::get_current_directory_impl(char* path) noexcept

@@ -133,8 +133,8 @@ add_mst_test(platform memory)
 add_mst_test(platform names_and_versions)
 add_mst_test(platform processor)
 
-add_mst_test(testing random_data_generator)
-add_mst_test(testing set_assertions)
+add_mst_test(test_util random_data_generator)
+add_mst_test(test_util set_assertions)
 
 add_mst_test(threading slim_event)
 

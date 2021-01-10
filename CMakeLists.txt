@@ -5,10 +5,10 @@ project (mst CXX)
 option(MST_RUN_TESTS "Build tests for mst utility library" OFF)
 
 if(UNIX)
-set(platform_name "Linux")
+set(platform_name "linux")
 
 elseif(WIN32)
-set(platform_name "Windows")
+set(platform_name "windows")
 
 else() ## platform neither linux nor windows
 
@@ -16,52 +16,87 @@ message(FATAL_ERROR "Platform not found")
 
 endif()
 
-add_library (mst STATIC
-	All_Platforms/muuid.cpp
-	${platform_name}/mplatform.cpp
-	${platform_name}/mthreading.cpp
-	${platform_name}/mthreading_rw_lock.cpp
-	${platform_name}/mthreading_slim.cpp)
+add_library(mst STATIC
+    src/${platform_name}/mplatform.cpp
+    src/${platform_name}/mthreading.cpp
+    src/${platform_name}/mthreading_rw_lock.cpp
+    src/${platform_name}/mthreading_slim.cpp
+    src/muuid.cpp)
+
+target_compile_features(mst 
+    PUBLIC cxx_std_11)
+
+if(UNIX)
+target_link_libraries(mst
+    PUBLIC pthread)
+endif()
 
 add_library(mst::mst ALIAS mst)
 
-target_compile_features(mst 
-	PUBLIC cxx_std_11)
+target_include_directories(mst PUBLIC "${CMAKE_SOURCE_DIR}/mst")
 
-target_include_directories(mst
-	PUBLIC ${PROJECT_SOURCE_DIR}/mst
-)
-
-add_subdirectory(${platform_name})
-
-if (MST_RUN_TESTS)
+if(MST_RUN_TESTS)
 
 enable_testing()
 
 include(CTest)
 
-add_subdirectory(dependencies)
 
-list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
+Include(FetchContent)
 
-include (Catch)
+FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v2.13.1
+    )
+
+FetchContent_MakeAvailable(Catch2)
+
+list (APPEND CMAKE_MODULE_PATH "${Catch2_SOURCE_DIR}/contrib")
+
+include(Catch)
+
+function(SETUP_TARGET TARGET_NAME)
+    set_target_properties(${TARGET_NAME} PROPERTIES CXX_EXTENSIONS OFF)
+    target_link_libraries(${TARGET_NAME} PRIVATE mst)
+
+    target_include_directories(${TARGET_NAME}
+        PUBLIC "${PROJECT_SOURCE_DIR}/tests/test_util"
+    )
+
+    if(MSVC)
+        target_compile_options(
+            ${TARGET_NAME}
+            PRIVATE
+                /EHsc /W1 /wd4996 /w14800
+                $<$<CONFIG:Debug>:/Od>
+                $<$<CONFIG:Release>:/O2>
+        )
+    else()
+        target_compile_options(
+            ${TARGET_NAME}
+            PRIVATE
+                -pedantic -fvisibility=hidden -Wall -Wshadow -Wno-deprecated-declarations
+                $<$<CONFIG:Debug>:-O0 -ggdb3>
+                $<$<CONFIG:Release>:-O2>
+        )
+    endif()
+
+    target_compile_definitions(${TARGET_NAME} PRIVATE ${ARGN})
+endfunction()
+
+function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
+    add_executable(${TEST_NAME} ${TEST_SOURCES})
+    target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2)
+    SETUP_TARGET(${TEST_NAME} ${ARGN})
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    catch_discover_tests(${TEST_NAME})
+
+endfunction()
 
 macro(add_mst_test CATEGORY TEST_NAME)
 
-add_executable("test_${CATEGORY}_${TEST_NAME}" "tests/${CATEGORY}/${TEST_NAME}.cpp")
-
-target_link_libraries("test_${CATEGORY}_${TEST_NAME}"
-	PRIVATE mst::mst
-	PRIVATE Catch2::Catch2)
-
-target_compile_definitions("test_${CATEGORY}_${TEST_NAME}"
-	PRIVATE _MST_TESTING=1)
-
-target_include_directories("test_${CATEGORY}_${TEST_NAME}"
-	PUBLIC ${PROJECT_SOURCE_DIR}/tests/testing
-)
-
-catch_discover_tests("test_${CATEGORY}_${TEST_NAME}")
+SETUP_BASIC_TEST("test_${CATEGORY}_${TEST_NAME}" "tests/${CATEGORY}/${TEST_NAME}.cpp")
 
 endmacro(add_mst_test)
 

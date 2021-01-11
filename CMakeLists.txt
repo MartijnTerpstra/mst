@@ -37,6 +37,8 @@ target_include_directories(mst PUBLIC "${CMAKE_SOURCE_DIR}/mst")
 
 if(MST_RUN_TESTS)
 
+option(MST_TEST_ARGS "Arguments for ctest" "")
+
 enable_testing()
 
 include(CTest)
@@ -90,11 +92,12 @@ function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
     target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2)
     SETUP_TARGET(${TEST_NAME} ${ARGN})
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-    catch_discover_tests(${TEST_NAME})
+    catch_discover_tests(${TEST_NAME} "" MST_TEST_ARGS)
 
 endfunction()
 
 macro(add_mst_test CATEGORY TEST_NAME)
+
 
 SETUP_BASIC_TEST("test_${CATEGORY}_${TEST_NAME}" "tests/${CATEGORY}/${TEST_NAME}.cpp")
 

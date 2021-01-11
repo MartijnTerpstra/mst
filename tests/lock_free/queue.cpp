@@ -23,7 +23,8 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
+//#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
@@ -309,4 +310,25 @@ TEST_CASE("lock_free_queue_singlethreaded_resize", "[lock_free][queue]")
 	}
 
 	REQUIRE(!q.try_pop(index));
+}
+
+#include <mplatform.h>
+
+int main(int argc, char** argv)
+{
+	auto docs = mst::platform::downloads_path();
+
+	if(!docs.empty())
+		docs.push_back(mst::platform::directory_separator());
+
+	std::ofstream output(docs + "file.txt");
+
+	for(int i = 0; i < argc; ++i)
+	{
+		output << argv[i] << std::endl;
+	}
+
+	output.close();
+
+	return Catch::Session().run(argc, argv);
 }

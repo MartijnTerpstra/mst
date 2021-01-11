@@ -94,6 +94,8 @@ function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     catch_discover_tests(${TEST_NAME} "" ${MST_TEST_ARGS})
 
+    message(STATUS "MST_TEST_ARGS: ${MST_TEST_ARGS}")
+
 endfunction()
 
 macro(add_mst_test CATEGORY TEST_NAME)

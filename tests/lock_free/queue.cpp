@@ -233,7 +233,7 @@ void TestReadersWriters(bool sequential = false)
 	}
 }
 
-TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue]")
+TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -241,7 +241,7 @@ TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -249,7 +249,7 @@ TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -257,7 +257,7 @@ TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -265,7 +265,7 @@ TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpmc_fill_first", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_mpmc_fill_first", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{

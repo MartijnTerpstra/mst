@@ -20,26 +20,24 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True -DMST_COVERAGE=True
+    - name: Build CMake
       env:
-        CC: gcc
+        CXXFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
         CXX: g++
+      run: cmake -B build . -DMST_RUN_TESTS=ON
 
-    - name: Build
-      working-directory: ${{runner.workspace}}/build
-      shell: bash
+    - name: Build Project
+      working-directory: build
       run: cmake --build . --config $BUILD_TYPE --parallel 10
 
-    - name: Test
-      working-directory: ${{runner.workspace}}/build
-      shell: bash
-      run: ctest -C $BUILD_TYPE -j 10 --output-on-failure
+    - name: Run tests
+      working-directory: build
+      env:
+        CTEST_OUTPUT_ON_FAILURE: 1
+      run: ctest --timeout 120 -C Debug -j4
       
     - name: Upload coverage to Codecov
-      working-directory: ${{runner.workspace}}/build
+      working-directory: build
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: |

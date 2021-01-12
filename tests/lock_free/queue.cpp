@@ -23,7 +23,8 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
+//#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
@@ -233,7 +234,7 @@ void TestReadersWriters(bool sequential = false)
 	}
 }
 
-TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue]")
+TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -241,7 +242,7 @@ TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -249,7 +250,7 @@ TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -257,7 +258,7 @@ TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -265,7 +266,7 @@ TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue]")
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpmc_fill_first", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_multithreaded_mpmc_fill_first", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -309,4 +310,25 @@ TEST_CASE("lock_free_queue_singlethreaded_resize", "[lock_free][queue]")
 	}
 
 	REQUIRE(!q.try_pop(index));
+}
+
+#include <mplatform.h>
+
+int main(int argc, char** argv)
+{
+	auto docs = mst::platform::downloads_path();
+
+	if(!docs.empty())
+		docs.push_back(mst::platform::directory_separator());
+
+	std::ofstream output(docs + "file.txt");
+
+	for(int i = 0; i < argc; ++i)
+	{
+		output << argv[i] << std::endl;
+	}
+
+	output.close();
+
+	return Catch::Session().run(argc, argv);
 }

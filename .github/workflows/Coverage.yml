@@ -17,9 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build
-
     - name: Build CMake
       env:
         CXXFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"

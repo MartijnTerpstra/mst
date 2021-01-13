@@ -37,7 +37,7 @@ target_include_directories(mst PUBLIC "${CMAKE_SOURCE_DIR}/mst")
 
 if(MST_RUN_TESTS)
 
-option(MST_TEST_ARGS "Arguments for ctest" "")
+option(MST_TEST_ARGS "Arguments for the Catch2 test runner" "")
 
 enable_testing()
 
@@ -87,7 +87,13 @@ function(SETUP_TARGET TARGET_NAME)
     target_compile_definitions(${TARGET_NAME} PRIVATE ${ARGN})
 endfunction()
 
+#if (NOT MST_TEST_ARGS)
+#set(MST_TEST_ARGS "")
+#endif()
+
 function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
+
+    message(STATUS "MST_TEST_ARGS: ${MST_TEST_ARGS}")
     add_executable(${TEST_NAME} ${TEST_SOURCES})
     target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2)
     SETUP_TARGET(${TEST_NAME} ${ARGN})

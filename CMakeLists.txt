@@ -87,9 +87,9 @@ function(SETUP_TARGET TARGET_NAME)
     target_compile_definitions(${TARGET_NAME} PRIVATE ${ARGN})
 endfunction()
 
-#if (NOT MST_TEST_ARGS)
-#set(MST_TEST_ARGS "")
-#endif()
+if (NOT MST_TEST_ARGS)
+set(MST_TEST_ARGS "")
+endif()
 
 function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
 

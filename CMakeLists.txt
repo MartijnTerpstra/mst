@@ -93,7 +93,6 @@ endif()
 
 function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
 
-    message(STATUS "MST_TEST_ARGS: ${MST_TEST_ARGS}")
     add_executable(${TEST_NAME} ${TEST_SOURCES})
     target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2)
     SETUP_TARGET(${TEST_NAME} ${ARGN})

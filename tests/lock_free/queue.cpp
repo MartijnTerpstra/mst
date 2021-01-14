@@ -23,8 +23,7 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-//#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
@@ -63,27 +62,83 @@ struct Counter
 	}
 };
 
-TEST_CASE("lock_free::queue: creation", "[lock_free][queue]")
+TEST_CASE("lock_free::queue: a newly created queue should be empty", "[lock_free][queue]")
 {
 	queue<Counter> q;
+
+	REQUIRE(q.size_approx() == 0);
+	REQUIRE(q.empty_approx());
 }
 
-TEST_CASE("lock_free::queue: single thread", "[lock_free][queue]")
+TEST_CASE(
+	"lock_free::queue: should have at least the explicit capacity given", "[lock_free][queue]")
+{
+	for(size_t capacity = 10; capacity < 100000; ++capacity)
+	{
+		queue<Counter> q{ capacity };
+
+		REQUIRE(q.capacity_approx() >= capacity);
+	}
+}
+
+TEST_CASE("lock_free::queue: should have a non-zero max size", "[lock_free][queue]")
+{
+	queue<Counter> q;
+
+	REQUIRE(q.max_size() > 0);
+}
+
+TEST_CASE("lock_free::queue: push(&&) should insert an element", "[lock_free][queue]")
 {
 	queue<int> q;
 
-	for(int i = 0; i < 10; ++i)
-	{
-		q.push(i);
-	}
+	q.push(53);
+
+	REQUIRE(q.capacity_approx() > 1);
+	REQUIRE(q.size_approx() == 1);
+	REQUIRE(!q.empty_approx());
+}
+
+TEST_CASE("lock_free::queue: push(const &) should insert an element", "[lock_free][queue]")
+{
+	queue<int> q;
+
+	const int val = 53;
+	q.push(val);
+
+	REQUIRE(q.capacity_approx() > 1);
+	REQUIRE(q.size_approx() == 1);
+	REQUIRE(!q.empty_approx());
+}
+
+TEST_CASE("lock_free::queue: try_pop should remove a pushed element", "[lock_free][queue]")
+{
+	queue<int> q;
+
+	q.push(53);
 
 	int val;
+	REQUIRE(q.try_pop(val));
+	REQUIRE(val == 53);
 
-	for(int i = 0; i < 10; ++i)
-	{
-		REQUIRE(q.try_pop(val));
-		REQUIRE(val == i);
-	}
+	REQUIRE(q.size_approx() == 0);
+	REQUIRE(q.empty_approx());
+}
+
+TEST_CASE("lock_free::queue: try_pop should return false when there are no more elements",
+	"[lock_free][queue]")
+{
+	queue<int> q;
+
+	int val;
+	REQUIRE(!q.try_pop(val));
+
+	REQUIRE(q.size_approx() == 0);
+	REQUIRE(q.empty_approx());
+
+	q.push(16);
+	REQUIRE(q.try_pop(val));
+	REQUIRE(!q.try_pop(val));
 }
 
 template<int WriterCount, int ReaderCount, typename QueueType>
@@ -287,13 +342,13 @@ TEST_CASE("lock_free_queue_precisely_full", "[lock_free][queue]")
 	REQUIRE(result == 0);
 }
 
-TEST_CASE("lock_free_queue_singlethreaded_resize", "[lock_free][queue]")
+TEST_CASE("lock_free_queue_resize", "[lock_free][queue]")
 {
 	queue<int> q;
 	int index = 0;
 	for(int i = 0; i < 10; ++i)
 	{
-		for(int j = 0; j < 1000; ++j)
+		for(int j = 0; j < 100000; ++j)
 		{
 			q.push(index++);
 		}
@@ -303,32 +358,11 @@ TEST_CASE("lock_free_queue_singlethreaded_resize", "[lock_free][queue]")
 	}
 
 
-	for(int i = 0; i < 9990; ++i)
+	for(int i = 0; i < 999990; ++i)
 	{
 		int result = -1;
 		REQUIRE(q.try_pop(result));
 	}
 
 	REQUIRE(!q.try_pop(index));
-}
-
-#include <mplatform.h>
-
-int main(int argc, char** argv)
-{
-	auto docs = mst::platform::downloads_path();
-
-	if(!docs.empty())
-		docs.push_back(mst::platform::directory_separator());
-
-	std::ofstream output(docs + "file.txt");
-
-	for(int i = 0; i < argc; ++i)
-	{
-		output << argv[i] << std::endl;
-	}
-
-	output.close();
-
-	return Catch::Session().run(argc, argv);
 }

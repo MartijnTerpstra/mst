@@ -230,6 +230,11 @@ public:
 		return size;
 	}
 
+	[[nodiscard]] bool empty_approx() const noexcept
+	{
+		return size_approx() == 0;
+	}
+
 private:
 	bool grab_buffer_for_push(uint32_t index) noexcept
 	{

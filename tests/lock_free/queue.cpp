@@ -165,11 +165,12 @@ TEST_CASE("lock_free::queue: pushing past capacity should increase capacity", "[
 	{
 		for(int j = 0; j < initialCapacity; ++j)
 		{
-			q.push(index++);
+			q.push(++index);
 		}
 
 		int temp;
 		REQUIRE(q.try_pop(temp));
+		--index;
 	}
 
 	REQUIRE(q.capacity_approx() > initialCapacity);

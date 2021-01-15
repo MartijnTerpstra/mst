@@ -220,7 +220,10 @@ struct queue_buffer
 		const auto tail = m_tail.load(std::memory_order_relaxed);
 		const auto head = m_head.load(std::memory_order_relaxed);
 
-		return head - tail;
+		if(tail < head)
+			return 0;
+
+		return tail - head;
 	}
 
 private:

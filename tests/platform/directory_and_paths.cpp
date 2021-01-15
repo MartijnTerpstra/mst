@@ -23,18 +23,12 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-//#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
 
 #include <mplatform.h>
-
-int main(int argc, char** argv)
-{
-	Catch::Session().run(argc, argv);
-}
 
 TEST_CASE("platform::newline", "[platform]")
 {

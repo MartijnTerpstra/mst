@@ -35,9 +35,12 @@ using mst::threading::slim::event;
 TEST_CASE("threading::slim::event: creation", "[thread][slim][event]")
 {
 	event e{ false, false };
+
+	REQUIRE(!e.try_wait());
 }
 
-TEST_CASE("threading::slim::event: single thread (manual)", "[thread][slim][event]")
+TEST_CASE(
+	"threading::slim::event: try_wait should not reset on manual mode", "[thread][slim][event]")
 {
 	event e{ false, true };
 
@@ -46,13 +49,30 @@ TEST_CASE("threading::slim::event: single thread (manual)", "[thread][slim][even
 	e.set();
 
 	REQUIRE(e.try_wait());
+	REQUIRE(e.try_wait());
 
 	e.reset();
 
 	REQUIRE(!e.try_wait());
 }
 
-TEST_CASE("threading::slim::event: single thread (auto)", "[thread][slim][event]")
+TEST_CASE("threading::slim::event: try_wait should reset on auto mode", "[thread][slim][event]")
+{
+	event e{ false, false };
+
+	REQUIRE(!e.try_wait());
+
+	e.set();
+
+	REQUIRE(e.try_wait());
+	REQUIRE(!e.try_wait());
+
+	e.reset();
+
+	REQUIRE(!e.try_wait());
+}
+
+TEST_CASE("threading::slim::event: wait() should block until set()", "[thread][slim][event]")
 {
 	event e{ false, false };
 

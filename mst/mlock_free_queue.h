@@ -65,7 +65,7 @@ public:
 		, m_writerCounts()
 		, m_createBufferMutex(0)
 	{
-		assert(initCapacity > max_size());
+		MST_ASSERT(initCapacity <= max_size());
 
 		uint32_t index = 0;
 		while((2048 << ((size_t)index * 2)) < initCapacity)
@@ -230,6 +230,11 @@ public:
 		return size;
 	}
 
+	[[nodiscard]] bool empty_approx() const noexcept
+	{
+		return size_approx() == 0;
+	}
+
 private:
 	bool grab_buffer_for_push(uint32_t index) noexcept
 	{
@@ -296,7 +301,7 @@ private:
 					break;
 
 				buffer = m_buffers[index].exchange(nullptr, std::memory_order_relaxed);
-				assert(buffer);
+				MST_ASSERT(buffer);
 				delete buffer;
 
 				++index;

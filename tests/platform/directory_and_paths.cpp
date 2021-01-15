@@ -23,22 +23,16 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-//#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
 
 #include <mplatform.h>
 
-int main(int argc, char** argv)
-{
-	Catch::Session().run(argc, argv);
-}
-
 TEST_CASE("platform::newline", "[platform]")
 {
-	REQUIRE(mst::platform::newline().length() > 0);
+	mst::platform::newline();
 }
 
 TEST_CASE("platform::directory_separator", "[platform]")
@@ -48,32 +42,32 @@ TEST_CASE("platform::directory_separator", "[platform]")
 
 TEST_CASE("platform::downloads_path", "[platform]")
 {
-	REQUIRE(mst::platform::downloads_path().length() > 0);
+	mst::platform::downloads_path();
 }
 
 TEST_CASE("platform::desktop_path", "[platform]")
 {
-	REQUIRE(mst::platform::desktop_path().length() > 0);
+	mst::platform::desktop_path();
 }
 
 TEST_CASE("platform::my_documents_path", "[platform]")
 {
-	REQUIRE(mst::platform::my_documents_path().length() > 0);
+	mst::platform::my_documents_path();
 }
 
 TEST_CASE("platform::temp_path", "[platform]")
 {
-	REQUIRE(mst::platform::temp_path().length() > 0);
+	mst::platform::temp_path();
 }
 
 TEST_CASE("platform::recycle_bin_path", "[platform]")
 {
-	REQUIRE(mst::platform::recycle_bin_path().length() > 0);
+	mst::platform::recycle_bin_path();
 }
 
 TEST_CASE("platform::current_directory", "[platform]")
 {
-	REQUIRE(mst::platform::current_directory().length() > 0);
+	mst::platform::current_directory();
 }
 
 TEST_CASE("platform::set_current_directory", "[platform]")

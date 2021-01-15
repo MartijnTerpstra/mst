@@ -23,8 +23,7 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-//#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
@@ -63,27 +62,126 @@ struct Counter
 	}
 };
 
-TEST_CASE("lock_free::queue: creation", "[lock_free][queue]")
+TEST_CASE("lock_free::queue: a newly created queue should be empty", "[lock_free][queue]")
 {
 	queue<Counter> q;
+
+	REQUIRE(q.size_approx() == 0);
+	REQUIRE(q.empty_approx());
 }
 
-TEST_CASE("lock_free::queue: single thread", "[lock_free][queue]")
+TEST_CASE(
+	"lock_free::queue: should have at least the explicit capacity given", "[lock_free][queue]")
+{
+	for(size_t capacity = 10; capacity < 100000; capacity *= 10)
+	{
+		queue<Counter> q{ capacity };
+
+		REQUIRE(q.capacity_approx() >= capacity);
+	}
+}
+
+TEST_CASE("lock_free::queue: should have a non-zero max size", "[lock_free][queue]")
+{
+	queue<Counter> q;
+
+	REQUIRE(q.max_size() > 0);
+}
+
+TEST_CASE("lock_free::queue: push(&&) should insert an element", "[lock_free][queue]")
 {
 	queue<int> q;
 
-	for(int i = 0; i < 10; ++i)
+	q.push(53);
+
+	REQUIRE(q.capacity_approx() >= 1);
+	REQUIRE(q.size_approx() == 1);
+	REQUIRE(!q.empty_approx());
+}
+
+TEST_CASE("lock_free::queue: push(const &) should insert an element", "[lock_free][queue]")
+{
+	queue<int> q;
+
+	const int val = 53;
+	q.push(val);
+
+	REQUIRE(q.capacity_approx() > 1);
+	REQUIRE(q.size_approx() == 1);
+	REQUIRE(!q.empty_approx());
+}
+
+TEST_CASE("lock_free::queue: try_pop(&) should remove a pushed element", "[lock_free][queue]")
+{
+	queue<int> q;
+
+	q.push(53);
+
+	int val;
+	REQUIRE(q.try_pop(val));
+	REQUIRE(val == 53);
+
+	REQUIRE(q.size_approx() == 0);
+	REQUIRE(q.empty_approx());
+}
+
+TEST_CASE("lock_free::queue: try_pop(&) should return false when there are no more elements",
+	"[lock_free][queue]")
+{
+	queue<int> q;
+
+	int val;
+	REQUIRE(!q.try_pop(val));
+
+	REQUIRE(q.size_approx() == 0);
+	REQUIRE(q.empty_approx());
+
+	q.push(16);
+	REQUIRE(q.try_pop(val));
+	REQUIRE(!q.try_pop(val));
+}
+
+TEST_CASE("lock_free::queue: fill to capacity", "[lock_free][queue]")
+{
+	queue<int> q;
+	for(int i = 0; i < (int)q.capacity_approx(); ++i)
 	{
 		q.push(i);
 	}
 
-	int val;
+	int result = -1;
+	REQUIRE(q.try_pop(result));
+	REQUIRE(result == 0);
+}
 
+TEST_CASE("lock_free::queue: pushing past capacity should increase capacity", "[lock_free][queue]")
+{
+	queue<int> q;
+
+	const auto initialCapacity = (int)q.capacity_approx() + 1;
+
+	int index = 0;
 	for(int i = 0; i < 10; ++i)
 	{
-		REQUIRE(q.try_pop(val));
-		REQUIRE(val == i);
+		for(int j = 0; j < initialCapacity; ++j)
+		{
+			q.push(++index);
+		}
+
+		int temp;
+		REQUIRE(q.try_pop(temp));
+		--index;
 	}
+
+	REQUIRE(q.capacity_approx() > initialCapacity);
+
+	for(size_t i = 0; i < index; ++i)
+	{
+		int result = -1;
+		REQUIRE(q.try_pop(result));
+	}
+
+	REQUIRE(!q.try_pop(index));
 }
 
 template<int WriterCount, int ReaderCount, typename QueueType>
@@ -234,7 +332,7 @@ void TestReadersWriters(bool sequential = false)
 	}
 }
 
-TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue][not_deterministic]")
+TEST_CASE("lock_free::queue: multithreaded SPSC", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -242,7 +340,7 @@ TEST_CASE("lock_free::queue: queue multithreaded SPSC", "[lock_free][queue][not_
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue][not_deterministic]")
+TEST_CASE("lock_free::queue: multithreaded MPSC", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -250,7 +348,7 @@ TEST_CASE("lock_free_queue_multithreaded_mpsc", "[lock_free][queue][not_determin
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue][not_deterministic]")
+TEST_CASE("lock_free::queue: multithreaded SPMC", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -258,7 +356,7 @@ TEST_CASE("lock_free_queue_multithreaded_spmc", "[lock_free][queue][not_determin
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue][not_deterministic]")
+TEST_CASE("lock_free::queue: multithreaded MPMC", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
@@ -266,69 +364,11 @@ TEST_CASE("lock_free_queue_multithreaded_mpmc", "[lock_free][queue][not_determin
 	}
 }
 
-TEST_CASE("lock_free_queue_multithreaded_mpmc_fill_first", "[lock_free][queue][not_deterministic]")
+TEST_CASE(
+	"lock_free::queue: multithreaded MPMC, fill first", "[lock_free][queue][not_deterministic]")
 {
 	for(int i = 0; i < 50; ++i)
 	{
 		TestReadersWriters<4, 4, queue<int>>(true);
 	}
-}
-
-TEST_CASE("lock_free_queue_precisely_full", "[lock_free][queue]")
-{
-	queue<int> q;
-	for(int i = 0; i < (int)q.capacity_approx(); ++i)
-	{
-		q.push(i);
-	}
-
-	int result = -1;
-	REQUIRE(q.try_pop(result));
-	REQUIRE(result == 0);
-}
-
-TEST_CASE("lock_free_queue_singlethreaded_resize", "[lock_free][queue]")
-{
-	queue<int> q;
-	int index = 0;
-	for(int i = 0; i < 10; ++i)
-	{
-		for(int j = 0; j < 1000; ++j)
-		{
-			q.push(index++);
-		}
-
-		int temp;
-		REQUIRE(q.try_pop(temp));
-	}
-
-
-	for(int i = 0; i < 9990; ++i)
-	{
-		int result = -1;
-		REQUIRE(q.try_pop(result));
-	}
-
-	REQUIRE(!q.try_pop(index));
-}
-
-#include <mplatform.h>
-
-int main(int argc, char** argv)
-{
-	auto docs = mst::platform::downloads_path();
-
-	if(!docs.empty())
-		docs.push_back(mst::platform::directory_separator());
-
-	std::ofstream output(docs + "file.txt");
-
-	for(int i = 0; i < argc; ++i)
-	{
-		output << argv[i] << std::endl;
-	}
-
-	output.close();
-
-	return Catch::Session().run(argc, argv);
 }

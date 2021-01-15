@@ -73,7 +73,7 @@ TEST_CASE("lock_free::queue: a newly created queue should be empty", "[lock_free
 TEST_CASE(
 	"lock_free::queue: should have at least the explicit capacity given", "[lock_free][queue]")
 {
-	for(size_t capacity = 10; capacity < 100000; ++capacity)
+	for(size_t capacity = 10; capacity < 100000; capacity *= 10)
 	{
 		queue<Counter> q{ capacity };
 

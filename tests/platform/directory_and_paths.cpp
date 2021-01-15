@@ -32,7 +32,7 @@
 
 TEST_CASE("platform::newline", "[platform]")
 {
-	REQUIRE(mst::platform::newline().length() > 0);
+	mst::platform::newline().length();
 }
 
 TEST_CASE("platform::directory_separator", "[platform]")
@@ -42,32 +42,32 @@ TEST_CASE("platform::directory_separator", "[platform]")
 
 TEST_CASE("platform::downloads_path", "[platform]")
 {
-	REQUIRE(mst::platform::downloads_path().length() > 0);
+	mst::platform::downloads_path().length();
 }
 
 TEST_CASE("platform::desktop_path", "[platform]")
 {
-	REQUIRE(mst::platform::desktop_path().length() > 0);
+	mst::platform::desktop_path().length();
 }
 
 TEST_CASE("platform::my_documents_path", "[platform]")
 {
-	REQUIRE(mst::platform::my_documents_path().length() > 0);
+	mst::platform::my_documents_path().length();
 }
 
 TEST_CASE("platform::temp_path", "[platform]")
 {
-	REQUIRE(mst::platform::temp_path().length() > 0);
+	mst::platform::temp_path().length();
 }
 
 TEST_CASE("platform::recycle_bin_path", "[platform]")
 {
-	REQUIRE(mst::platform::recycle_bin_path().length() > 0);
+	mst::platform::recycle_bin_path().length();
 }
 
 TEST_CASE("platform::current_directory", "[platform]")
 {
-	REQUIRE(mst::platform::current_directory().length() > 0);
+	mst::platform::current_directory().length();
 }
 
 TEST_CASE("platform::set_current_directory", "[platform]")

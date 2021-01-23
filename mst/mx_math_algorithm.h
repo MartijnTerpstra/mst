@@ -176,27 +176,39 @@ struct _Cvalue
 };
 
 template<typename ValueType, size_t Columns, size_t Rows>
-ValueType* begin(matrix<ValueType, Columns, Rows>& m)
+vector<ValueType, Columns>* begin(matrix<ValueType, Columns, Rows>& m)
 {
-	return m.data();
+	return m.begin();
 }
 
 template<typename ValueType, size_t Columns, size_t Rows>
-const ValueType* begin(const matrix<ValueType, Columns, Rows>& m)
+vector<ValueType, Columns>* end(matrix<ValueType, Columns, Rows>& m)
 {
-	return m.data();
+	return m.end();
 }
 
 template<typename ValueType, size_t Columns, size_t Rows>
-ValueType* end(matrix<ValueType, Columns, Rows>& m)
+const vector<ValueType, Columns>* begin(const matrix<ValueType, Columns, Rows>& m)
 {
-	return m.data() + m.size();
+	return m.begin();
 }
 
 template<typename ValueType, size_t Columns, size_t Rows>
-const ValueType* end(const matrix<ValueType, Columns, Rows>& m)
+const vector<ValueType, Columns>* end(const matrix<ValueType, Columns, Rows>& m)
 {
-	return m.data() + m.size();
+	return m.end();
+}
+
+template<typename ValueType, size_t Columns, size_t Rows>
+const vector<ValueType, Columns>* cbegin(const matrix<ValueType, Columns, Rows>& m)
+{
+	return m.begin();
+}
+
+template<typename ValueType, size_t Columns, size_t Rows>
+const vector<ValueType, Columns>* cend(const matrix<ValueType, Columns, Rows>& m)
+{
+	return m.end();
 }
 
 template<typename ValueType, size_t Elems>
@@ -243,6 +255,10 @@ template<typename ValueType, size_t Elems>
 struct VectorTag
 { };
 
+template<typename ValueType, size_t Columns, size_t Rows>
+struct MatrixTag
+{ };
+
 template<typename T>
 struct ConvertToTag
 {
@@ -255,22 +271,35 @@ struct ConvertToTag<mst::math::vector<ValueType, Elems>>
 	typedef VectorTag<ValueType, Elems> type;
 };
 
-template<typename T, typename V>
-inline T ConvertToImpl(V value, DefaultTag<T>)
+template<typename ValueType, size_t Columns, size_t Rows>
+struct ConvertToTag<mst::math::matrix<ValueType, Columns, Rows>>
 {
-	return static_cast<T>(value);
+	typedef MatrixTag<ValueType, Columns, Rows> type;
+};
+
+template<typename T, typename V>
+inline T ConvertToImpl(V scalar, DefaultTag<T>)
+{
+	return static_cast<T>(scalar);
 }
 
 template<typename ValueType, size_t Elems, typename V>
-inline mst::math::vector<ValueType, Elems> ConvertToImpl(V value, VectorTag<ValueType, Elems>)
+inline mst::math::vector<ValueType, Elems> ConvertToImpl(V scalar, VectorTag<ValueType, Elems>)
 {
-	return mst::math::vector<ValueType, Elems>{ (ValueType)value };
+	return mst::math::vector<ValueType, Elems>{ (ValueType)scalar };
+}
+
+template<typename ValueType, size_t Columns, size_t Rows, typename V>
+inline mst::math::matrix<ValueType, Columns, Rows> ConvertToImpl(
+	V scalar, MatrixTag<ValueType, Columns, Rows>)
+{
+	return mst::math::matrix<ValueType, Columns, Rows>{ (ValueType)scalar };
 }
 
 template<typename T, typename V>
-inline std::decay_t<T> ConvertTo(V value)
+inline std::decay_t<T> ConvertTo(V scalar)
 {
-	return ConvertToImpl(value, typename ConvertToTag<std::decay_t<T>>::type{});
+	return ConvertToImpl(scalar, typename ConvertToTag<std::decay_t<T>>::type{});
 }
 
 } // namespace _Details

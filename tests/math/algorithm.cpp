@@ -34,6 +34,7 @@
 #include <mmath2.h>
 #include <mcommon.h>
 #include <vector>
+#include <mcommon.h>
 
 using namespace mst::math;
 using namespace mst;
@@ -260,19 +261,39 @@ TEST_CASE("math::average: vector of 3D vectors", "[math][algorithm]")
 	REQUIRE(average(begin(cvecs), end(cvecs)) == expectedAvg);
 }
 
-/*TEST_CASE("math::average: matrix", "[math][algorithm]")
+TEST_CASE("math::average: matrix", "[math][algorithm]")
 {
 	typedef matrix<float, 4, 4> mat4x4;
 	typedef matrix<double, 4, 4> dmat4x4;
 
-	REQUIRE(average(mat4x4(-1.f)) == -1);
+	mat4x4 m{ 0 };
+	int value = 0;
+	for(auto& c : m)
+	{
+		c.x = value - 19.0f;
+		c.y = value - 53.0f;
+		c.z = value + 0.0f;
+		c.w = value + 16.0f;
 
-	REQUIRE(average(mat4x4(0.f)) == 0.f);
+		++value;
+	}
+
+	const vector<float, 4> expectedAvg = { 2 - 19.0f, 2 - 53.0f, 2.0f, 2 + 16.0f };
+
+	const auto beginiter = begin(m);
+
+	mst::printf("Type: %s\n", mst::typename_of<decltype(beginiter)>());
+
+	const auto result = average(beginiter, end(m));
+
+	// REQUIRE(result == expectedAvg);
+
+	// REQUIRE(average(mat4x4(0.f)) == 0.f);
 }
 
 TEST_CASE("math::average: array", "[math][algorithm]")
 {
 	const float values[] = { 1, 2, 3, 4, 5 };
 
-	REQUIRE(average(values) == 3);
-}*/
+	REQUIRE(average(std::begin(values), std::end(values)) == 3);
+}

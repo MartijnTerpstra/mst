@@ -85,6 +85,14 @@ public:
 	_MST_NODISCARD constexpr const mst::math::vector<_Value_type, _Columns>& operator[](
 		size_t _Idx) const noexcept;
 
+	[[nodiscard]] inline mst::math::vector<_Value_type, _Columns>* begin() noexcept;
+	[[nodiscard]] inline const mst::math::vector<_Value_type, _Columns>* begin() const noexcept;
+	[[nodiscard]] inline const mst::math::vector<_Value_type, _Columns>* cbegin() const noexcept;
+
+	[[nodiscard]] inline mst::math::vector<_Value_type, _Columns>* end() noexcept;
+	[[nodiscard]] inline const mst::math::vector<_Value_type, _Columns>* end() const noexcept;
+	[[nodiscard]] inline const mst::math::vector<_Value_type, _Columns>* cend() const noexcept;
+
 	/* sets the values of the matrix */
 	_MST_CONSTEXPR17 void set(const _Value_type (&_Values)[_Columns * _Rows]) noexcept;
 

@@ -82,7 +82,8 @@ _MST_CONSTEXPR17 T _Saturate(const T& val, _Math_type) noexcept
 
 	while(inIt != endIt)
 	{
-		*outIt++ = _Saturate(*inIt++, _Scalar_type());
+		*outIt++ = _Saturate(
+			*inIt++, typename _Details::_Math_traits<std::decay_t<decltype(*inIt)>>::math_type{});
 	}
 
 	return retval;
@@ -230,14 +231,14 @@ constexpr T mst::math::cubic_interp(
 template<typename Ty>
 constexpr Ty mst::math::reflect(const Ty& i, const Ty& n) noexcept
 {
-	return _Details::_Reflect(i, n, typename _Details::_Math_traits<Ty>::math_type());
+	return _Details::_Reflect(i, n, typename _Details::_Math_traits<Ty>::math_type{});
 }
 
 /* returns clamps all the values to the range: [0,1] */
 template<typename _Ty>
 constexpr _Ty mst::math::saturate(const _Ty& val) noexcept
 {
-	return _Details::_Saturate(val, typename _Details::_Math_traits<_Ty>::math_type());
+	return _Details::_Saturate(val, typename _Details::_Math_traits<_Ty>::math_type{});
 }
 
 template<typename T>
@@ -250,7 +251,7 @@ _MST_CONSTEXPR17 T mst::math::smoothstep(
 template<typename _Ty>
 _MST_CONSTEXPR17 _Ty mst::math::frac(const _Ty& val) noexcept
 {
-	return _Details::_Frac(val, typename _Details::_Math_traits<_Ty>::math_type());
+	return _Details::_Frac(val, typename _Details::_Math_traits<_Ty>::math_type{});
 }
 
 template<typename T>

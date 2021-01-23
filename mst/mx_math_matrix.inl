@@ -435,6 +435,48 @@ _Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::operator[](size_t _Id
 }
 
 template<typename _Value_type, size_t _Columns, size_t _Rows>
+vector<_Value_type, _Columns>*
+_Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::begin() noexcept
+{
+	return this->_Data;
+}
+
+template<typename _Value_type, size_t _Columns, size_t _Rows>
+const vector<_Value_type, _Columns>*
+_Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::begin() const noexcept
+{
+	return this->_Data;
+}
+
+template<typename _Value_type, size_t _Columns, size_t _Rows>
+const vector<_Value_type, _Columns>*
+_Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::cbegin() const noexcept
+{
+	return this->_Data;
+}
+
+template<typename _Value_type, size_t _Columns, size_t _Rows>
+vector<_Value_type, _Columns>*
+_Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::end() noexcept
+{
+	return this->_Data + _Rows;
+}
+
+template<typename _Value_type, size_t _Columns, size_t _Rows>
+const vector<_Value_type, _Columns>*
+_Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::end() const noexcept
+{
+	return this->_Data + _Rows;
+}
+
+template<typename _Value_type, size_t _Columns, size_t _Rows>
+const vector<_Value_type, _Columns>*
+_Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::cend() const noexcept
+{
+	return this->_Data + _Rows;
+}
+
+template<typename _Value_type, size_t _Columns, size_t _Rows>
 inline matrix<_Value_type, _Rows, _Columns>
 _Details::_Math_matrix_base<_Value_type, _Columns, _Rows>::get_transpose() const noexcept
 {

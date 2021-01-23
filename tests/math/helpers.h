@@ -60,18 +60,18 @@ public:
 public:
 	bool match(const MathType& left) const override
 	{
-		return _Match(left, m_right, [this](const value_type& left, const value_type& right) {
+		return _Match(left, m_right, [this](const value_type& l, const value_type& r) {
 			if(m_percentage == 0)
 			{
-				return abs(left - right) < m_epsilon;
+				return abs(l - r) < m_epsilon;
 			}
-			else if(abs(right) < m_epsilon)
+			else if(abs(r) < m_epsilon)
 			{
-				return left < m_epsilon;
+				return l < m_epsilon;
 			}
 			else
 			{
-				return abs(left - right) / right < m_percentage;
+				return abs(l - r) / r < m_percentage;
 			}
 		});
 	}

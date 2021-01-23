@@ -200,21 +200,21 @@ template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
 vector_iterator<_Value_type, _Elems>
 _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::end() noexcept
 {
-	return { &this->x, _Elems - 1 };
+	return { &this->x, _Elems };
 }
 
 template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
 const_vector_iterator<_Value_type, _Elems>
 _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::end() const noexcept
 {
-	return { &this->x, _Elems - 1 };
+	return { &this->x, _Elems };
 }
 
 template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
 const_vector_iterator<_Value_type, _Elems>
 _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::cend() const noexcept
 {
-	return { &this->x, _Elems - 1 };
+	return { &this->x, _Elems };
 }
 
 /* returns the squared length */

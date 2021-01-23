@@ -253,7 +253,7 @@ TEST_CASE("math::average: vector of 3D vectors", "[math][algorithm]")
 
 	const auto& cvecs = vecs;
 
-	const float3 expectedAvg = { 3 - 19, 3, 3 + 20 };
+	const float3 expectedAvg = { 2 - 19, 2, 2 + 20 };
 
 	REQUIRE(average(begin(vecs), end(vecs)) == expectedAvg);
 	REQUIRE(average(cbegin(vecs), cend(vecs)) == expectedAvg);

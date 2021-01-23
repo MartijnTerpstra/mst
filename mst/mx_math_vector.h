@@ -1123,36 +1123,36 @@ public:
 
 	[[nodiscard]] inline bool operator<(const vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx < other.m_idx;
 	}
 
 	[[nodiscard]] inline bool operator<=(const vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx <= other.m_idx;
 	}
 
 	[[nodiscard]] inline bool operator>(const vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx > other.m_idx;
 	}
 
 	[[nodiscard]] inline bool operator>=(const vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx >= other.m_idx;
 	}
 
 	[[nodiscard]] inline _Value_type& operator*() const noexcept
 	{
-		MST_ASSERT(m_vec);
-		MST_ASSERT(m_idx < _Elems);
+		MST_ASSERT(m_vec, "Iterators to different vectors");
+		MST_ASSERT(m_idx < _Elems, "Iterator out of range");
 
 		return m_vec[m_idx];
 	}
@@ -1259,7 +1259,7 @@ public:
 
 	[[nodiscard]] inline bool operator==(const const_vector_iterator& other) const noexcept
 	{
-		return m_vec == other.m_vec && m_idx == m_idx;
+		return m_vec == other.m_vec && m_idx == other.m_idx;
 	}
 
 	[[nodiscard]] inline bool operator!=(const const_vector_iterator& other) const noexcept
@@ -1269,36 +1269,36 @@ public:
 
 	[[nodiscard]] inline bool operator<(const const_vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx < other.m_idx;
 	}
 
 	[[nodiscard]] inline bool operator<=(const const_vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx <= other.m_idx;
 	}
 
 	[[nodiscard]] inline bool operator>(const const_vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx > other.m_idx;
 	}
 
 	[[nodiscard]] inline bool operator>=(const const_vector_iterator& other) const noexcept
 	{
-		MST_ASSERT(m_vec == other.m_vec);
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
 
 		return m_idx >= other.m_idx;
 	}
 
 	[[nodiscard]] inline const _Value_type& operator*() const noexcept
 	{
-		MST_ASSERT(m_vec);
-		MST_ASSERT(m_idx < _Elems);
+		MST_ASSERT(m_vec, "Iterators to different vectors");
+		MST_ASSERT(m_idx < _Elems, "Iterator out of range");
 
 		return m_vec[m_idx];
 	}

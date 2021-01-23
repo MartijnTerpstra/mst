@@ -278,17 +278,14 @@ TEST_CASE("math::average: matrix", "[math][algorithm]")
 		++value;
 	}
 
+	const auto& cm = m;
+
 	const vector<float, 4> expectedAvg = { 2 - 19.0f, 2 - 53.0f, 2.0f, 2 + 16.0f };
 
-	const auto beginiter = begin(m);
 
-	mst::printf("Type: %s\n", mst::typename_of<decltype(beginiter)>());
-
-	const auto result = average(beginiter, end(m));
-
-	// REQUIRE(result == expectedAvg);
-
-	// REQUIRE(average(mat4x4(0.f)) == 0.f);
+	REQUIRE(average(begin(m), end(m)) == expectedAvg);
+	REQUIRE(average(cbegin(m), cend(m)) == expectedAvg);
+	REQUIRE(average(begin(cm), end(cm)) == expectedAvg);
 }
 
 TEST_CASE("math::average: array", "[math][algorithm]")

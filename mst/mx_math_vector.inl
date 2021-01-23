@@ -175,6 +175,48 @@ _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::operator[]
 	return (&this->x)[_Idx];
 }
 
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::begin() noexcept
+{
+	return { &this->x, 0 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::begin() const noexcept
+{
+	return { &this->x, 0 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::cbegin() const noexcept
+{
+	return { &this->x, 0 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::end() noexcept
+{
+	return { &this->x, _Elems - 1 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::end() const noexcept
+{
+	return { &this->x, _Elems - 1 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::cend() const noexcept
+{
+	return { &this->x, _Elems - 1 };
+}
+
 /* returns the squared length */
 template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
 _MST_CONSTEXPR17 _Value_type(

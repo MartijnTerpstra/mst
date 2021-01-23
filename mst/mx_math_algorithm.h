@@ -31,6 +31,13 @@
 
 namespace mst {
 namespace math {
+
+template<typename _Value_type, size_t _Elems>
+class vector_iterator;
+
+template<typename _Value_type, size_t _Elems>
+class const_vector_iterator;
+
 namespace _Details {
 
 struct _Math_type
@@ -119,19 +126,19 @@ struct _Cvalue
 	}
 
 	constexpr static typename _Math_traits<T>::value_type _Create(
-		const int initValue, _Math_type) noexcept
+		const int32_t initValue, _Math_type) noexcept
 	{
 		return typename _Math_traits<T>::value_type(initValue);
 	}
 
 	constexpr static typename _Math_traits<T>::value_type _Create(
-		const int initValue, _Scalar_type) noexcept
+		const int32_t initValue, _Scalar_type) noexcept
 	{
 		return typename _Math_traits<T>::value_type(initValue);
 	}
 
 	constexpr static typename _Math_traits<T>::value_type _Create(
-		const int initValue, _Array_type) noexcept
+		const int32_t initValue, _Array_type) noexcept
 	{
 		return typename _Math_traits<T>::value_type(
 			_Cvalue<typename _Math_traits<T>::value_type>::create(initValue));
@@ -142,7 +149,7 @@ struct _Cvalue
 		return _Create(initValue, typename _Math_traits<T>::math_type());
 	}
 
-	constexpr static typename _Math_traits<T>::value_type create(const int initValue) noexcept
+	constexpr static typename _Math_traits<T>::value_type create(const int32_t initValue) noexcept
 	{
 		return _Create(initValue, typename _Math_traits<T>::math_type());
 	}
@@ -153,6 +160,11 @@ struct _Cvalue
 	}
 
 	constexpr static T create_object(const double initValue) noexcept
+	{
+		return T(_Create(initValue, typename _Math_traits<T>::math_type()));
+	}
+
+	constexpr static T create_object(const int32_t initValue) noexcept
 	{
 		return T(_Create(initValue, typename _Math_traits<T>::math_type()));
 	}
@@ -188,27 +200,77 @@ const ValueType* end(const matrix<ValueType, Columns, Rows>& m)
 }
 
 template<typename ValueType, size_t Elems>
-ValueType* begin(mst::math::vector<ValueType, Elems>& v)
+vector_iterator<ValueType, Elems> begin(mst::math::vector<ValueType, Elems>& v)
 {
-	return v.data();
+	return v.begin();
 }
 
 template<typename ValueType, size_t Elems>
-ValueType* end(mst::math::vector<ValueType, Elems>& v)
+vector_iterator<ValueType, Elems> end(mst::math::vector<ValueType, Elems>& v)
 {
-	return v.data() + v.size();
+	return v.end();
 }
 
 template<typename ValueType, size_t Elems>
-const ValueType* begin(const mst::math::vector<ValueType, Elems>& v)
+const_vector_iterator<ValueType, Elems> begin(const mst::math::vector<ValueType, Elems>& v)
 {
-	return v.data();
+	return v.begin();
 }
 
 template<typename ValueType, size_t Elems>
-const ValueType* end(const mst::math::vector<ValueType, Elems>& v)
+const_vector_iterator<ValueType, Elems> end(const mst::math::vector<ValueType, Elems>& v)
 {
-	return v.data() + v.size();
+	return v.end();
+}
+
+template<typename ValueType, size_t Elems>
+const_vector_iterator<ValueType, Elems> cbegin(const mst::math::vector<ValueType, Elems>& v)
+{
+	return v.cbegin();
+}
+
+template<typename ValueType, size_t Elems>
+const_vector_iterator<ValueType, Elems> cend(const mst::math::vector<ValueType, Elems>& v)
+{
+	return v.cend();
+}
+
+template<typename T>
+struct DefaultTag
+{ };
+
+template<typename ValueType, size_t Elems>
+struct VectorTag
+{ };
+
+template<typename T>
+struct ConvertToTag
+{
+	typedef DefaultTag<T> type;
+};
+
+template<typename ValueType, size_t Elems>
+struct ConvertToTag<mst::math::vector<ValueType, Elems>>
+{
+	typedef VectorTag<ValueType, Elems> type;
+};
+
+template<typename T, typename V>
+inline T ConvertToImpl(V value, DefaultTag<T>)
+{
+	return static_cast<T>(value);
+}
+
+template<typename ValueType, size_t Elems, typename V>
+inline mst::math::vector<ValueType, Elems> ConvertToImpl(V value, VectorTag<ValueType, Elems>)
+{
+	return mst::math::vector<ValueType, Elems>{ (ValueType)value };
+}
+
+template<typename T, typename V>
+inline std::decay_t<T> ConvertTo(V value)
+{
+	return ConvertToImpl(value, typename ConvertToTag<std::decay_t<T>>::type{});
 }
 
 } // namespace _Details

@@ -33,6 +33,7 @@
 //#define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
 #include <mmath2.h>
 #include <mcommon.h>
+#include <vector>
 
 using namespace mst::math;
 using namespace mst;
@@ -125,7 +126,7 @@ TEST_CASE("to_bit_shift", "[math][algorithm]")
 
 #endif // _MST_HAS_TEMPLATE_AUTO
 
-TEST_CASE("algorithm_saturate_scalar", "[math][algorithm]")
+TEST_CASE("math::saturate: scalar", "[math][algorithm]")
 {
 	REQUIRE(saturate(-1.f) == 0.0f);
 	REQUIRE(saturate(.5f) == .5f);
@@ -141,7 +142,7 @@ TEST_CASE("algorithm_saturate_scalar", "[math][algorithm]")
 	REQUIRE(saturate(2) == 1);
 }
 
-TEST_CASE("algorithm_saturate_vector", "[math][algorithm]")
+TEST_CASE("math::saturate: vector", "[math][algorithm]")
 {
 	typedef vector<float, 4> vec4;
 	typedef vector<double, 4> dvec4;
@@ -161,7 +162,7 @@ TEST_CASE("algorithm_saturate_vector", "[math][algorithm]")
 	REQUIRE(saturate(ivec4(2)) == ivec4(1));
 }
 
-TEST_CASE("algorithm_saturate_matrix", "[math][algorithm]")
+TEST_CASE("math::saturate: matrix", "[math][algorithm]")
 {
 	typedef matrix<float, 4, 4> mat4x4;
 	typedef matrix<double, 4, 4> dmat4x4;
@@ -181,7 +182,7 @@ TEST_CASE("algorithm_saturate_matrix", "[math][algorithm]")
 	REQUIRE(saturate(imat4x4(2)) == imat4x4(1));
 }
 
-TEST_CASE("algorithm_lerp_scalar", "[math][algorithm]")
+TEST_CASE("math::lerp: scalar", "[math][algorithm]")
 {
 	auto result = lerp(-1.f, 1.0f, 0.5f);
 	REQUIRE(result == 0.0f);
@@ -198,7 +199,7 @@ TEST_CASE("algorithm_lerp_scalar", "[math][algorithm]")
 	REQUIRE(resultd == 0.0);
 }
 
-TEST_CASE("algorithm_lerp_vector", "[math][algorithm]")
+TEST_CASE("math::lerp: vector", "[math][algorithm]")
 {
 	typedef vector<float, 4> vec4;
 	typedef vector<double, 4> dvec4;
@@ -212,7 +213,7 @@ TEST_CASE("algorithm_lerp_vector", "[math][algorithm]")
 	REQUIRE(lerp(dvec4(2.0), dvec4(-6.0), 0.25) == dvec4(0.0));
 }
 
-TEST_CASE("algorithm_lerp_matrix", "[math][algorithm]")
+TEST_CASE("math::lerp: matrix", "[math][algorithm]")
 {
 	typedef matrix<float, 4, 4> mat4x4;
 	typedef matrix<double, 4, 4> dmat4x4;
@@ -225,3 +226,53 @@ TEST_CASE("algorithm_lerp_matrix", "[math][algorithm]")
 	REQUIRE(lerp(dmat4x4(-.5), dmat4x4(1.5), 0.5) == dmat4x4(0.5));
 	REQUIRE(lerp(dmat4x4(2.0), dmat4x4(-6.0), 0.25) == dmat4x4(0.0));
 }
+
+TEST_CASE("math::average: 3D vector", "[math][algorithm]")
+{
+	typedef vector<float, 3> float3;
+
+	float3 vec = { 0, 1, 2 };
+
+	const auto& cvec = vec;
+
+	REQUIRE(average(begin(vec), end(vec)) == 1);
+	REQUIRE(average(cbegin(vec), cend(vec)) == 1);
+	REQUIRE(average(begin(cvec), end(cvec)) == 1);
+}
+
+TEST_CASE("math::average: vector of 3D vectors", "[math][algorithm]")
+{
+	typedef vector<float, 3> float3;
+
+	std::vector<float3> vecs;
+
+	for(int i = 0; i < 5; ++i)
+	{
+		vecs.emplace_back(i - 19, i, i + 20);
+	}
+
+	const auto& cvecs = vecs;
+
+	const float3 expectedAvg = { 3 - 19, 3, 3 + 20 };
+
+	REQUIRE(average(begin(vecs), end(vecs)) == expectedAvg);
+	REQUIRE(average(cbegin(vecs), cend(vecs)) == expectedAvg);
+	REQUIRE(average(begin(cvecs), end(cvecs)) == expectedAvg);
+}
+
+/*TEST_CASE("math::average: matrix", "[math][algorithm]")
+{
+	typedef matrix<float, 4, 4> mat4x4;
+	typedef matrix<double, 4, 4> dmat4x4;
+
+	REQUIRE(average(mat4x4(-1.f)) == -1);
+
+	REQUIRE(average(mat4x4(0.f)) == 0.f);
+}
+
+TEST_CASE("math::average: array", "[math][algorithm]")
+{
+	const float values[] = { 1, 2, 3, 4, 5 };
+
+	REQUIRE(average(values) == 3);
+}*/

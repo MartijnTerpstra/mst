@@ -26,7 +26,7 @@
 #pragma once
 
 #include <mcore.h>
-#include <emmintrin.h>
+#include <iterator>
 #include <mx_math_algorithm.h>
 
 namespace mst {
@@ -70,9 +70,9 @@ _MST_NODISCARD constexpr T clamp(const T& val, typename _MST_MDET _Cref_value<T>
 template<typename T>
 _MST_NODISCARD constexpr T clamp(const T& val, const T& minim, const T& maxim) noexcept;
 
-template<typename T>
-_MST_NODISCARD constexpr typename ::mst::math::_Details::_Math_traits<T>::value_type average(
-	const T& value) noexcept;
+template<typename ForwardIterator>
+_MST_NODISCARD constexpr auto average(ForwardIterator begin, ForwardIterator end) noexcept
+	-> std::decay_t<decltype(*begin)>;
 
 template<typename T>
 _MST_NODISCARD _MST_CONSTEXPR17 T greatest_common_devisor(const T& left, const T& right) noexcept;

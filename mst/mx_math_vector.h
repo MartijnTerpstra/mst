@@ -1056,7 +1056,7 @@ class vector_iterator
 {
 	friend class const_vector_iterator<_Value_type, _Elems>;
 
-	template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+	template<typename _Vt, size_t _El, bool _IsFP, bool _IsU>
 	friend class _Details::_Math_vector_base;
 
 public:

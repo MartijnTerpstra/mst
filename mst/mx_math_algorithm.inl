@@ -106,7 +106,7 @@ _MST_CONSTEXPR17 T _Smoothstep(
 }
 
 template<typename ForwardIterator>
-_MST_CONSTEXPR17 typename auto _Average(ForwardIterator begin, ForwardIterator end) noexcept
+_MST_CONSTEXPR17 auto _Average(ForwardIterator begin, ForwardIterator end) noexcept
 	-> std::decay_t<decltype(*begin)>
 {
 	typedef std::decay_t<decltype(*begin)> ValueType;

@@ -280,7 +280,7 @@ TEST_CASE("math::average: matrix", "[math][algorithm]")
 
 	const auto& cm = m;
 
-	const vector<float, 4> expectedAvg = { 2 - 19.0f, 2 - 53.0f, 2.0f, 2 + 16.0f };
+	const vector<float, 4> expectedAvg = { 1.5f - 19.0f, 1.5f - 53.0f, 1.5f, 1.5f + 16.0f };
 
 
 	REQUIRE(average(begin(m), end(m)) == expectedAvg);

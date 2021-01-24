@@ -35,7 +35,7 @@ template<typename T>
 constexpr T lerp_impl(
 	const T& u, const T& v, typename _Cref_value<T>::type s, _Scalar_type) noexcept
 {
-	return (u * (T(1) - s)) + (v * s);
+	return (u * (ConvertTo<T>(1) - s)) + (v * s);
 }
 
 template<typename T>
@@ -53,7 +53,8 @@ _MST_CONSTEXPR17 T lerp_impl(
 
 	for(; uIt != endIt; ++uIt, ++vIt, ++outIt)
 	{
-		*outIt = (*uIt * (one - s)) + (*vIt * s);
+		*outIt = lerp_impl(
+			*uIt, *vIt, s, typename _Math_traits<std::decay_t<decltype(*uIt)>>::math_type{});
 	}
 
 	return retval;

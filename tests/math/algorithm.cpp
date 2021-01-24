@@ -270,11 +270,7 @@ TEST_CASE("math::average: matrix", "[math][algorithm]")
 	int value = 0;
 	for(auto& c : m)
 	{
-		c.x = value - 19.0f;
-		c.y = value - 53.0f;
-		c.z = value + 0.0f;
-		c.w = value + 16.0f;
-
+		c = { value - 19.0f, value - 53.0f, value + 0.0f, value + 16.0f };
 		++value;
 	}
 

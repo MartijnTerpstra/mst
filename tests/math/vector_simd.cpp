@@ -196,6 +196,6 @@ TEST_CASE("vector<V,E>: divide with scalar", "[math][vector]")
 	vector<float, 2> vfloat2 = { 2, -3 };
 	vector<double, 2> vdouble2 = { -55, 165 };
 
-	REQUIRE((vfloat2 / 2.0f) == vector<float, 2>{ 2.f, -1.5f });
+	REQUIRE((vfloat2 / 2.0f) == vector<float, 2>{ 1.f, -1.5f });
 	REQUIRE((vdouble2 / -5.0) == vector<double, 2>{ 11.0, -33.0 });
 }

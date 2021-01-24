@@ -27,8 +27,7 @@
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
-
-#include "helpers.h"
+#include <helpers.h>
 
 //#define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
 #include <mmath2.h>
@@ -295,11 +294,11 @@ TEST_CASE("math::frac: scalar", "[math][algorithm]")
 {
 	REQUIRE(frac(0.0f) == .0f);
 	REQUIRE(frac(1.5f) == .5f);
-	REQUIRE(frac(2.1f) == .1f);
+	REQUIRE_THAT(frac(2.1f), Catch::Matchers::WithinULP(.1f, 2));
 	REQUIRE(frac(1.0f) == .0f);
 
 	REQUIRE(frac(0.0) == .0);
-	REQUIRE(frac(1.7) == .7);
-	REQUIRE(frac(2.86) == .86);
+	REQUIRE_THAT(frac(1.7), Catch::Matchers::WithinULP(.7, 2));
+	REQUIRE_THAT(frac(2.86), Catch::Matchers::WithinULP(.86, 2));
 	REQUIRE(frac(100.0) == .0);
 }

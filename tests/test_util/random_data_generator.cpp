@@ -30,7 +30,7 @@
 #include <random_data_generator.h>
 
 using namespace ::Catch::Generators;
-using namespace ::mst::tests;
+using namespace ::mst::test_util;
 
 TEST_CASE("random_data_generator::scalar_int: range should be [min,max]", "[testing]")
 {

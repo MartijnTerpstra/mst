@@ -33,7 +33,7 @@
 #include <vector>
 
 using namespace ::Catch::Generators;
-using namespace ::mst::tests;
+using namespace ::mst::test_util;
 
 void CheckIsSorted(const std::vector<int>& input)
 {

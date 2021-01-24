@@ -199,11 +199,11 @@ void TestInverse()
 
 	auto rightinvref = ReferenceMatrixInverse(right);
 
-	REQUIRE_THAT(
-		rightinv, mst::test::approx_equal(rightinvref, (ValueType)0.00001, (ValueType)0.00015));
+	REQUIRE_THAT(rightinv,
+		mst::test_util::approx_equal(rightinvref, (ValueType)0.00001, (ValueType)0.00015));
 
 	REQUIRE_THAT(left * right * rightinv,
-		mst::test::approx_equal(left, (ValueType)0.00001, (ValueType)0.00015));
+		mst::test_util::approx_equal(left, (ValueType)0.00001, (ValueType)0.00015));
 }
 
 TEST_CASE("matrix<V,C,R>: SIMD inverse", "[matrix][simd]")

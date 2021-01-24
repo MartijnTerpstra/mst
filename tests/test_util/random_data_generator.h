@@ -29,7 +29,7 @@
 #include <vector>
 
 namespace mst {
-namespace tests {
+namespace test_util {
 
 class random_data_generator
 {

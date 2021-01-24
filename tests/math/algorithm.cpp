@@ -290,3 +290,16 @@ TEST_CASE("math::average: array", "[math][algorithm]")
 
 	REQUIRE(average(std::begin(values), std::end(values)) == 3);
 }
+
+TEST_CASE("math::frac: scalar", "[math][algorithm]")
+{
+	REQUIRE(frac(0.0f) == .0f);
+	REQUIRE(frac(1.5f) == .5f);
+	REQUIRE(frac(2.1f) == .1f);
+	REQUIRE(frac(1.0f) == .0f);
+
+	REQUIRE(frac(0.0) == .0);
+	REQUIRE(frac(1.7) == .7);
+	REQUIRE(frac(2.86) == .86);
+	REQUIRE(frac(100.0) == .0);
+}

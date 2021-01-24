@@ -133,10 +133,17 @@ _MST_CONSTEXPR17 T _Frac(const T& val, _MST_MDET _Math_type) noexcept
 		"frac() cannot be used with integer types");
 
 	T retval;
-	for(size_t i = 0; i < T::dimensions; ++i)
+
+	auto inIt = begin(val);
+	auto outIt = begin(retval);
+	auto endIt = end(val);
+
+	while(inIt != endIt)
 	{
-		retval = val - floor(val.data()[i]);
+		*outIt++ = _Frac(
+			*inIt++, typename _Details::_Math_traits<std::decay_t<decltype(*inIt)>>::math_type{});
 	}
+
 	return retval;
 }
 
@@ -144,7 +151,7 @@ template<typename T>
 _MST_CONSTEXPR17 T _Frac(const T& val, _MST_MDET _Scalar_type) noexcept
 {
 	static_assert(::std::is_floating_point<T>::value,
-		"::mst::math::frac() cannot be used with integer types");
+		"::mst::math::frac() can only be used with floating point types");
 	return val - floor(val);
 }
 

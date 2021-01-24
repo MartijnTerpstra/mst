@@ -38,7 +38,7 @@
 
 using mst::math::vector;
 
-TEST_CASE("vector<V,E>: base support", "[vector][simd]")
+TEST_CASE("vector<V,E>: type support", "[math][vector]")
 {
 	REQUIRE(vector<float, 1>(0).x == 0);
 	REQUIRE(vector<float, 2>(0).x == 0);
@@ -159,7 +159,7 @@ void TestArithmetics()
 	}
 }
 
-TEST_CASE("vector<V,E>: SIMD arithmetics", "[vector][simd]")
+TEST_CASE("vector<V,E>: SIMD arithmetics", "[math][vector]")
 {
 	TestArithmetics<float, 1>();
 	TestArithmetics<float, 2>();
@@ -180,4 +180,22 @@ TEST_CASE("vector<V,E>: SIMD arithmetics", "[vector][simd]")
 	TestArithmetics<double, 2>();
 	TestArithmetics<double, 3>();
 	TestArithmetics<double, 4>();
+}
+
+TEST_CASE("vector<V,E>: multiply with scalar", "[math][vector]")
+{
+	vector<float, 2> vfloat2 = { 2, -3 };
+	vector<double, 2> vdouble2 = { -57, 61 };
+
+	REQUIRE((vfloat2 * 2.0f) == vector<float, 2>{ 4.f, -6.f });
+	REQUIRE((vdouble2 * -5.0) == vector<double, 2>{ 285.0, -305.0 });
+}
+
+TEST_CASE("vector<V,E>: divide with scalar", "[math][vector]")
+{
+	vector<float, 2> vfloat2 = { 2, -3 };
+	vector<double, 2> vdouble2 = { -55, 165 };
+
+	REQUIRE((vfloat2 / 2.0f) == vector<float, 2>{ 2.f, -1.5f });
+	REQUIRE((vdouble2 / -5.0) == vector<double, 2>{ 11.0, -33.0 });
 }

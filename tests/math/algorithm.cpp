@@ -27,8 +27,7 @@
 #include <catch2/catch.hpp>
 
 #include <set_assertions.h>
-
-#include "helpers.h"
+#include <helpers.h>
 
 //#define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
 #include <mmath2.h>
@@ -289,4 +288,17 @@ TEST_CASE("math::average: array", "[math][algorithm]")
 	const float values[] = { 1, 2, 3, 4, 5 };
 
 	REQUIRE(average(std::begin(values), std::end(values)) == 3);
+}
+
+TEST_CASE("math::frac: scalar", "[math][algorithm]")
+{
+	REQUIRE(frac(0.0f) == .0f);
+	REQUIRE(frac(1.5f) == .5f);
+	REQUIRE_THAT(frac(2.1f), Catch::Matchers::WithinAbs(.1f, _MST_EPSILON));
+	REQUIRE(frac(1.0f) == .0f);
+
+	REQUIRE(frac(0.0) == .0);
+	REQUIRE_THAT(frac(1.7), Catch::Matchers::WithinAbs(.7, _MST_EPSILON));
+	REQUIRE_THAT(frac(2.86), Catch::Matchers::WithinAbs(.86, _MST_EPSILON));
+	REQUIRE(frac(100.0) == .0);
 }

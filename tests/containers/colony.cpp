@@ -33,7 +33,7 @@
 #include <mcolony.h>
 
 using mst::colony;
-using namespace mst::tests;
+using namespace mst::test_util;
 
 TEST_CASE("colony<T>: creation", "[colony]")
 {

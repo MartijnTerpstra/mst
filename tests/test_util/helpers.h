@@ -28,7 +28,7 @@
 #include <mmath2.h>
 
 namespace mst {
-namespace test {
+namespace test_util {
 
 
 template<typename MathType>

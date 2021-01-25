@@ -294,7 +294,8 @@ TEST_CASE("math::frac: scalar", "[math][algorithm]")
 {
 	REQUIRE(frac(0.0f) == .0f);
 	REQUIRE(frac(1.5f) == .5f);
-	REQUIRE_THAT(frac(2.1f), Catch::Matchers::WithinULP(.1f, 2));
+	REQUIRE_THAT(frac(2.1f), Catch::Matchers::WithinULP(.1f, 13));
+	REQUIRE_THAT(frac(102.1f), Catch::Matchers::WithinULP(.1f, 13));
 	REQUIRE(frac(1.0f) == .0f);
 
 	REQUIRE(frac(0.0) == .0);

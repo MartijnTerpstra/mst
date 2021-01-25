@@ -294,12 +294,11 @@ TEST_CASE("math::frac: scalar", "[math][algorithm]")
 {
 	REQUIRE(frac(0.0f) == .0f);
 	REQUIRE(frac(1.5f) == .5f);
-	REQUIRE_THAT(frac(2.1f), Catch::Matchers::WithinULP(.1f, 13));
-	REQUIRE_THAT(frac(102.1f), Catch::Matchers::WithinULP(.1f, 13));
+	REQUIRE_THAT(frac(2.1f), Catch::Matchers::WithinAbs(.1f, _MST_EPSILON));
 	REQUIRE(frac(1.0f) == .0f);
 
 	REQUIRE(frac(0.0) == .0);
-	REQUIRE_THAT(frac(1.7), Catch::Matchers::WithinULP(.7, 2));
-	REQUIRE_THAT(frac(2.86), Catch::Matchers::WithinULP(.86, 2));
+	REQUIRE_THAT(frac(1.7), Catch::Matchers::WithinAbs(.7, _MST_EPSILON));
+	REQUIRE_THAT(frac(2.86), Catch::Matchers::WithinAbs(.86, _MST_EPSILON));
 	REQUIRE(frac(100.0) == .0);
 }

@@ -308,5 +308,5 @@ TEST_CASE("math::cubic_interp: scalar", "[math][algorithm]")
 	REQUIRE(cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, 0.f) == .0f);
 	REQUIRE(cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, 1.f) == 1.f);
 	REQUIRE_THAT(
-		cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, 1.f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
+		cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, .5f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
 }

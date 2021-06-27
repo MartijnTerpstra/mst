@@ -209,6 +209,23 @@ inline size_t _Strlen(const wchar_t* arg)
 	return ::wcslen(arg);
 }
 
+template<typename _Elem>
+inline void _To_ptr_str(_Elem* buffer, size_t value)
+{
+	const char hexChar[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
+		'e', 'f' };
+
+	buffer[0] = '0';
+	buffer[1] = 'x';
+	size_t idx = sizeof(size_t) * 2;
+	size_t charIdx = 2;
+	do
+	{
+		--idx;
+		buffer[charIdx++] = hexChar[(value >> (idx * 4)) & 0xF];
+	} while(idx != 0);
+}
+
 template<typename Arg>
 inline void _String_to_string(char* buffer, size_t length, const char* formatString, Arg&& arg)
 {
@@ -551,9 +568,9 @@ inline void _Append_pointer_argument(::std::basic_string<_Elem, _Traits, _Alloc>
 	_Elem fmt[32] = {};
 
 	// '%p' => pointer type
-	if(reinterpret_cast<size_t>(arg) >= 0 && reinterpret_cast<size_t>(arg) <= SIZE_MAX)
+	if constexpr(std::is_pointer_v<std::decay_t<Arg>>)
 	{
-		_To_string(fmt, formatString, static_cast<const void*>(arg));
+		_To_ptr_str(fmt, reinterpret_cast<size_t>(arg));
 		buffer.append(fmt);
 		return;
 	}
@@ -629,7 +646,7 @@ template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
 	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
-	if(stringLength >= 2 && stringLength <= 3)
+	if(stringLength < 2 || stringLength > 3)
 	{
 		MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 	}

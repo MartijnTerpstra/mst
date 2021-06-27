@@ -25,6 +25,56 @@
 
 #include <mthreading.h>
 
+#include <mx_platform.h>
+
+#if MST_PLATFORM_MAC || MST_PLATFORM_LINUX
+
+using namespace mst::threading;
+
+rw_lock::rw_lock()
+{
+	_Myhandle = new pthread_rwlock_t();
+	pthread_rwlock_init(reinterpret_cast<pthread_rwlock_t*>(_Myhandle), nullptr);
+}
+
+rw_lock::~rw_lock()
+{
+	// do nothing
+	delete reinterpret_cast<pthread_rwlock_t*>(_Myhandle);
+}
+
+bool rw_lock::try_lock_read() const
+{
+	return pthread_rwlock_tryrdlock(reinterpret_cast<pthread_rwlock_t*>(_Myhandle)) == 0;
+}
+
+bool rw_lock::try_lock_write() const
+{
+	return pthread_rwlock_trywrlock(reinterpret_cast<pthread_rwlock_t*>(_Myhandle)) == 0;
+}
+
+void rw_lock::lock_read() const
+{
+	pthread_rwlock_rdlock(reinterpret_cast<pthread_rwlock_t*>(_Myhandle));
+}
+
+void rw_lock::lock_write() const
+{
+	pthread_rwlock_wrlock(reinterpret_cast<pthread_rwlock_t*>(_Myhandle));
+}
+
+void rw_lock::unlock_read() const
+{
+	pthread_rwlock_unlock(reinterpret_cast<pthread_rwlock_t*>(_Myhandle));
+}
+
+void rw_lock::unlock_write() const
+{
+	pthread_rwlock_unlock(reinterpret_cast<pthread_rwlock_t*>(_Myhandle));
+}
+
+#elif MST_PLATFORM_WINDOWS
+
 #include <Windows.h>
 
 using namespace mst::threading;
@@ -70,3 +120,9 @@ void rw_lock::unlock_write() const
 {
 	ReleaseSRWLockExclusive(reinterpret_cast<PSRWLOCK>(_Myhandle));
 }
+
+#else
+
+#error "Operating system not supported"
+
+#endif

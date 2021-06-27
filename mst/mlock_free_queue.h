@@ -65,7 +65,8 @@ public:
 		, m_writerCounts()
 		, m_createBufferMutex(0)
 	{
-		MST_ASSERT(initCapacity <= max_size());
+		MST_ASSERT(initCapacity <= max_size(), "Initial capacity of", initCapacity,
+			"exceeds max_size of ", max_size());
 
 		uint32_t index = 0;
 		while((2048 << ((size_t)index * 2)) < initCapacity)
@@ -103,8 +104,7 @@ public:
 			if(ptr)
 			{
 				while(ptr->try_delete())
-				{
-				}
+				{ }
 				delete ptr;
 			}
 		}
@@ -301,7 +301,7 @@ private:
 					break;
 
 				buffer = m_buffers[index].exchange(nullptr, std::memory_order_relaxed);
-				MST_ASSERT(buffer);
+				MST_ASSERT(buffer, "buffer already removed");
 				delete buffer;
 
 				++index;

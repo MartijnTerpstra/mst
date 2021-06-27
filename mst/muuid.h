@@ -30,6 +30,7 @@
 #include <mx_string_utils.h>
 #include <mx_uuid.h>
 #include <cstring>
+#include <string>
 
 namespace mst {
 

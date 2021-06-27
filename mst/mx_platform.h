@@ -35,6 +35,11 @@
 #undef MST_PLATFORM_WINDOWS
 #define MST_PLATFORM_WINDOWS 1
 
+#elif defined(__APPLE__)
+
+#undef MST_PLATFORM_MAC
+#define MST_PLATFORM_MAC 1
+
 #elif defined(__linux__) || defined(__unix) || defined(__linux)
 
 #undef MST_PLATFORM_LINUX
@@ -48,16 +53,6 @@
 
 namespace mst {
 
-namespace platform {
-enum class processor_feature_flags : uint32_t;
-} // namespace platform
-
-template<>
-struct flag_traits<platform::processor_feature_flags>
-	: public flag_traits_not_preshifted<platform::processor_feature_flags>
-{ };
-
-namespace platform {
 namespace _Details {
 
 const char* get_os_name_impl() noexcept;
@@ -75,8 +70,9 @@ bool set_current_directory_impl(const char* path) noexcept;
 uint32_t get_page_size_impl() noexcept;
 uint32_t get_processor_core_count_impl() noexcept;
 uint32_t get_processor_thread_count_impl() noexcept;
-mst::flag<processor_feature_flags> processor_features_impl() noexcept;
+uint32_t processor_features_impl() noexcept;
+
+uint64_t get_current_thread_id() noexcept;
 
 } // namespace _Details
-} // namespace platform
 } // namespace mst

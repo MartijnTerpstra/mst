@@ -37,6 +37,9 @@
 # Visual Studio Code
 .vscode/
 
+# clangd
+.cache/clangd
+
 # CMake
 build/
 out/

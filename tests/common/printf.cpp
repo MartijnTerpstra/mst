@@ -107,7 +107,6 @@ TEST_CASE("printf: pointer", "[common]")
 TEST_CASE("printf: int8_t", "[common]")
 {
 	const auto minValue = std::numeric_limits<int8_t>::min();
-	const auto maxValue = std::numeric_limits<int8_t>::max();
 
 	auto value = minValue;
 	do
@@ -122,7 +121,6 @@ TEST_CASE("printf: int8_t", "[common]")
 TEST_CASE("printf: uint8_t", "[common]")
 {
 	const auto minValue = std::numeric_limits<uint8_t>::min();
-	const auto maxValue = std::numeric_limits<uint8_t>::max();
 
 	auto value = minValue;
 	do
@@ -131,6 +129,8 @@ TEST_CASE("printf: uint8_t", "[common]")
 		REQUIRE(mst::to_printf_string("%hho", value) == ToOctStr(value));
 		REQUIRE(mst::to_printf_string("%hhx", value) == ToHexStr(value, false));
 		REQUIRE(mst::to_printf_string("%hhX", value) == ToHexStr(value, true));
+
+		++value;
 
 	} while(value != minValue);
 }
@@ -289,7 +289,7 @@ std::string ToOctStr(IntType value)
 
 	while(value != 0)
 	{
-		oct.insert(0, 1, '0' + (value & 7));
+		oct.insert(oct.begin(), 1, static_cast<char>('0' + (value & 7)));
 		value >>= 3;
 	}
 

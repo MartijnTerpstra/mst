@@ -49,8 +49,6 @@ _MST_CONSTEXPR17 T lerp_impl(
 	auto outIt = begin(retval);
 	auto endIt = end(u);
 
-	const auto one = _Cvalue<T>::create(1);
-
 	for(; uIt != endIt; ++uIt, ++vIt, ++outIt)
 	{
 		*outIt = lerp_impl(
@@ -113,7 +111,7 @@ _MST_CONSTEXPR17 auto _Average(ForwardIterator begin, ForwardIterator end) noexc
 {
 	typedef std::decay_t<decltype(*begin)> ValueType;
 
-	MST_ASSERT(begin != end);
+	MST_ASSERT(begin != end, "An empty sequence cannot have an average");
 
 	auto retval = *begin++;
 	int32_t count = 1;

@@ -123,7 +123,7 @@ private:
 
 private:
 	void* _Myhandle;
-	mutable uint32_t _Myholder;
+	mutable uint64_t _Myholder;
 	mutable uint32_t _Mycount;
 };
 

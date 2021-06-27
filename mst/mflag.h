@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "mx_compiler.h"
 #include <mcore.h>
 #include <mflag_traits.h>
 #include <initializer_list>
@@ -147,6 +148,13 @@ public:
 	_MST_CONSTEXPR17 void toggle(T enumFlag) noexcept
 	{
 		_Myflags ^= FlagTraits::to_storage_type(enumFlag);
+	}
+
+	_MST_CONSTEXPR17 static flag from_storage(typename FlagTraits::storage_type storage) noexcept
+	{
+		flag r;
+		r._Myflags = storage;
+		return r;
 	}
 
 private:

@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "mx_platform.h"
 #include <mthreading_slim.h>
 
 namespace mst {
@@ -416,7 +417,7 @@ inline bool mutex::_Try_wait() const noexcept
 
 inline recursive_mutex::recursive_mutex(bool owned) noexcept
 	: m_counter(owned ? 1U : 0)
-	, m_tid(owned ? ::mst::_Details::_Get_tid() : UINT32_MAX)
+	, m_tid(owned ? ::mst::_Details::get_current_thread_id() : UINT64_MAX)
 	, m_recursiveCounter(owned ? 1U : 0)
 { }
 
@@ -424,14 +425,14 @@ inline void recursive_mutex::signal() const noexcept
 {
 	if((--m_recursiveCounter) == 0)
 	{
-		m_tid = UINT32_MAX;
+		m_tid = UINT64_MAX;
 		m_counter.store(0);
 	}
 }
 
 inline bool recursive_mutex::_Try_wait() const noexcept
 {
-	const uint32_t tid = ::mst::_Details::_Get_tid();
+	const uint32_t tid = ::mst::_Details::get_current_thread_id();
 
 	if(m_tid == tid)
 	{

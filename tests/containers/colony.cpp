@@ -87,6 +87,7 @@ TEST_CASE("colony<T>: expand and clear", "[colony]")
 
 			for(auto& item : datas)
 			{
+				_MST_UNUSED(item);
 				FAIL("Should be empty: ");
 			}
 
@@ -182,6 +183,7 @@ TEST_CASE("colony<T>: clear and expand", "[colony]")
 		size_t elemsEncountered = 0;
 		for(auto& item : intint)
 		{
+			_MST_UNUSED(item);
 			++elemsEncountered;
 		}
 
@@ -194,9 +196,10 @@ TEST_CASE("colony<T>: clear and expand", "[colony]")
 			REQUIRE(intint.empty());
 			REQUIRE(intint.size() == 0);
 
-			size_t elemsEncountered = 0;
+			elemsEncountered = 0;
 			for(auto& item : intint)
 			{
+				_MST_UNUSED(item);
 				++elemsEncountered;
 			}
 
@@ -209,9 +212,10 @@ TEST_CASE("colony<T>: clear and expand", "[colony]")
 					intint.emplace();
 				}
 
-				size_t elemsEncountered = 0;
+				elemsEncountered = 0;
 				for(auto item : intint)
 				{
+					_MST_UNUSED(item);
 					++elemsEncountered;
 				}
 

@@ -629,7 +629,7 @@ template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
 	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
-	if(stringLength > 3 && stringLength <= 1)
+	if(stringLength >= 2 && stringLength <= 3)
 	{
 		MST_FATAL_ERROR("Argument could not be converted to this format specifier");
 	}

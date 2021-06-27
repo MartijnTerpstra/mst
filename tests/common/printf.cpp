@@ -102,9 +102,7 @@ TEST_CASE("printf: null pointer", "[common]")
 
 	const auto ptrStr = mst::to_printf_string("%p", pNull);
 
-	const auto expectedLength = ToHexStr(std::numeric_limits<size_t>::max(), false).length();
-	std::string expectedValue = "0x";
-	expectedValue.resize(expectedLength + 2, '0');
+	std::string expectedValue = ToPtrStr(0);
 
 	REQUIRE(ptrStr == expectedValue);
 }
@@ -118,9 +116,7 @@ TEST_CASE("printf: pointer", "[common]")
 
 	const auto ptrStr = mst::to_printf_string("%p", ptr);
 
-	const auto expectedLength = ToHexStr(std::numeric_limits<size_t>::max(), false).length();
-	auto expectedValue = ToHexStr(value, false);
-	expectedValue.insert(expectedValue.begin(), expectedLength - expectedValue.length(), '0');
+	const auto expectedValue = ToPtrStr(value);
 
 	REQUIRE(ptrStr == "0x" + expectedValue);
 }
@@ -358,18 +354,9 @@ std::string ToHexStr(IntType value, bool upper)
 
 std::string ToPtrStr(size_t value)
 {
-	char hexChar[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
-		'f' };
+	const auto expectedLength = ToHexStr(std::numeric_limits<size_t>::max(), false).length();
+	auto expectedValue = ToHexStr(value, false);
+	expectedValue.insert(expectedValue.begin(), expectedLength - expectedValue.length(), '0');
 
-	std::string oct;
-
-	for(size_t i = 0; i < sizeof(size_t) * 2; ++i)
-	{
-		const auto index = value & 15;
-
-		oct.insert(0, 1, hexChar[index]);
-		value >>= 4;
-	}
-
-	return oct;
+	return "0x" + expectedValue;
 }

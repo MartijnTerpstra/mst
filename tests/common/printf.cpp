@@ -96,12 +96,33 @@ TEST_CASE("printf: wchar_t string", "[common]")
 	REQUIRE(mst::to_printf_string("%ls", L"Test") == "Test");
 }
 
-TEST_CASE("printf: pointer", "[common]")
+TEST_CASE("printf: null pointer", "[common]")
 {
 	const void* pNull = nullptr;
 
 	const auto ptrStr = mst::to_printf_string("%p", pNull);
-	REQUIRE((ptrStr == ToPtrStr(0) || ptrStr == "(nil)"));
+
+	const auto expectedLength = ToHexStr(std::numeric_limits<size_t>::max(), false).length();
+	std::string expectedValue = "0x";
+	expectedValue.resize(expectedLength + 2, '0');
+
+	REQUIRE(ptrStr == expectedValue);
+}
+
+TEST_CASE("printf: pointer", "[common]")
+{
+	const auto minValue = std::numeric_limits<size_t>::min();
+	const auto maxValue = std::numeric_limits<size_t>::max();
+	const auto value = GENERATE_COPY(take(10000, random(minValue, maxValue)));
+	const void* ptr = reinterpret_cast<const void*>(value);
+
+	const auto ptrStr = mst::to_printf_string("%p", ptr);
+
+	const auto expectedLength = ToHexStr(std::numeric_limits<size_t>::max(), false).length();
+	auto expectedValue = ToHexStr(value, false);
+	expectedValue.insert(expectedValue.begin(), expectedLength - expectedValue.length(), '0');
+
+	REQUIRE(ptrStr == "0x" + expectedValue);
 }
 
 TEST_CASE("printf: int8_t", "[common]")

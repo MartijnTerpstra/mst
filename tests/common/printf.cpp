@@ -118,7 +118,7 @@ TEST_CASE("printf: pointer", "[common]")
 
 	const auto expectedValue = ToPtrStr(value);
 
-	REQUIRE(ptrStr == "0x" + expectedValue);
+	REQUIRE(ptrStr == expectedValue);
 }
 
 TEST_CASE("printf: int8_t", "[common]")

@@ -805,7 +805,7 @@ static inline mst::flag<mst::platform::processor_feature_flags> processor_featur
 
 uint32_t mst::_Details::processor_features_impl() noexcept
 {
-	static uint43_t features = processor_features_init().get();
+	static uint32_t features = processor_features_init().get();
 
 	return features;
 }

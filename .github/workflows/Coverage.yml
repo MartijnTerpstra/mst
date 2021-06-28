@@ -7,10 +7,6 @@ on:
   push:
     branches: [ main, develop ]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Debug
-
 jobs:
 
    codecov:
@@ -29,7 +25,7 @@ jobs:
 
     - name: Build Project
       working-directory: build
-      run: cmake --build . --config $BUILD_TYPE --parallel 10
+      run: cmake --build . --parallel 10
 
     - name: Run tests
       working-directory: build

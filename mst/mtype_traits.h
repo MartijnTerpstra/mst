@@ -165,9 +165,7 @@ struct is_power_of_2
 { };
 
 template<auto Value>
-struct to_bit_shift
-	: public std::integral_constant<int32_t,
-		  ::mst::_Details::_Getshift_value_impl<decltype(Value), Value>::value>::type
+struct to_bit_shift : public std::integral_constant<int32_t, _MST_GET_SHIFT(Value)>::type
 { };
 
 #if _MST_HAS_INLINE_VARIABLES
@@ -188,8 +186,7 @@ struct is_power_of_2_cpp11
 { };
 
 template<typename T, T Value>
-struct to_bit_shift_cpp11 : public std::integral_constant<int32_t,
-								::mst::_Details::_Getshift_value_impl<T, Value>::value>::type
+struct to_bit_shift_cpp11 : public std::integral_constant<int32_t, _MST_GET_SHIFT(Value)>::type
 { };
 
 }

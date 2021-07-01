@@ -263,7 +263,7 @@ TEST_CASE("math::average: vector of 3D vectors", "[math][algorithm]")
 TEST_CASE("math::average: matrix", "[math][algorithm]")
 {
 	typedef matrix<float, 4, 4> mat4x4;
-	typedef matrix<double, 4, 4> dmat4x4;
+	// typedef matrix<double, 4, 4> dmat4x4;
 
 	mat4x4 m{ 0 };
 	int value = 0;
@@ -301,4 +301,12 @@ TEST_CASE("math::frac: scalar", "[math][algorithm]")
 	REQUIRE_THAT(frac(1.7), Catch::Matchers::WithinAbs(.7, _MST_EPSILON));
 	REQUIRE_THAT(frac(2.86), Catch::Matchers::WithinAbs(.86, _MST_EPSILON));
 	REQUIRE(frac(100.0) == .0);
+}
+
+TEST_CASE("math::cubic_interp: scalar", "[math][algorithm]")
+{
+	REQUIRE(cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, 0.f) == .0f);
+	REQUIRE(cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, 1.f) == 1.f);
+	REQUIRE_THAT(
+		cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, .5f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
 }

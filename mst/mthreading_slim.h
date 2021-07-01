@@ -27,7 +27,7 @@
 
 #include <mcore.h>
 #include <thread>
-#include <mx_threading_slim.h>
+#include <mx_platform.h>
 #include <chrono>
 #include <atomic>
 
@@ -200,7 +200,7 @@ protected:
 
 private:
 	mutable ::std::atomic_uint32_t m_counter;
-	mutable volatile uint32_t m_tid;
+	mutable volatile uint64_t m_tid;
 	mutable volatile uint32_t m_recursiveCounter;
 };
 

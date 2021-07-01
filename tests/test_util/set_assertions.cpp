@@ -30,12 +30,12 @@
 
 TEST_CASE("MST_ASSERT: true", "[testing]")
 {
-	MST_ASSERT(true);
+	MST_ASSERT(true, "woop");
 }
 
 TEST_CASE("MST_ASSERT: false", "[!shouldfail][testing]")
 {
-	MST_ASSERT(false);
+	MST_ASSERT(false, "woop");
 }
 TEST_CASE("MST_FATAL_ERROR", "[!shouldfail][testing]")
 {

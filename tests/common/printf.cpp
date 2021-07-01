@@ -96,18 +96,34 @@ TEST_CASE("printf: wchar_t string", "[common]")
 	REQUIRE(mst::to_printf_string("%ls", L"Test") == "Test");
 }
 
-TEST_CASE("printf: pointer", "[common]")
+TEST_CASE("printf: null pointer", "[common]")
 {
 	const void* pNull = nullptr;
 
 	const auto ptrStr = mst::to_printf_string("%p", pNull);
-	REQUIRE((ptrStr == ToPtrStr(0) || ptrStr == "(nil)"));
+
+	std::string expectedValue = ToPtrStr(0);
+
+	REQUIRE(ptrStr == expectedValue);
+}
+
+TEST_CASE("printf: pointer", "[common]")
+{
+	const auto minValue = std::numeric_limits<size_t>::min();
+	const auto maxValue = std::numeric_limits<size_t>::max();
+	const auto value = GENERATE_COPY(take(10000, random(minValue, maxValue)));
+	const void* ptr = reinterpret_cast<const void*>(value);
+
+	const auto ptrStr = mst::to_printf_string("%p", ptr);
+
+	const auto expectedValue = ToPtrStr(value);
+
+	REQUIRE(ptrStr == expectedValue);
 }
 
 TEST_CASE("printf: int8_t", "[common]")
 {
 	const auto minValue = std::numeric_limits<int8_t>::min();
-	const auto maxValue = std::numeric_limits<int8_t>::max();
 
 	auto value = minValue;
 	do
@@ -122,7 +138,6 @@ TEST_CASE("printf: int8_t", "[common]")
 TEST_CASE("printf: uint8_t", "[common]")
 {
 	const auto minValue = std::numeric_limits<uint8_t>::min();
-	const auto maxValue = std::numeric_limits<uint8_t>::max();
 
 	auto value = minValue;
 	do
@@ -131,6 +146,8 @@ TEST_CASE("printf: uint8_t", "[common]")
 		REQUIRE(mst::to_printf_string("%hho", value) == ToOctStr(value));
 		REQUIRE(mst::to_printf_string("%hhx", value) == ToHexStr(value, false));
 		REQUIRE(mst::to_printf_string("%hhX", value) == ToHexStr(value, true));
+
+		++value;
 
 	} while(value != minValue);
 }
@@ -289,7 +306,7 @@ std::string ToOctStr(IntType value)
 
 	while(value != 0)
 	{
-		oct.insert(0, 1, '0' + (value & 7));
+		oct.insert(oct.begin(), 1, static_cast<char>('0' + (value & 7)));
 		value >>= 3;
 	}
 
@@ -337,18 +354,9 @@ std::string ToHexStr(IntType value, bool upper)
 
 std::string ToPtrStr(size_t value)
 {
-	char hexChar[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
-		'f' };
+	const auto expectedLength = ToHexStr(std::numeric_limits<size_t>::max(), false).length();
+	auto expectedValue = ToHexStr(value, false);
+	expectedValue.insert(expectedValue.begin(), expectedLength - expectedValue.length(), '0');
 
-	std::string oct;
-
-	for(size_t i = 0; i < sizeof(size_t) * 2; ++i)
-	{
-		const auto index = value & 15;
-
-		oct.insert(0, 1, hexChar[index]);
-		value >>= 4;
-	}
-
-	return oct;
+	return "0x" + expectedValue;
 }

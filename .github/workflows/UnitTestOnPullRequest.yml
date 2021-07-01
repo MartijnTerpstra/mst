@@ -37,10 +37,11 @@ jobs:
       run: ctest -C $BUILD_TYPE --output-on-failure
       
   gcc-unit-tests:
-    name: GCC Unit Tests
+    name: GCC/Clang Unit Tests
     strategy:
       matrix:
         platforms: [ubuntu-latest, macos-latest]
+        compilers: [g++, clang++]
     
     runs-on: ${{ matrix.platforms }}
 
@@ -55,7 +56,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
       env:
-        CXX: g++
+        CXX: ${{ matrix.compilers }}
 
     - name: Build
       working-directory: ${{runner.workspace}}/build

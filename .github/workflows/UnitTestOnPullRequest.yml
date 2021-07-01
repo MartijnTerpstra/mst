@@ -38,9 +38,11 @@ jobs:
       
   gcc-unit-tests:
     name: GCC Unit Tests
+    strategy:
+      matrix:
+        platforms: [ubuntu-latest, macos-latest]
     
-    # Run on Ubuntu
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platforms }}
 
     steps:
     - uses: actions/checkout@v2

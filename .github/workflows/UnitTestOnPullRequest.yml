@@ -70,7 +70,7 @@ jobs:
     name: Clang Unit Tests
     
     # Run on Ubuntu
-    runs-on: ubuntu-latest
+    runs-on: [macos-latest, ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2

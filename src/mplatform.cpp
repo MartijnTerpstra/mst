@@ -39,6 +39,11 @@
 #include <set>
 #include <map>
 
+#if MST_PLATFORM_MAC
+#include <thread>
+#include <sys/sysctl.h>
+#endif
+
 static std::string get_os_name_init()
 {
 	struct utsname buffer;
@@ -218,8 +223,30 @@ struct ProcCpuInfo
 
 static ProcCpuInfo get_proc_cpuinfo_init() noexcept
 {
+#if MST_PLATFORM_MAC
+
+	int count;
+	size_t size = sizeof(count);
+	if(sysctlbyname("hw.physicalcpu", &count, &size, NULL, 0) || count < 0)
+		std::abort();
+
+	const auto cpuCount = static_cast<uint32_t>(count);
+
+	if(sysctlbyname("hw.ncpu", &count, &size, NULL, 0) || count < 0)
+		if(sysctlbyname("hw.logicalcpu", &count, &size, NULL, 0) || count < 0)
+			std::abort();
+
+	const auto threadCount = static_cast<uint32_t>(count);
+
+	return ProcCpuInfo{ cpuCount, threadCount };
+
+#else
+
 	// parse /proc/cpuinfo
 	std::ifstream cpuinfo("/proc/cpuinfo");
+
+	if(cpuinfo.fail())
+		std::abort();
 
 	std::set<std::string> cores;
 	uint32_t threadCount = 0;
@@ -257,6 +284,7 @@ static ProcCpuInfo get_proc_cpuinfo_init() noexcept
 	}
 
 	return ProcCpuInfo{ static_cast<uint32_t>(cores.size()), threadCount };
+#endif
 }
 
 static const ProcCpuInfo& get_proc_cpuinfo_impl() noexcept

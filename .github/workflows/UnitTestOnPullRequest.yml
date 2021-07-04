@@ -67,32 +67,3 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: ctest -C $BUILD_TYPE -j 10 --output-on-failure
-
-  clang-unit-tests:
-    name: Clang Unit Tests
-    
-    # Run on Ubuntu
-    runs-on: [macos-latest, ubuntu-latest]
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build
-
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
-      env:
-        CXX: clang++
-
-    - name: Build
-      working-directory: ${{runner.workspace}}/build
-      shell: bash
-      run: cmake --build . --config $BUILD_TYPE --parallel 10
-
-    - name: Test
-      working-directory: ${{runner.workspace}}/build
-      shell: bash
-      run: ctest -C $BUILD_TYPE -j 10 --output-on-failure

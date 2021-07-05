@@ -26,10 +26,10 @@
 #pragma once
 
 /* the current version of the MST */
-#define MST_VER 4201
+#define MST_VER 4300
 
 /* the current version of the MST in string format */
-#define MST_VER_STR "4.2.01"
+#define MST_VER_STR "4.3.00"
 
 /**/
 /* when this version is changed, functionality is changed or deprecated */

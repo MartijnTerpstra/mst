@@ -29,17 +29,48 @@ jobs:
     - name: Build
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build . --config $BUILD_TYPE --parallel 10
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: ctest -C $BUILD_TYPE --output-on-failure
       
+  clang-unit-tests:
+    name: Clang Unit Tests
+    strategy:
+      matrix:
+        platforms: [ubuntu-latest, macos-latest]
+    
+    runs-on: ${{ matrix.platforms }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
+      env:
+        CXX: clang++
+        CC: clang
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE --parallel 10
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -C $BUILD_TYPE -j 10 --output-on-failure
+      
   gcc-unit-tests:
     name: GCC Unit Tests
     
-    # Run on Ubuntu
     runs-on: ubuntu-latest
 
     steps:
@@ -53,8 +84,8 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
       env:
-        CC: gcc
         CXX: g++
+        CC: gcc
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
@@ -66,32 +97,3 @@ jobs:
       shell: bash
       run: ctest -C $BUILD_TYPE -j 10 --output-on-failure
 
-  clang-unit-tests:
-    name: Clang Unit Tests
-    
-    # Run on Ubuntu
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build
-
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
-      env:
-        CC: clang
-        CXX: clang++
-
-    - name: Build
-      working-directory: ${{runner.workspace}}/build
-      shell: bash
-      run: cmake --build . --config $BUILD_TYPE --parallel 10
-
-    - name: Test
-      working-directory: ${{runner.workspace}}/build
-      shell: bash
-      run: ctest -C $BUILD_TYPE -j 10 --output-on-failure

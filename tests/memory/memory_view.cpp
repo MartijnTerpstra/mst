@@ -1,0 +1,99 @@
+//////////////////////////////////////////////////////////////////////////////////////////////
+//																							//
+//		MST Utility Library							 										//
+//		Copyright (c)2014 Martinus Terpstra													//
+//																							//
+//		Permission is hereby granted, free of charge, to any person obtaining a copy		//
+//		of this software and associated documentation files (the "Software"), to deal		//
+//		in the Software without restriction, including without limitation the rights		//
+//		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell			//
+//		copies of the Software, and to permit persons to whom the Software is				//
+//		furnished to do so, subject to the following conditions:							//
+//																							//
+//		The above copyright notice and this permission notice shall be included in			//
+//		all copies or substantial portions of the Software.									//
+//																							//
+//		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR			//
+//		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,			//
+//		FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE			//
+//		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER				//
+//		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,		//
+//		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN			//
+//		THE SOFTWARE.																		//
+//																							//
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+
+#include <set_assertions.h>
+
+#include <mmemory_view.h>
+
+TEST_CASE("memory_view: empty", "[memory_view]")
+{
+	const mst::memory_view arrview{ nullptr, 0 };
+	REQUIRE(arrview.size() == 0);
+	REQUIRE(arrview.empty());
+	REQUIRE(arrview.begin() == arrview.end());
+	REQUIRE(arrview.cbegin() == arrview.cend());
+
+	int count = 0;
+	for(auto elem : arrview)
+	{
+		_MST_UNUSED(elem);
+		FAIL("should be empty");
+	}
+	REQUIRE(count == 0);
+}
+
+TEST_CASE("memory_view: container value", "[memory_view]")
+{
+	std::vector<int> value = { 21 };
+	const mst::memory_view arrview(value);
+	REQUIRE(arrview.size() == sizeof(int));
+	REQUIRE(!arrview.empty());
+
+	int count = 0;
+	for(auto elem : arrview)
+	{
+		_MST_UNUSED(elem);
+		++count;
+	}
+	REQUIRE(count == sizeof(int));
+}
+
+TEST_CASE("memory_view: pointer to array", "[memory_view]")
+{
+	int* value = new int[1];
+	value[0] = 21;
+	const mst::memory_view arrview(value, sizeof(int));
+	REQUIRE(arrview.size() == sizeof(int));
+	REQUIRE(!arrview.empty());
+
+	int count = 0;
+	for(auto elem : arrview)
+	{
+		_MST_UNUSED(elem);
+		++count;
+	}
+	REQUIRE(count == sizeof(int));
+
+	delete[] value;
+}
+
+TEST_CASE("memory_view: array", "[memory_view]")
+{
+	int value[1]{ 21 };
+	const mst::memory_view arrview(value);
+	REQUIRE(arrview.size() == sizeof(int));
+	REQUIRE(!arrview.empty());
+
+	int count = 0;
+	for(auto elem : arrview)
+	{
+		_MST_UNUSED(elem);
+		++count;
+	}
+	REQUIRE(count == sizeof(int));
+}

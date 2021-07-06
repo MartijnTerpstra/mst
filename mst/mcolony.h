@@ -167,11 +167,10 @@ public:
 	inline iterator emplace(Args&&... args)
 	{
 		int32_t newIndex;
-		if(m_elementCount == m_capacity)
-			_MST_UNLIKELY
-			{
-				newIndex = create_new();
-			}
+		if(m_elementCount == m_capacity) // _MST_UNLIKELY
+		{
+			newIndex = create_new();
+		}
 		else
 		{
 			newIndex = get_from_free_list();
@@ -185,9 +184,10 @@ public:
 
 	inline iterator erase(const_iterator it) noexcept
 	{
-		CHECK_IF(it.m_container != this, "iterator is not attached to this container");
-		CHECK_IF(it.m_index >= m_capacity, "iterator out of range");
-		CHECK_IF(m_skips[it.m_index] != 0, "iterator invalid");
+		MST_ASSERT(it.m_container == this, "iterator is not attached to this container");
+		MST_ASSERT(it.m_index >= 0, "iterator out of range");
+		MST_ASSERT(it.m_index < m_capacity, "iterator out of range");
+		MST_ASSERT(m_skips[it.m_index] == 0, "iterator invalid");
 
 		get_impl(it.m_index).~T();
 		new(&get_free_impl(it.m_index)) FreeListNode{};
@@ -199,8 +199,9 @@ public:
 
 	inline int32_t erase(int32_t index) noexcept
 	{
-		CHECK_IF(index >= m_capacity, "iterator out of range");
-		CHECK_IF(m_skips[index] != 0, "iterator invalid");
+		MST_ASSERT(index >= 0, "iterator out of range");
+		MST_ASSERT(index < m_capacity, "iterator out of range");
+		MST_ASSERT(m_skips[index] == 0, "iterator invalid");
 
 		get_impl(index).~T();
 		new(&get_free_impl(index)) FreeListNode{};
@@ -212,16 +213,18 @@ public:
 
 	inline T& operator[](int32_t index) noexcept
 	{
-		CHECK_IF(index >= m_capacity, "iterator out of range");
-		CHECK_IF(m_skips[index] != 0, "iterator invalid");
+		MST_ASSERT(index >= 0, "iterator out of range");
+		MST_ASSERT(index < m_capacity, "iterator out of range");
+		MST_ASSERT(m_skips[index] == 0, "iterator invalid");
 
 		return get_impl(index);
 	}
 
 	inline const T& operator[](int32_t index) const noexcept
 	{
-		CHECK_IF(index >= m_capacity, "iterator out of range");
-		CHECK_IF(m_skips[index] != 0, "iterator invalid");
+		MST_ASSERT(index >= 0, "iterator out of range");
+		MST_ASSERT(index < m_capacity, "iterator out of range");
+		MST_ASSERT(m_skips[index] == 0, "iterator invalid");
 
 		return get_impl(index);
 	}
@@ -266,49 +269,10 @@ public:
 		return end();
 	}
 
-#if _MST_TESTING
-
-	inline void check_freelist()
-	{
-		int32_t loopCount = 0;
-
-		int32_t count = 0;
-
-		std::vector<int32_t> nodes;
-
-		auto freeIndex = m_freeListHead;
-		while(freeIndex != -1)
-		{
-			nodes.push_back(freeIndex);
-			count += m_skips[freeIndex];
-
-			freeIndex = get_free_next(freeIndex);
-
-			if(++loopCount > m_capacity)
-			{
-				_MST_BREAK;
-			}
-		}
-
-		if(!nodes.empty())
-		{
-			for(size_t index = nodes.size() - 1; index > 0; --index)
-			{
-				CHECK_IF(get_free_prev(nodes[index]) != nodes[index - 1], "Checksum failed");
-			}
-
-			CHECK_IF(get_free_prev(nodes[0]) != -1, "Checksum failed");
-		}
-
-		CHECK_IF(count != (m_capacity - m_elementCount), "Checksum failed");
-	}
-
-#endif
-
 private:
 	_MST_NODISCARD inline int32_t create_new()
 	{
-		CHECK_IF(m_capacity != m_elementCount, "invalid create_new() call");
+		MST_ASSERT(m_capacity == m_elementCount, "invalid create_new() call");
 
 		if(m_capacity == 0) // [[unlikely]]
 		{
@@ -342,7 +306,10 @@ private:
 		const auto newPages = new ElemType*[(size_t)pageCount];
 		const auto newSkips = new int32_t[size_t(m_capacity + 1)];
 
-		memcpy(newPages, m_pages, sizeof(ElemType*) * oldPageCount);
+		for(int32_t i = 0; i < oldPageCount; ++i)
+		{
+			newPages[i] = m_pages[i];
+		}
 
 		newPages[oldPageCount] = new ElemType[ElementsPerPage];
 
@@ -352,9 +319,9 @@ private:
 		}
 
 		memset(newSkips, 0, size_t(m_elementCount + 1) * sizeof(int32_t));
-		memset(newSkips + m_elementCount + 2, 1, size_t(m_elementCount - 3) * sizeof(int32_t));
-		newSkips[m_elementCount + 1] = m_elementCount - 1;
-		newSkips[m_capacity - 1] = m_elementCount - 1;
+		memset(newSkips + m_elementCount + 2, 1, size_t(ElementsPerPage - 3) * sizeof(int32_t));
+		newSkips[m_elementCount + 1] = ElementsPerPage - 1;
+		newSkips[m_capacity - 1] = ElementsPerPage - 1;
 		newSkips[m_capacity] = 0;
 
 		delete[] m_pages;
@@ -372,7 +339,7 @@ private:
 
 	_MST_NODISCARD inline int32_t get_from_free_list() noexcept
 	{
-		CHECK_IF(m_freeListHead == -1, "no free list elements");
+		MST_ASSERT(m_freeListHead != -1, "no free list elements");
 
 		++m_elementCount;
 
@@ -656,7 +623,7 @@ public:
 
 	_MST_NODISCARD inline colony_iterator& operator++() noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement end iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement end iterator");
 
 		m_index += m_container->m_skips[m_index + 1] + 1;
 		return *this;
@@ -664,7 +631,7 @@ public:
 
 	_MST_NODISCARD inline colony_iterator operator++(int) noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement end iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement end iterator");
 
 		const auto retval = *this;
 		m_index += m_container->m_skips[m_index + 1] + 1;
@@ -673,7 +640,7 @@ public:
 
 	_MST_NODISCARD inline colony_iterator& operator--() noexcept
 	{
-		CHECK_IF(m_index <= 0, "cannot decrement begin iterator");
+		MST_ASSERT(m_index > 0, "cannot decrement begin iterator");
 
 		m_index += m_container->m_skips[m_index - 1] - 1;
 		return *this;
@@ -681,7 +648,7 @@ public:
 
 	_MST_NODISCARD inline colony_iterator operator--(int) noexcept
 	{
-		CHECK_IF(m_index <= 0, "cannot decrement begin iterator");
+		MST_ASSERT(m_index > 0, "cannot decrement begin iterator");
 
 		const auto retval = *this;
 		m_index += m_container->m_skips[m_index - 1] - 1;
@@ -690,7 +657,7 @@ public:
 
 	_MST_NODISCARD inline bool operator==(const colony_iterator& other) const noexcept
 	{
-		CHECK_IF(m_container != other.m_container, "invalid container iterators");
+		MST_ASSERT(m_container == other.m_container, "invalid container iterators");
 
 		return m_index == other.m_index;
 	}
@@ -702,16 +669,18 @@ public:
 
 	_MST_NODISCARD inline T& operator*() const noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement iterator");
-		CHECK_IF(m_container->m_skips[m_index] != 0, "cannot decrement iterator");
+		MST_ASSERT(m_index >= 0, "cannot decrement iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement iterator");
+		MST_ASSERT(m_container->m_skips[m_index] == 0, "cannot decrement iterator");
 
 		return m_container->get_impl(m_index);
 	}
 
 	_MST_NODISCARD inline T* operator->() const noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement iterator");
-		CHECK_IF(m_container->m_skips[m_index] != 0, "cannot decrement iterator");
+		MST_ASSERT(m_index >= 0, "cannot decrement iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement iterator");
+		MST_ASSERT(m_container->m_skips[m_index] == 0, "cannot decrement iterator");
 
 		return &m_container->get_impl(m_index);
 	}
@@ -723,8 +692,9 @@ public:
 
 	_MST_NODISCARD T* ptr() const noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement iterator");
-		CHECK_IF(m_container->m_skips[m_index] != 0, "cannot decrement iterator");
+		MST_ASSERT(m_index >= 0, "cannot decrement iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement iterator");
+		MST_ASSERT(m_container->m_skips[m_index] == 0, "cannot decrement iterator");
 
 		return &m_container->get_impl(m_index);
 	}
@@ -757,12 +727,16 @@ public:
 
 	_MST_NODISCARD inline colony_const_iterator& operator++() noexcept
 	{
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement end iterator");
+
 		m_index += m_container->m_skips[m_index + 1] + 1;
 		return *this;
 	}
 
 	_MST_NODISCARD inline colony_const_iterator operator++(int) noexcept
 	{
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement end iterator");
+
 		const auto retval = *this;
 		m_index += m_container->m_skips[m_index + 1] + 1;
 		return retval;
@@ -770,7 +744,7 @@ public:
 
 	_MST_NODISCARD inline bool operator==(const colony_const_iterator& other) const noexcept
 	{
-		CHECK_IF(m_container != other.m_container, "invalid container iterators");
+		MST_ASSERT(m_container == other.m_container, "invalid container iterators");
 
 		return m_index == other.m_index;
 	}
@@ -782,16 +756,18 @@ public:
 
 	_MST_NODISCARD inline const T& operator*() const noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement iterator");
-		CHECK_IF(m_container->m_skips[m_index] != 0, "cannot decrement iterator");
+		MST_ASSERT(m_index >= 0, "cannot decrement iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement iterator");
+		MST_ASSERT(m_container->m_skips[m_index] == 0, "cannot decrement iterator");
 
 		return m_container->get_impl(m_index);
 	}
 
 	_MST_NODISCARD inline const T* operator->() const noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement iterator");
-		CHECK_IF(m_container->m_skips[m_index] != 0, "cannot decrement iterator");
+		MST_ASSERT(m_index >= 0, "cannot decrement iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement iterator");
+		MST_ASSERT(m_container->m_skips[m_index] == 0, "cannot decrement iterator");
 
 		return &m_container->get_impl(m_index);
 	}
@@ -803,8 +779,9 @@ public:
 
 	_MST_NODISCARD const T* ptr() const noexcept
 	{
-		CHECK_IF(m_index >= m_container->m_capacity, "cannot decrement iterator");
-		CHECK_IF(m_container->m_skips[m_index] != 0, "cannot decrement iterator");
+		MST_ASSERT(m_index >= 0, "cannot decrement iterator");
+		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement iterator");
+		MST_ASSERT(m_container->m_skips[m_index] == 0, "cannot decrement iterator");
 
 		return &m_container->get_impl(m_index);
 	}

@@ -121,7 +121,7 @@ public:
 	template<typename... Args>
 	inline value_type& emplace(IndexType index, Args&&... args)
 	{
-		CHECK_IF(contains(index), "index already exists in set");
+		MST_ASSERT(!contains(index), "index already exists in set");
 
 		const size_t idx = static_cast<size_t>(index);
 		const size_t pageIdx = idx >> _MST_GET_SHIFT(PageSize);
@@ -137,7 +137,7 @@ public:
 
 	void erase(IndexType index) noexcept
 	{
-		CHECK_IF(!contains(index), "erase() requires an existing index");
+		MST_ASSERT(contains(index), "erase() requires an existing index");
 
 		const size_t idx = static_cast<size_t>(index);
 		const size_t pageIdx = idx >> _MST_GET_SHIFT(PageSize);
@@ -177,14 +177,14 @@ public:
 
 	[[nodiscard]] inline const ElementType& at(IndexType index) const noexcept
 	{
-		CHECK_IF(!contains(index), "at() requires an existing index");
+		MST_ASSERT(contains(index), "at() requires an existing index");
 
 		return m_data[get_index_impl(index)].get().second;
 	}
 
 	[[nodiscard]] inline ElementType& at(IndexType index) noexcept
 	{
-		CHECK_IF(!contains(index), "at() requires an existing index");
+		MST_ASSERT(contains(index), "at() requires an existing index");
 
 		return m_data[get_index_impl(index)].get().second;
 	}

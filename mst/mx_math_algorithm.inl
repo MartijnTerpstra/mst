@@ -35,7 +35,7 @@ template<typename T>
 constexpr T lerp_impl(
 	const T& u, const T& v, typename _Cref_value<T>::type s, _Scalar_type) noexcept
 {
-	return (u * (T(1) - s)) + (v * s);
+	return (u * (ConvertTo<T>(1) - s)) + (v * s);
 }
 
 template<typename T>
@@ -49,11 +49,10 @@ _MST_CONSTEXPR17 T lerp_impl(
 	auto outIt = begin(retval);
 	auto endIt = end(u);
 
-	const auto one = _Cvalue<T>::create(1);
-
-	for(; uIt < endIt; ++uIt, ++vIt, ++outIt)
+	for(; uIt != endIt; ++uIt, ++vIt, ++outIt)
 	{
-		*outIt = (*uIt * (one - s)) + (*vIt * s);
+		*outIt = lerp_impl(
+			*uIt, *vIt, s, typename _Math_traits<std::decay_t<decltype(*uIt)>>::math_type{});
 	}
 
 	return retval;
@@ -80,9 +79,10 @@ _MST_CONSTEXPR17 T _Saturate(const T& val, _Math_type) noexcept
 	auto outIt = begin(retval);
 	auto endIt = end(val);
 
-	while(inIt < endIt)
+	while(inIt != endIt)
 	{
-		*outIt++ = _Saturate(*inIt++, _Scalar_type());
+		*outIt++ = _Saturate(
+			*inIt++, typename _Details::_Math_traits<std::decay_t<decltype(*inIt)>>::math_type{});
 	}
 
 	return retval;
@@ -105,38 +105,23 @@ _MST_CONSTEXPR17 T _Smoothstep(
 	return t * t * (T(3.0) - (T(2.0) * t));
 }
 
-template<typename T>
-_MST_CONSTEXPR17 typename _Math_traits<T>::value_type _Average(const T& val, _Array_type) noexcept
+template<typename ForwardIterator>
+_MST_CONSTEXPR17 auto _Average(ForwardIterator begin, ForwardIterator end) noexcept
+	-> std::decay_t<decltype(*begin)>
 {
-	auto retval = _Cvalue<T>::create(0.0);
-	for(size_t i = 0; i < _Math_traits<T>::dimensions; ++i)
+	typedef std::decay_t<decltype(*begin)> ValueType;
+
+	MST_ASSERT(begin != end, "An empty sequence cannot have an average");
+
+	auto retval = *begin++;
+	int32_t count = 1;
+	while(begin != end)
 	{
-		retval += val[i];
+		retval += *begin++;
+		++count;
 	}
 
-	return retval / _Cvalue<T>::create(_Math_traits<T>::dimensions);
-}
-
-template<typename T>
-_MST_CONSTEXPR17 typename _MST_MDET _Math_traits<T>::value_type _Average(
-	const T& val, _MST_MDET _Math_type) noexcept
-{
-	typename _MST_MDET _Math_traits<T>::value_type retval =
-		typename _MST_MDET _Math_traits<T>::value_type(0.0);
-	for(size_t i = 0; i < _MST_MDET _Math_traits<T>::dimensions; ++i)
-	{
-		retval += val[i];
-	}
-
-	return retval / _Math_traits<T>::dimensions;
-}
-
-template<typename T>
-constexpr typename _MST_MDET _Math_traits<T>::value_type _Average(
-	const T& val, _MST_MDET _Scalar_type) noexcept
-{
-	// it's a single value
-	return val;
+	return retval / ConvertTo<ValueType>(count);
 }
 
 template<typename T>
@@ -146,10 +131,17 @@ _MST_CONSTEXPR17 T _Frac(const T& val, _MST_MDET _Math_type) noexcept
 		"frac() cannot be used with integer types");
 
 	T retval;
-	for(size_t i = 0; i < T::dimensions; ++i)
+
+	auto inIt = begin(val);
+	auto outIt = begin(retval);
+	auto endIt = end(val);
+
+	while(inIt != endIt)
 	{
-		retval = val - floor(val.data()[i]);
+		*outIt++ = _Frac(
+			*inIt++, typename _Details::_Math_traits<std::decay_t<decltype(*inIt)>>::math_type{});
 	}
+
 	return retval;
 }
 
@@ -157,7 +149,7 @@ template<typename T>
 _MST_CONSTEXPR17 T _Frac(const T& val, _MST_MDET _Scalar_type) noexcept
 {
 	static_assert(::std::is_floating_point<T>::value,
-		"::mst::math::frac() cannot be used with integer types");
+		"::mst::math::frac() can only be used with floating point types");
 	return val - floor(val);
 }
 
@@ -245,14 +237,14 @@ constexpr T mst::math::cubic_interp(
 template<typename Ty>
 constexpr Ty mst::math::reflect(const Ty& i, const Ty& n) noexcept
 {
-	return _Details::_Reflect(i, n, typename _Details::_Math_traits<Ty>::math_type());
+	return _Details::_Reflect(i, n, typename _Details::_Math_traits<Ty>::math_type{});
 }
 
 /* returns clamps all the values to the range: [0,1] */
 template<typename _Ty>
 constexpr _Ty mst::math::saturate(const _Ty& val) noexcept
 {
-	return _Details::_Saturate(val, typename _Details::_Math_traits<_Ty>::math_type());
+	return _Details::_Saturate(val, typename _Details::_Math_traits<_Ty>::math_type{});
 }
 
 template<typename T>
@@ -265,7 +257,7 @@ _MST_CONSTEXPR17 T mst::math::smoothstep(
 template<typename _Ty>
 _MST_CONSTEXPR17 _Ty mst::math::frac(const _Ty& val) noexcept
 {
-	return _Details::_Frac(val, typename _Details::_Math_traits<_Ty>::math_type());
+	return _Details::_Frac(val, typename _Details::_Math_traits<_Ty>::math_type{});
 }
 
 template<typename T>
@@ -281,10 +273,11 @@ constexpr T mst::math::clamp(const T& val, const T& minim, const T& maxim) noexc
 	return _MST_MDET _Clamp(val, minim, maxim, typename _MST_MDET _Math_traits<T>::math_type());
 }
 
-template<typename T>
-constexpr typename _MST_MDET _Math_traits<T>::value_type mst::math::average(const T& val) noexcept
+template<typename ForwardIterator>
+constexpr auto mst::math::average(ForwardIterator begin, ForwardIterator end) noexcept
+	-> std::decay_t<decltype(*begin)>
 {
-	return _MST_MDET _Average(val, typename _MST_MDET _Math_traits<T>::math_type());
+	return _MST_MDET _Average(begin, end);
 }
 
 template<typename T>

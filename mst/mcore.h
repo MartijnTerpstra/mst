@@ -63,11 +63,4 @@ typedef unsigned char byte;
 #define MST_DEFAULT_NARGS 5
 #endif
 
-namespace mst {
-
-using ::std::move;
-using ::std::forward;
-
-} // namespace mst
-
 #endif // MCORE_H

@@ -28,6 +28,12 @@
 namespace mst {
 namespace math {
 
+template<typename _Value_type, size_t _Elems>
+class vector_iterator;
+
+template<typename _Value_type, size_t _Elems>
+class const_vector_iterator;
+
 #define _mst_declare_swizzle2(_Elemcount, _Component1, _Component2)                                \
 	_mst_declare_get_swizzle2(_Elemcount, _Component1, _Component2)
 
@@ -334,6 +340,14 @@ public:
 
 	_MST_NODISCARD _MST_CONSTEXPR17 _Value_type& operator[](size_t _Idx) noexcept;
 	_MST_NODISCARD constexpr const _Value_type& operator[](size_t _Idx) const noexcept;
+
+	[[nodiscard]] inline vector_iterator<_Value_type, _Elems> begin() noexcept;
+	[[nodiscard]] inline const_vector_iterator<_Value_type, _Elems> begin() const noexcept;
+	[[nodiscard]] inline const_vector_iterator<_Value_type, _Elems> cbegin() const noexcept;
+
+	[[nodiscard]] inline vector_iterator<_Value_type, _Elems> end() noexcept;
+	[[nodiscard]] inline const_vector_iterator<_Value_type, _Elems> end() const noexcept;
+	[[nodiscard]] inline const_vector_iterator<_Value_type, _Elems> cend() const noexcept;
 
 	/* returns the squared length */
 	_MST_NODISCARD _MST_CONSTEXPR17 _Value_type squared_length() const noexcept;
@@ -1036,6 +1050,277 @@ _mst_declare_get_swizzle4(4, z, z, w, w);
 #undef _mst_declare_get_swizzle4
 
 #undef _mst_declare_value
+
+template<typename _Value_type, size_t _Elems>
+class vector_iterator
+{
+	friend class const_vector_iterator<_Value_type, _Elems>;
+
+	template<typename _Vt, size_t _El, bool _IsFP, bool _IsU>
+	friend class _Details::_Math_vector_base;
+
+public:
+	vector_iterator() = default;
+	vector_iterator(const vector_iterator&) = default;
+	vector_iterator(vector_iterator&&) = default;
+
+	vector_iterator& operator=(const vector_iterator&) = default;
+	vector_iterator& operator=(vector_iterator&&) = default;
+
+	inline vector_iterator& operator++() noexcept
+	{
+		++m_idx;
+		return *this;
+	}
+
+	[[nodiscard]] inline vector_iterator operator++(int) noexcept
+	{
+		return vector_iterator(m_vec, m_idx++);
+	}
+
+	inline vector_iterator& operator--() noexcept
+	{
+		--m_idx;
+		return *this;
+	}
+
+	[[nodiscard]] inline vector_iterator operator--(int) noexcept
+	{
+		return vector_iterator(m_vec, m_idx--);
+	}
+
+	inline vector_iterator& operator+=(ptrdiff_t offset) noexcept
+	{
+		m_idx += offset;
+		return *this;
+	}
+
+	[[nodiscard]] inline vector_iterator operator+(ptrdiff_t offset) noexcept
+	{
+		return vector_iterator(m_vec, m_idx + offset);
+	}
+
+	inline vector_iterator& operator-=(ptrdiff_t offset) noexcept
+	{
+		m_idx -= offset;
+		return *this;
+	}
+
+	[[nodiscard]] inline vector_iterator operator-(ptrdiff_t offset) noexcept
+	{
+		return vector_iterator(m_vec, m_idx - offset);
+	}
+
+	[[nodiscard]] inline bool operator==(const vector_iterator& other) const noexcept
+	{
+		return m_vec == other.m_vec && m_idx == other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator!=(const vector_iterator& other) const noexcept
+	{
+		return !(*this == other);
+	}
+
+	[[nodiscard]] inline bool operator<(const vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx < other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator<=(const vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx <= other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator>(const vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx > other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator>=(const vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx >= other.m_idx;
+	}
+
+	[[nodiscard]] inline _Value_type& operator*() const noexcept
+	{
+		MST_ASSERT(m_vec, "Iterators to different vectors");
+		MST_ASSERT(m_idx < _Elems, "Iterator out of range");
+
+		return m_vec[m_idx];
+	}
+
+private:
+	vector_iterator(_Value_type* vec, size_t idx)
+		: m_vec(vec)
+		, m_idx(idx)
+	{ }
+
+private:
+	_Value_type* m_vec;
+	size_t m_idx;
+};
+
+template<typename _Value_type, size_t _Elems>
+[[nodiscard]] inline vector_iterator<_Value_type, _Elems> operator+(
+	ptrdiff_t offset, vector_iterator<_Value_type, _Elems> iter) noexcept
+{
+	return iter += offset;
+}
+
+template<typename _Value_type, size_t _Elems>
+class const_vector_iterator
+{
+	template<typename _Vt, size_t _El, bool _IsFP, bool _IsU>
+	friend class _Details::_Math_vector_base;
+
+public:
+	const_vector_iterator() = default;
+	const_vector_iterator(const const_vector_iterator&) = default;
+	const_vector_iterator(const_vector_iterator&&) = default;
+
+	const_vector_iterator(const vector_iterator<_Value_type, _Elems>& other)
+		: m_vec(other.m_vec)
+		, m_idx(other.m_idx)
+	{ }
+
+	const_vector_iterator(vector_iterator<_Value_type, _Elems>&& other)
+		: m_vec(other.m_vec)
+		, m_idx(other.m_idx)
+	{ }
+
+	const_vector_iterator& operator=(const const_vector_iterator&) = default;
+	const_vector_iterator& operator=(const_vector_iterator&&) = default;
+
+	const_vector_iterator& operator=(const vector_iterator<_Value_type, _Elems>& other)
+	{
+		m_vec = other.m_vec;
+		m_idx = other.m_idx;
+		return *this;
+	}
+
+	const_vector_iterator& operator=(vector_iterator<_Value_type, _Elems>&& other)
+	{
+		m_vec = std::move(other.m_vec);
+		m_idx = std::move(other.m_idx);
+		return *this;
+	}
+
+	inline const_vector_iterator& operator++() noexcept
+	{
+		++m_idx;
+		return *this;
+	}
+
+	[[nodiscard]] inline const_vector_iterator operator++(int) noexcept
+	{
+		return const_vector_iterator(m_vec, m_idx++);
+	}
+
+	inline const_vector_iterator& operator--() noexcept
+	{
+		--m_idx;
+		return *this;
+	}
+
+	[[nodiscard]] inline const_vector_iterator operator--(int) noexcept
+	{
+		return const_vector_iterator(m_vec, m_idx--);
+	}
+
+	inline const_vector_iterator& operator+=(ptrdiff_t offset) noexcept
+	{
+		m_idx += offset;
+		return *this;
+	}
+
+	[[nodiscard]] inline const_vector_iterator operator+(ptrdiff_t offset) noexcept
+	{
+		return const_vector_iterator(m_idx + offset);
+	}
+
+	inline const_vector_iterator& operator-=(ptrdiff_t offset) noexcept
+	{
+		m_idx -= offset;
+		return *this;
+	}
+
+	[[nodiscard]] inline const_vector_iterator operator-(ptrdiff_t offset) noexcept
+	{
+		return const_vector_iterator(m_idx - offset);
+	}
+
+	[[nodiscard]] inline bool operator==(const const_vector_iterator& other) const noexcept
+	{
+		return m_vec == other.m_vec && m_idx == other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator!=(const const_vector_iterator& other) const noexcept
+	{
+		return !(*this == other);
+	}
+
+	[[nodiscard]] inline bool operator<(const const_vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx < other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator<=(const const_vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx <= other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator>(const const_vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx > other.m_idx;
+	}
+
+	[[nodiscard]] inline bool operator>=(const const_vector_iterator& other) const noexcept
+	{
+		MST_ASSERT(m_vec == other.m_vec, "Iterators to different vectors");
+
+		return m_idx >= other.m_idx;
+	}
+
+	[[nodiscard]] inline const _Value_type& operator*() const noexcept
+	{
+		MST_ASSERT(m_vec, "Iterators to different vectors");
+		MST_ASSERT(m_idx < _Elems, "Iterator out of range");
+
+		return m_vec[m_idx];
+	}
+
+private:
+	const_vector_iterator(const _Value_type* vec, size_t idx)
+		: m_vec(vec)
+		, m_idx(idx)
+	{ }
+
+private:
+	const _Value_type* m_vec;
+	size_t m_idx;
+};
+
+template<typename _Value_type, size_t _Elems>
+[[nodiscard]] inline const_vector_iterator<_Value_type, _Elems> operator+(
+	ptrdiff_t offset, const_vector_iterator<_Value_type, _Elems> iter) noexcept
+{
+	return iter += offset;
+}
+
 
 } // namespace math
 } // namespace mst

@@ -162,7 +162,7 @@ _MST_CONSTEXPR17 _Value_type&
 _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::operator[](
 	size_t _Idx) noexcept
 {
-	CHECK_ARR_RANGE(_Idx, _Elems, "index out of range");
+	MST_ASSERT(_Idx < _Elems, "index out of range");
 	return (&this->x)[_Idx];
 }
 
@@ -171,8 +171,50 @@ constexpr const _Value_type&
 _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::operator[](
 	size_t _Idx) const noexcept
 {
-	CHECK_ARR_RANGE(_Idx, _Elems, "index out of range");
+	MST_ASSERT(_Idx < _Elems, "index out of range");
 	return (&this->x)[_Idx];
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::begin() noexcept
+{
+	return { &this->x, 0 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::begin() const noexcept
+{
+	return { &this->x, 0 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::cbegin() const noexcept
+{
+	return { &this->x, 0 };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::end() noexcept
+{
+	return { &this->x, _Elems };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::end() const noexcept
+{
+	return { &this->x, _Elems };
+}
+
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+const_vector_iterator<_Value_type, _Elems>
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::cend() const noexcept
+{
+	return { &this->x, _Elems };
 }
 
 /* returns the squared length */

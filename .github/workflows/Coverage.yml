@@ -1,0 +1,43 @@
+name: Code Coverage
+
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+
+   codecov:
+    
+    # Run on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build CMake
+      env:
+        CXXFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+        CXX: g++
+      run: cmake -B build . -DMST_RUN_TESTS=ON -DMST_TEST_ARGS="~[not_deterministic]"
+
+    - name: Build Project
+      working-directory: build
+      run: cmake --build . --parallel 10
+
+    - name: Run tests
+      working-directory: build
+      env:
+        CTEST_OUTPUT_ON_FAILURE: 1
+      run: ctest --timeout 120 -C Debug -j4
+      
+    - name: Upload coverage to Codecov
+      working-directory: build
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        wget https://codecov.io/bash -O codecov
+        chmod +x codecov
+        ./codecov -t $CODECOV_TOKEN -B $GITHUB_REF -s .

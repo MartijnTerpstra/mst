@@ -31,5 +31,16 @@
 *.out
 *.app
 
-#Visual Studio
-.vs
+# Visual Studio
+.vs/
+
+# Visual Studio Code
+.vscode/
+
+# clangd
+.cache/clangd
+
+# CMake
+build/
+out/
+Testing/

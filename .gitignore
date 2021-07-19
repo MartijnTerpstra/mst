@@ -44,3 +44,7 @@
 build/
 out/
 Testing/
+
+# clion
+cmake-build-*/
+.idea/

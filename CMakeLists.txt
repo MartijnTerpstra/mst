@@ -20,7 +20,7 @@ endif()
 
 add_library(mst::mst ALIAS mst)
 
-target_include_directories(mst PUBLIC "${CMAKE_SOURCE_DIR}/mst")
+target_include_directories(mst PUBLIC "${PROJECT_SOURCE_DIR}/mst")
 
 if(MST_RUN_TESTS)
 

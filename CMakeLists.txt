@@ -10,7 +10,7 @@ add_library(mst STATIC
     src/mthreading_rw_lock.cpp
     src/muuid.cpp)
 
-target_compile_features(mst 
+target_compile_features(mst
     PUBLIC cxx_std_17)
 
 if(APPLE OR UNIX)
@@ -90,7 +90,6 @@ endfunction()
 
 macro(add_mst_test CATEGORY TEST_NAME)
 
-
 SETUP_BASIC_TEST("test_${CATEGORY}_${TEST_NAME}" "tests/${CATEGORY}/${TEST_NAME}.cpp")
 
 endmacro(add_mst_test)
@@ -131,6 +130,8 @@ add_mst_test(platform processor)
 add_mst_test(test_util helpers)
 add_mst_test(test_util random_data_generator)
 add_mst_test(test_util set_assertions)
+
+add_mst_test(text static_string)
 
 add_mst_test(threading slim_event)
 

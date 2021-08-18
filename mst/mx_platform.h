@@ -64,7 +64,6 @@ bool get_desktop_folder_impl(char* path) noexcept;
 bool get_mydocuments_folder_impl(char* path) noexcept;
 bool get_temp_folder_impl(char* path) noexcept;
 bool get_recycle_bin_folder_impl(char* path) noexcept;
-bool create_directory_impl(const char* path) noexcept;
 bool get_current_directory_impl(char* path) noexcept;
 bool set_current_directory_impl(const char* path) noexcept;
 uint32_t get_page_size_impl() noexcept;

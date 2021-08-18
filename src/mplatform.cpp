@@ -188,11 +188,6 @@ bool mst::_Details::get_recycle_bin_folder_impl(char* path) noexcept
 	return path[0] != 0;
 }
 
-bool mst::_Details::create_directory_impl(const char* path) noexcept
-{
-	return mkdir(path, 0777) == 0;
-}
-
 bool mst::_Details::get_current_directory_impl(char* path) noexcept
 {
 	return getcwd(path, 1024) != nullptr;
@@ -647,11 +642,6 @@ bool mst::_Details::get_temp_folder_impl(char* path) noexcept
 bool mst::_Details::get_recycle_bin_folder_impl(char* path) noexcept
 {
 	return _Get_special_folder_impl(FOLDERID_RecycleBinFolder, path);
-}
-
-bool mst::_Details::create_directory_impl(const char* path) noexcept
-{
-	return _mkdir(path) == 0;
 }
 
 bool mst::_Details::get_current_directory_impl(char* path) noexcept

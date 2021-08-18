@@ -23,6 +23,7 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <filesystem>
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
@@ -79,7 +80,11 @@ TEST_CASE("platform::set_current_directory", "[platform]")
 
 	REQUIRE(mst::platform::current_directory() != current);
 
-	REQUIRE(mst::platform::create_directory(current.c_str()));
+	if(!std::filesystem::exists(current))
+	{
+		INFO("Current dir: " << current);
+		REQUIRE(std::filesystem::create_directory(current));
+	}
 
 	mst::platform::set_current_directory(current);
 

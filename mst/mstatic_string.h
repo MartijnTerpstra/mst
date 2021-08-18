@@ -84,6 +84,8 @@ public:
 	constexpr basic_static_string(const ::std::basic_string<CharT, Traits, Allocator>& stdString)
 		: m_length(stdString.length())
 	{
+		MST_ASSERT(stdString.length() <= max_size(), "stdString: length is out of range");
+
 		auto bg = stdString.begin();
 
 		for(size_t i = 0; i < m_length; ++i)
@@ -111,18 +113,16 @@ public:
 	template<typename IteratorType>
 	constexpr basic_static_string(IteratorType begin, IteratorType end)
 	{
+		MST_ASSERT(end >= begin, "iterator range: begin should not be past end iterator");
+		MST_ASSERT((end - begin) <= max_size(), "iterator range: length overflow");
+
 		while(begin != end)
 		{
 			m_ptr[m_length++] = *begin++;
 		}
 	}
 
-	constexpr basic_static_string& operator=(const basic_static_string& other)
-	{
-		memcpy(m_ptr, other.m_ptr, sizeof(other.m_ptr));
-
-		return *this;
-	}
+	constexpr basic_static_string& operator=(const basic_static_string& other) = default;
 
 	template<size_t OtherMaxElements>
 	constexpr basic_static_string& operator=(
@@ -159,16 +159,36 @@ public:
 		return *this;
 	}
 
-	constexpr basic_static_string& operator=(const ::std::string& stdStr)
+	template<typename Traits, typename Allocator>
+	constexpr basic_static_string& operator=(
+		const ::std::basic_string<CharT, Traits, Allocator>& stdStr)
 	{
 		MST_ASSERT(stdStr.length() <= max_size(), "stdStr: length is out of range");
+
+		const size_t maxLength = std::max(m_length, stdStr.length());
+		m_length = stdStr.length();
+
+		for(size_t i = 0; i < stdStr.length(); ++i)
+		{
+			m_ptr[i] = stdStr[i];
+		}
+
+		memset(m_ptr + m_length, 0, maxLength - m_length);
+
+		return *this;
+	}
+
+	template<typename Traits>
+	constexpr basic_static_string& operator=(const ::std::basic_string_view<CharT, Traits>& strView)
+	{
+		MST_ASSERT(strView.length() <= max_size(), "strin: length is out of range");
 
 		memset(m_ptr, 0, sizeof(m_ptr));
 		m_length = 0;
 
-		while(stdStr[m_length])
+		while(strView[m_length])
 		{
-			m_ptr[m_length] = stdStr[m_length];
+			m_ptr[m_length] = strView[m_length];
 			++m_length;
 		}
 
@@ -220,11 +240,10 @@ public:
 		return data();
 	}
 
-	template<typename T, typename Traits = std::char_traits<T>,
-		typename Allocator = std::allocator<T>>
-	[[nodiscard]] inline ::std::basic_string<T, Traits, Allocator> str() const
+	template<typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
+	[[nodiscard]] inline ::std::basic_string<CharT, Traits, Allocator> str() const
 	{
-		return ::std::basic_string<T, Traits, Allocator>(m_ptr, m_length);
+		return ::std::basic_string<CharT, Traits, Allocator>(m_ptr, m_length);
 	}
 
 	[[nodiscard]] constexpr reference operator[](size_t index)
@@ -272,6 +291,7 @@ public:
 		{
 			m_ptr[i] = (CharT)0;
 		}
+		m_length = 0;
 	}
 
 	constexpr void push_back(const CharT& value)

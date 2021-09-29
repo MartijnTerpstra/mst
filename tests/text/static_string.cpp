@@ -23,7 +23,11 @@
 //																							//
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <memory>
+#include <sstream>
 #include <string>
+#include <variant>
+#include <sstream>
 #include <string_view>
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
@@ -32,7 +36,6 @@
 
 #include <mstatic_string.h>
 
-#include <variant>
 
 #define STR(x)                                                                                     \
 	std::get<const TestType*>([]() {                                                               \
@@ -419,4 +422,345 @@ TEMPLATE_TEST_CASE(
 	}
 
 	s.push_back('E');
+}
+
+TEMPLATE_TEST_CASE("static_string::pop_back()", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("12345");
+
+	REQUIRE(s.length() == 5);
+
+	for(size_t i = 0; i < 5; ++i)
+	{
+		s.pop_back();
+
+		REQUIRE(s.length() == 4 - i);
+	}
+
+	REQUIRE(s.length() == 0);
+	REQUIRE(s.empty());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::pop_back() on empty", "[!shouldfail][text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s;
+
+	s.pop_back();
+}
+
+TEMPLATE_TEST_CASE("static_string::insert() begin", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("12345");
+
+	REQUIRE(s.length() == 5);
+
+	s.insert(s.begin(), CHR('6'));
+
+	REQUIRE(s.length() == 6);
+	REQUIRE(s == STR("612345"));
+
+	s.insert(s.begin(), CHR('7'));
+
+	REQUIRE(s.length() == 7);
+	REQUIRE(s == STR("7612345"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE("static_string::insert() middle", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("12345");
+
+	REQUIRE(s.length() == 5);
+
+	s.insert(s.begin() + 3, CHR('6'));
+
+	REQUIRE(s.length() == 6);
+	REQUIRE(s == STR("123645"));
+
+	s.insert(s.begin() + 5, CHR('7'));
+
+	REQUIRE(s.length() == 7);
+	REQUIRE(s == STR("1236475"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE("static_string::insert() end", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("12345");
+
+	REQUIRE(s.length() == 5);
+
+	s.insert(s.end(), CHR('6'));
+
+	REQUIRE(s.length() == 6);
+	REQUIRE(s == STR("123456"));
+
+	s.insert(s.end(), CHR('7'));
+
+	REQUIRE(s.length() == 7);
+	REQUIRE(s == STR("1234567"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE("static_string::insert() out of range", "[!shouldfail][text]", char, wchar_t,
+	char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("12345");
+
+	s.insert(s.end() + 1, CHR('6'));
+}
+
+TEMPLATE_TEST_CASE("static_string::insert() invalid iterator", "[!shouldfail][text]", char, wchar_t,
+	char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("12345");
+	auto heapS = std::make_shared<static_string>();
+
+	s.insert(heapS->begin(), CHR('6'));
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::append(static_string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const static_string s2 = STR("Append");
+
+	s.append(s2);
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::append(std::string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const auto s2 = std::basic_string(STR("Append"));
+
+	s.append(s2);
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::append(std::string_view)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const auto s2 = std::basic_string_view(STR("Append"));
+
+	s.append(s2);
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::append(const CharT*)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const auto s2 = STR("Append");
+
+	s.append(s2);
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+
+
+TEMPLATE_TEST_CASE(
+	"static_string::operator+=(static_string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const static_string s2 = STR("Append");
+
+	s += s2;
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::operator+=(std::string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const auto s2 = std::basic_string(STR("Append"));
+
+	s += s2;
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::operator+=(std::string_view)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const auto s2 = std::basic_string_view(STR("Append"));
+
+	s += s2;
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::operator+=(const CharT*)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const auto s2 = STR("Append");
+
+	s += s2;
+
+	REQUIRE(s.length() == strlen("PrependAppend"));
+	REQUIRE(s == STR("PrependAppend"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+TEMPLATE_TEST_CASE(
+	"static_string::operator+=(const CharT&)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Prepend");
+	const auto s2 = CHR('A');
+
+	s += s2;
+
+	REQUIRE(s.length() == strlen("PrependA"));
+	REQUIRE(s == STR("PrependA"));
+	REQUIRE(std::char_traits<TestType>::length(s.c_str()) == s.length());
+}
+
+// char16_t and char32_t not included. fails on std::ostringstream
+TEMPLATE_TEST_CASE("operator<<(std::ostream&,static_string)", "[text]", char, wchar_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("ToStream");
+
+	std::basic_ostringstream<TestType> ss;
+
+	ss << s;
+
+	REQUIRE(s == ss.str());
+}
+
+TEMPLATE_TEST_CASE(
+	"operator==(static_string, const CharT*)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Equal");
+	const auto s2 = STR("Equal");
+	const auto ns = STR("NotEqual");
+
+	REQUIRE(s == s2);
+	REQUIRE(s != ns);
+}
+
+TEMPLATE_TEST_CASE(
+	"operator==(const CharT*, static_string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Equal");
+	const auto s2 = STR("Equal");
+	const auto ns = STR("NotEqual");
+
+	REQUIRE(s2 == s);
+	REQUIRE(ns != s);
+}
+
+
+
+TEMPLATE_TEST_CASE(
+	"operator==(static_string, std::string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Equal");
+	const auto s2 = std::basic_string(STR("Equal"));
+	const auto ns = std::basic_string(STR("NotEqual"));
+
+	REQUIRE(s == s2);
+	REQUIRE(s != ns);
+}
+
+TEMPLATE_TEST_CASE(
+	"operator==(std::string, static_string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Equal");
+	const auto s2 = std::basic_string(STR("Equal"));
+	const auto ns = std::basic_string(STR("NotEqual"));
+
+	REQUIRE(s2 == s);
+	REQUIRE(ns != s);
+}
+
+TEMPLATE_TEST_CASE(
+	"operator==(static_string_view, std::string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Equal");
+	const auto s2 = std::basic_string(STR("Equal"));
+	const auto ns = std::basic_string(STR("NotEqual"));
+
+	REQUIRE(s == s2);
+	REQUIRE(s != ns);
+}
+
+TEMPLATE_TEST_CASE(
+	"operator==(std::string_view, static_string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Equal");
+	const auto s2 = std::basic_string_view(STR("Equal"));
+	const auto ns = std::basic_string_view(STR("NotEqual"));
+
+	REQUIRE(s2 == s);
+	REQUIRE(ns != s);
 }

@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <mcore.h>
 #include <string>
 #include <mdebug.h>
@@ -310,14 +311,15 @@ public:
 
 	constexpr void insert(const_iterator iter, const CharT& value)
 	{
-		MST_ASSERT(iter >= begin() && iter < end(), "iterator is not from this container");
+		MST_ASSERT(iter >= begin() && iter <= end(), "iterator is not from this container");
 		MST_ASSERT(size() < max_size(), "container is already at max size");
 
 		const auto offset = static_cast<size_t>(iter - begin());
 
-		::std::char_traits<CharT>::move(m_ptr + offset + 1, m_ptr + offset, m_length - offset - 1);
+		::std::char_traits<CharT>::move(m_ptr + offset + 1, m_ptr + offset, m_length - offset);
 
 		m_ptr[offset] = value;
+		++m_length;
 	}
 
 	template<size_t OtherMaxElements>
@@ -326,9 +328,11 @@ public:
 		size_t prevSize = size();
 		size_t otherSize = other.size();
 
-		MST_ASSERT(prevSize + otherSize >= max_size(), "appending out of bounds");
+		MST_ASSERT(prevSize + otherSize <= max_size(), "appending out of bounds");
 
 		::std::char_traits<CharT>::copy(m_ptr + prevSize, other.data(), otherSize);
+
+		m_length = prevSize + otherSize;
 
 		return *this;
 	}
@@ -336,12 +340,28 @@ public:
 	template<typename Traits, typename Alloc>
 	constexpr basic_static_string& append(const ::std::basic_string<CharT, Traits, Alloc>& other)
 	{
-		size_t prevSize = size();
-		size_t otherSize = other.size();
+		size_t prevSize = length();
+		size_t otherSize = other.length();
 
-		MST_ASSERT(prevSize + otherSize >= max_size(), "appending out of bounds");
+		MST_ASSERT(prevSize + otherSize <= max_size(), "appending out of bounds");
 
 		::std::char_traits<CharT>::copy(m_ptr + prevSize, other.data(), otherSize);
+
+		m_length = prevSize + otherSize;
+
+		return *this;
+	}
+
+	constexpr basic_static_string& append(const ::std::basic_string_view<CharT>& other)
+	{
+		size_t prevSize = length();
+		size_t otherSize = other.length();
+
+		MST_ASSERT(prevSize + otherSize <= max_size(), "appending out of bounds");
+
+		::std::char_traits<CharT>::copy(m_ptr + prevSize, other.data(), otherSize);
+
+		m_length = prevSize + otherSize;
 
 		return *this;
 	}
@@ -349,12 +369,14 @@ public:
 	constexpr basic_static_string& append(const CharT* cStr)
 	{
 		MST_ASSERT(cStr != nullptr, "invalid nullptr value");
-		size_t prevSize = size();
+		size_t prevSize = length();
 		size_t otherSize = ::std::char_traits<CharT>::length(cStr);
 
-		MST_ASSERT(prevSize + otherSize >= max_size(), "appending out of bounds");
+		MST_ASSERT(prevSize + otherSize <= max_size(), "appending out of bounds");
 
 		::std::char_traits<CharT>::copy(m_ptr + prevSize, cStr, otherSize);
+
+		m_length = prevSize + otherSize;
 
 		return *this;
 	}
@@ -375,73 +397,118 @@ public:
 		return append(cStr);
 	}
 
+	template<typename Traits, typename Allocator>
+	constexpr basic_static_string& operator+=(
+		const std::basic_string<CharT, Traits, Allocator>& stdStr)
+	{
+		return append(stdStr);
+	}
+
+	constexpr basic_static_string& operator+=(const std::basic_string_view<CharT>& strView)
+	{
+		return append(strView);
+	}
+
 private:
 	CharT m_ptr[MaxElements] = {};
 	size_t m_length = 0;
 
 }; // class basic_static_string
 
-template<typename T, size_t MaxElements>
-::std::basic_ostream<T>& operator<<(
-	::std::basic_ostream<T>& ostr, const ::mst::basic_static_string<T, MaxElements>& str)
+template<typename CharT, size_t MaxElements>
+::std::basic_ostream<CharT>& operator<<(
+	::std::basic_ostream<CharT>& ostr, const ::mst::basic_static_string<CharT, MaxElements>& str)
 {
 	return ostr << str.c_str();
 }
 
-template<typename T, size_t MaxElements>
-inline bool operator==(const ::mst::basic_static_string<T, MaxElements>& l, const T* r)
+template<typename CharT, size_t MaxElements>
+constexpr bool operator==(const ::mst::basic_static_string<CharT, MaxElements>& l, const CharT* r)
 {
-	return strcmp(l.c_str(), r) == 0;
+	return l.length() == std::char_traits<CharT>::length(r) &&
+		   std::char_traits<CharT>::compare(l.c_str(), r, l.length()) == 0;
 }
 
-template<typename T, size_t MaxElements>
-inline bool operator!=(const ::mst::basic_static_string<T, MaxElements>& l, const T* r)
+template<typename CharT, size_t MaxElements>
+constexpr bool operator!=(const ::mst::basic_static_string<CharT, MaxElements>& l, const CharT* r)
 {
-	return strcmp(l.c_str(), r) != 0;
+	return !(l == r);
 }
 
-template<typename T, size_t MaxElements>
-inline bool operator==(const T* l, const ::mst::basic_static_string<T, MaxElements>& r)
+template<typename CharT, size_t MaxElements>
+constexpr bool operator==(const CharT* l, const ::mst::basic_static_string<CharT, MaxElements>& r)
 {
-	return strcmp(l, r.c_str()) == 0;
+	return r == l;
 }
 
-template<typename T, size_t MaxElements>
-inline bool operator!=(const T* l, const ::mst::basic_static_string<T, MaxElements>& r)
+template<typename CharT, size_t MaxElements>
+constexpr bool operator!=(const CharT* l, const ::mst::basic_static_string<CharT, MaxElements>& r)
 {
-	return strcmp(l, r.c_str()) != 0;
+	return !(l == r);
 }
 
-template<typename T, size_t MaxElements, typename Traits, typename Allocator>
-inline bool operator==(const ::mst::basic_static_string<T, MaxElements>& l,
-	const ::std::basic_string<T, Traits, Allocator>& r)
+template<typename CharT, size_t MaxElements, typename Traits, typename Allocator>
+inline bool operator==(const ::mst::basic_static_string<CharT, MaxElements>& l,
+	const ::std::basic_string<CharT, Traits, Allocator>& r)
 {
-	return l.size() == r.size() && (memcmp(l.data(), r.data(), l.size() * sizeof(T)) == 0);
+	return l.length() == r.length() && Traits::compare(l.data(), r.data(), l.length()) == 0;
 }
 
-template<typename T, size_t MaxElements, typename Traits, typename Allocator>
-inline bool operator!=(const ::mst::basic_static_string<T, MaxElements>& l,
-	const ::std::basic_string<T, Traits, Allocator>& r)
+template<typename CharT, size_t MaxElements, typename Traits, typename Allocator>
+inline bool operator!=(const ::mst::basic_static_string<CharT, MaxElements>& l,
+	const ::std::basic_string<CharT, Traits, Allocator>& r)
 {
-	return l.size() != r.size() || (memcmp(l.data(), r.data(), l.size() * sizeof(T)) != 0);
+	return l.length() != r.length() || Traits::compare(l.data(), r.data(), l.length()) != 0;
 }
 
-template<typename T, size_t MaxElements, typename Traits, typename Allocator>
-inline bool operator==(const ::std::basic_string<T, Traits, Allocator>& l,
-	const ::mst::basic_static_string<T, MaxElements>& r)
+template<typename CharT, size_t MaxElements, typename Traits, typename Allocator>
+inline bool operator==(const ::std::basic_string<CharT, Traits, Allocator>& l,
+	const ::mst::basic_static_string<CharT, MaxElements>& r)
 {
-	return l.size() == r.size() && (memcmp(l.data(), r.data(), r.size() * sizeof(T)) == 0);
+	return l.length() == r.length() && Traits::compare(l.data(), r.data(), r.length()) == 0;
 }
 
-template<typename T, size_t MaxElements, typename Traits, typename Allocator>
-inline bool operator!=(const ::std::basic_string<T, Traits, Allocator>& l,
-	const ::mst::basic_static_string<T, MaxElements>& r)
+template<typename CharT, size_t MaxElements, typename Traits, typename Allocator>
+inline bool operator!=(const ::std::basic_string<CharT, Traits, Allocator>& l,
+	const ::mst::basic_static_string<CharT, MaxElements>& r)
 {
-	return l.size() != r.size() || (memcmp(l.data(), r.data(), r.size() * sizeof(T)) != 0);
+	return l.length() != r.length() || Traits::compare(l.data(), r.data(), r.length()) != 0;
 }
 
-template<typename T, size_t MaxElements>
-struct is_string_type<::mst::basic_static_string<T, MaxElements>>
+template<typename CharT, size_t MaxElements>
+inline bool operator==(const ::mst::basic_static_string<CharT, MaxElements>& l,
+	const ::std::basic_string_view<CharT>& r)
+{
+	return l.length() == r.length() &&
+		   std::char_traits<CharT>::compare(l.data(), r.data(), l.length()) == 0;
+}
+
+template<typename CharT, size_t MaxElements>
+inline bool operator!=(const ::mst::basic_static_string<CharT, MaxElements>& l,
+	const ::std::basic_string_view<CharT>& r)
+{
+	return l.length() != r.length() ||
+		   std::char_traits<CharT>::compare(l.data(), r.data(), l.length()) != 0;
+}
+
+template<typename CharT, size_t MaxElements>
+inline bool operator==(const ::std::basic_string_view<CharT>& l,
+	const ::mst::basic_static_string<CharT, MaxElements>& r)
+{
+	return l.length() == r.length() &&
+		   std::char_traits<CharT>::compare(l.data(), r.data(), r.length()) == 0;
+}
+
+template<typename CharT, size_t MaxElements>
+inline bool operator!=(const ::std::basic_string_view<CharT>& l,
+	const ::mst::basic_static_string<CharT, MaxElements>& r)
+{
+	return l.length() != r.length() ||
+		   std::char_traits<CharT>::compare(l.data(), r.data(), r.length()) != 0;
+}
+
+template<typename CharT, size_t MaxElements>
+struct is_string_type<::mst::basic_static_string<CharT, MaxElements>>
 	: public ::std::integral_constant<bool, true>
 { };
 

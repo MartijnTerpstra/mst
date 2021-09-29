@@ -101,7 +101,10 @@ public:
 	constexpr basic_static_string(const ::mst::basic_static_string<CharT, OtherMaxElements>& other)
 		: m_length(other.length())
 	{
-		MST_ASSERT(other.length() > max_size(), "other: length is out of range");
+		if constexpr(OtherMaxElements > MaxElements)
+		{
+			MST_ASSERT(other.length() <= max_size(), "other: length is out of range");
+		}
 
 		auto bg = other.begin();
 
@@ -129,6 +132,11 @@ public:
 	constexpr basic_static_string& operator=(
 		const ::mst::basic_static_string<CharT, OtherMaxElements>& other)
 	{
+		if constexpr(OtherMaxElements > MaxElements)
+		{
+			MST_ASSERT(other.length() <= max_size(), "other: length is out of range");
+		}
+
 		clear();
 
 		auto begin = other.begin();
@@ -530,11 +538,11 @@ namespace std {
 
 template<typename T, size_t MaxElements>
 struct hash<::mst::basic_static_string<T, MaxElements>>
+	: private std::hash<std::basic_string_view<T>>
 {
 	size_t operator()(const ::mst::basic_static_string<T, MaxElements>& value)
 	{
-		return std::hash<std::basic_string_view<T>>{ value.data(), value.length() };
+		return std::hash<std::basic_string_view<T>>::operator()({ value.data(), value.length() });
 	}
 };
-
 }

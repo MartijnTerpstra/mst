@@ -145,6 +145,14 @@ TEMPLATE_TEST_CASE(
 	REQUIRE(cs.cend() - cs.cbegin() == strlen("String view"));
 }
 
+TEMPLATE_TEST_CASE("static_string::static_string(std::string_view): length overflow",
+	"[!shouldfail][text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 24>;
+
+	static_string s{ std::basic_string_view(OVERFLOW_STRING) };
+}
+
 TEMPLATE_TEST_CASE(
 	"static_string::static_string(static_string)", "[text]", char, wchar_t, char16_t, char32_t)
 {
@@ -163,12 +171,12 @@ TEMPLATE_TEST_CASE(
 	REQUIRE(cs.cend() - cs.cbegin() == strlen("StaticString"));
 }
 
-TEMPLATE_TEST_CASE("static_string::static_string(std::string_view): length overflow",
+TEMPLATE_TEST_CASE("static_string::static_string(static_string): length overflow",
 	"[!shouldfail][text]", char, wchar_t, char16_t, char32_t)
 {
 	using static_string = ::mst::basic_static_string<TestType, 24>;
 
-	static_string s{ std::basic_string_view(OVERFLOW_STRING) };
+	static_string s{ ::mst::basic_static_string<TestType, 1024>(OVERFLOW_STRING) };
 }
 
 TEMPLATE_TEST_CASE(

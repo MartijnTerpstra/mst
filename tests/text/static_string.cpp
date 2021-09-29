@@ -26,6 +26,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <variant>
 #include <sstream>
 #include <string_view>
@@ -144,6 +145,24 @@ TEMPLATE_TEST_CASE(
 	REQUIRE(cs.cend() - cs.cbegin() == strlen("String view"));
 }
 
+TEMPLATE_TEST_CASE(
+	"static_string::static_string(static_string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s{ static_string(STR("StaticString")) };
+	const static_string& cs = s;
+
+	REQUIRE(!s.empty());
+	REQUIRE(s.length() == strlen("StaticString"));
+	REQUIRE(s.begin() != s.end());
+	REQUIRE(s.end() - s.begin() == strlen("StaticString"));
+	REQUIRE(cs.begin() != cs.end());
+	REQUIRE(cs.end() - cs.begin() == strlen("StaticString"));
+	REQUIRE(cs.begin() != cs.end());
+	REQUIRE(cs.cend() - cs.cbegin() == strlen("StaticString"));
+}
+
 TEMPLATE_TEST_CASE("static_string::static_string(std::string_view): length overflow",
 	"[!shouldfail][text]", char, wchar_t, char16_t, char32_t)
 {
@@ -237,6 +256,35 @@ TEMPLATE_TEST_CASE("static_string::operator = (const CharT*): length overflow",
 }
 
 TEMPLATE_TEST_CASE(
+	"static_string::operator = (static_string)", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s;
+	s = static_string(STR("StaticString"));
+	const static_string& cs = s;
+
+	REQUIRE(!s.empty());
+	REQUIRE(s.length() == strlen("StaticString"));
+	REQUIRE(s.begin() != s.end());
+	REQUIRE(s.end() - s.begin() == strlen("StaticString"));
+	REQUIRE(cs.begin() != cs.end());
+	REQUIRE(cs.end() - cs.begin() == strlen("StaticString"));
+	REQUIRE(cs.begin() != cs.end());
+	REQUIRE(cs.cend() - cs.cbegin() == strlen("StaticString"));
+}
+
+TEMPLATE_TEST_CASE("static_string::operator = (static_string): length overflow",
+	"[!shouldfail][text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 24>;
+
+
+	static_string s;
+	s = ::mst::basic_static_string<TestType, 1024>(OVERFLOW_STRING);
+}
+
+TEMPLATE_TEST_CASE(
 	"static_string::operator = (std::string_view)", "[text]", char, wchar_t, char16_t, char32_t)
 {
 	using static_string = ::mst::basic_static_string<TestType, 1024>;
@@ -291,6 +339,20 @@ TEMPLATE_TEST_CASE("static_string::operator = (std::string): length overflow",
 
 	static_string s;
 	s = std::basic_string(OVERFLOW_STRING);
+}
+
+TEMPLATE_TEST_CASE("static_string::data()", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s1 = STR("DataString");
+	static_string s2 = STR("DataString");
+
+	REQUIRE(s1.data() != nullptr);
+	REQUIRE(std::as_const(s1).data() != nullptr);
+	REQUIRE(memcmp(s1.data(), s2.data(), s1.length() * sizeof(TestType)) == 0);
+	REQUIRE(memcmp(std::as_const(s1).data(), std::as_const(s2).data(),
+				s1.length() * sizeof(TestType)) == 0);
 }
 
 TEMPLATE_TEST_CASE("static_string::str()", "[text]", char, wchar_t, char16_t, char32_t)
@@ -740,13 +802,13 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-	"operator==(static_string_view, std::string)", "[text]", char, wchar_t, char16_t, char32_t)
+	"operator==(static_string, std::string_view)", "[text]", char, wchar_t, char16_t, char32_t)
 {
 	using static_string = ::mst::basic_static_string<TestType, 1024>;
 
 	static_string s = STR("Equal");
-	const auto s2 = std::basic_string(STR("Equal"));
-	const auto ns = std::basic_string(STR("NotEqual"));
+	const auto s2 = std::basic_string_view(STR("Equal"));
+	const auto ns = std::basic_string_view(STR("NotEqual"));
 
 	REQUIRE(s == s2);
 	REQUIRE(s != ns);
@@ -763,4 +825,18 @@ TEMPLATE_TEST_CASE(
 
 	REQUIRE(s2 == s);
 	REQUIRE(ns != s);
+}
+
+TEMPLATE_TEST_CASE("std::hash<static_string>", "[text]", char, wchar_t, char16_t, char32_t)
+{
+	using static_string = ::mst::basic_static_string<TestType, 1024>;
+
+	static_string s = STR("Equal");
+	const static_string s2 = STR("Equal");
+	const static_string ns = STR("NotEqual");
+
+	std::hash<static_string> hasher;
+
+	REQUIRE(hasher(s2) == hasher(s));
+	REQUIRE(hasher(ns) != hasher(s));
 }

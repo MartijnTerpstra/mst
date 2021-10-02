@@ -158,7 +158,7 @@ TEMPLATE_TEST_CASE(
 {
 	using static_string = ::mst::basic_static_string<TestType, 1024>;
 
-	static_string s{ static_string(STR("StaticString")) };
+	static_string s{ ::mst::basic_static_string<TestType, 1025>(STR("StaticString")) };
 	const static_string& cs = s;
 
 	REQUIRE(!s.empty());
@@ -269,7 +269,7 @@ TEMPLATE_TEST_CASE(
 	using static_string = ::mst::basic_static_string<TestType, 1024>;
 
 	static_string s;
-	s = static_string(STR("StaticString"));
+	s = ::mst::basic_static_string<TestType, 1025>(STR("StaticString"));
 	const static_string& cs = s;
 
 	REQUIRE(!s.empty());

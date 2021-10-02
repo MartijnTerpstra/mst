@@ -128,6 +128,7 @@ add_mst_test(platform memory)
 add_mst_test(platform names_and_versions)
 add_mst_test(platform processor)
 
+add_mst_test(test_util helpers)
 add_mst_test(test_util random_data_generator)
 add_mst_test(test_util set_assertions)
 
@@ -137,4 +138,10 @@ if(WIN32)
 add_mst_test(memory com_ptr)
 endif()
 
+endif()
+
+if(MST_UTILS)
+add_executable(generate_headers utils/generate_headers/main.cpp)
+set_target_properties(generate_headers PROPERTIES CXX_EXTENSIONS OFF)
+target_link_libraries(generate_headers PRIVATE mst)
 endif()

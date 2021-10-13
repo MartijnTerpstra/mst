@@ -23,44 +23,7 @@
 //                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-#ifndef MCORE_H
-#define MCORE_H
-
-#include <mx_core.h>
-
-#include <mversion.h>
-
-// typedefs of unsigned types
-#ifndef _UNSIGNED_INTEGERS_DEFINED
-typedef unsigned int uint;
-typedef unsigned short ushort;
-typedef unsigned char ubyte;
-typedef unsigned char byte;
-#define _UNSIGNED_INTEGERS_DEFINED 1
-#endif
-
-#ifndef _VARIADIC_MAX
-#define _VARIADIC_MAX 10
-#endif
-
-#ifndef _MST_EPSILON
-#define _MST_EPSILON (1e-5L)
-#endif
-
-#ifndef NOMINMAX
-#define NOMINMAX 1
-#endif
-
-#ifndef MST_DEBUGMODE
-#if _DEBUG
-#define MST_DEBUGMODE 1
-#endif
-#endif
-
-#ifndef MST_DEFAULT_NARGS
-#define MST_DEFAULT_NARGS 5
-#endif
-
-#endif // MCORE_H
+#include <helpers.h>

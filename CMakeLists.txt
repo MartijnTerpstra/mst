@@ -61,7 +61,7 @@ Include(FetchContent)
 FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG v2.13.1
+        GIT_TAG v2.13.8
     )
 
 FetchContent_MakeAvailable(Catch2)
@@ -90,10 +90,18 @@ function(SETUP_TARGET TARGET_NAME)
         target_compile_options(
             ${TARGET_NAME}
             PRIVATE
-                -pedantic -fvisibility=hidden -Wall -Wshadow -Wno-deprecated-declarations -mavx
+                -pedantic -fvisibility=hidden -Wall -Wshadow -Wno-deprecated-declarations
                 $<$<CONFIG:Debug>:-O0 -ggdb3>
                 $<$<CONFIG:Release>:-O2>
         )
+        
+        if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
+        target_compile_options(
+            ${TARGET_NAME}
+            PRIVATE
+                -mavx
+        )
+        endif()
     endif()
 
     target_compile_definitions(${TARGET_NAME} PRIVATE ${ARGN})

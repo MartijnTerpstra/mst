@@ -69,7 +69,7 @@ bool set_current_directory_impl(const char* path) noexcept;
 uint32_t get_page_size_impl() noexcept;
 uint32_t get_processor_core_count_impl() noexcept;
 uint32_t get_processor_thread_count_impl() noexcept;
-uint32_t processor_features_impl() noexcept;
+uint64_t processor_features_impl() noexcept;
 
 uint64_t get_current_thread_id() noexcept;
 

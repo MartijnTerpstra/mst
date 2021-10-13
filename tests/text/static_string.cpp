@@ -446,23 +446,25 @@ TEMPLATE_TEST_CASE("static_string::push_back()", "[text]", char, wchar_t, char16
 
 	static_string s;
 
-	for(size_t i = 0; i < 100; ++i)
+	ptrdiff_t si = 0;
+	for(size_t i = 0; i < 100; ++i, ++si)
 	{
 		s.push_back('X');
 
 		const static_string& cs = s;
 
 		auto const elemCount = i + 1;
+		auto const selemCount = si + 1;
 
 		REQUIRE(s.str() == std::basic_string<TestType>(elemCount, CHR('X')));
 		REQUIRE(!s.empty());
 		REQUIRE(s.length() == elemCount);
 		REQUIRE(s.begin() != s.end());
-		REQUIRE(s.end() - s.begin() == elemCount);
+		REQUIRE(s.end() - s.begin() == selemCount);
 		REQUIRE(cs.begin() != cs.end());
-		REQUIRE(cs.end() - cs.begin() == elemCount);
+		REQUIRE(cs.end() - cs.begin() == selemCount);
 		REQUIRE(cs.begin() != cs.end());
-		REQUIRE(cs.cend() - cs.cbegin() == elemCount);
+		REQUIRE(cs.cend() - cs.cbegin() == selemCount);
 	}
 }
 

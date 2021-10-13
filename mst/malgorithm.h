@@ -49,4 +49,4 @@ inline void for_each(_Iterator _Begin, _Iterator _End, _Function _Func)
 	::std::for_each(_Begin, _End, _Func);
 }
 
-}; // namespace mst
+} // namespace mst

@@ -93,4 +93,4 @@ struct flag_traits
 #endif // MST_USE_PRESHIFTED_FLAGS_AS_DEFAULT
 { };
 
-}; // namespace mst
+} // namespace mst

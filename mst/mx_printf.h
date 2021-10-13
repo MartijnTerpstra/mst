@@ -104,7 +104,7 @@ inline void _Check_printf(const char* formatString, size_t strIndex, size_t strL
 	}
 }
 
-}; // namespace _Details
+} // namespace _Details
 
 MST_VARIADIC_TEMPLATE_DECL
 inline void printf(const char* formatString MST_VARIADIC_TEMPLATE_REFFS_COMMA)

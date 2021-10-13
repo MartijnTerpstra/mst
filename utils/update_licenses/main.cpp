@@ -38,6 +38,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <ctime>
+#include <iostream>
 
 const std::regex g_oldHeader{
 	R"(\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tMST Utility Library\t\t\t\t\t\t\t \t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tCopyright \(c\)\d\d\d\d Martinus Terpstra\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tPermission is hereby granted, free of charge, to any person obtaining a copy\t\t\/\/\n\/\/\t\tof this software and associated documentation files \(the "Software"\), to deal\t\t\/\/\n\/\/\t\tin the Software without restriction, including without limitation the rights\t\t\/\/\n\/\/\t\tto use, copy, modify, merge, publish, distribute, sublicense, and\/or sell\t\t\t\/\/\n\/\/\t\tcopies of the Software, and to permit persons to whom the Software is\t\t\t\t\/\/\n\/\/\t\tfurnished to do so, subject to the following conditions:\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tThe above copyright notice and this permission notice shall be included in\t\t\t\/\/\n\/\/\t\tall copies or substantial portions of the Software\.\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\t\t\t\/\/\n\/\/\t\tIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\t\t\t\/\/\n\/\/\t\tFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\. IN NO EVENT SHALL THE\t\t\t\/\/\n\/\/\t\tAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\t\t\t\t\/\/\n\/\/\t\tLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\t\t\/\/\n\/\/\t\tOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\t\t\t\/\/\n\/\/\t\tTHE SOFTWARE\.\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/)"
@@ -105,7 +106,7 @@ std::string g_newHeaderHash =
 ##                                                                                          ##
 ##############################################################################################)";
 
-bool g_failOnMissmatch = false;
+std::optional<std::vector<std::string>> g_failOnMissmatch;
 
 std::string GetCurrentYear()
 {
@@ -200,12 +201,13 @@ void ProcessFile(
 	file.close();
 	if(g_failOnMissmatch)
 	{
-		exit(1);
+		g_failOnMissmatch->push_back(path.filename());
+		return;
 	}
 	FixFileHeader(path, delimiter, { buffer.data(), filesize });
 }
 
-std::vector<FileType> mathingFileTypes;
+std::vector<FileType> g_matchingFileTypes;
 
 int main(int argc, const char* const* argv)
 {
@@ -216,7 +218,10 @@ int main(int argc, const char* const* argv)
 	}
 	auto directory = argv[1];
 
-	g_failOnMissmatch = (argc >= 3 && strcmp(argv[2], "--fail-on-missmatch") == 0);
+	if(argc >= 3 && strcmp(argv[2], "--fail-on-missmatch") == 0)
+	{
+		g_failOnMissmatch.emplace();
+	}
 
 	std::ifstream checkFile{ std::string{ directory } + mst::platform::directory_separator() +
 							 "CMakeLists.txt" };
@@ -249,11 +254,11 @@ int main(int argc, const char* const* argv)
 		checkFile.close();
 	}
 
-	mathingFileTypes.emplace_back(std::regex{ ".+\\.cpp$" }, '/');
-	mathingFileTypes.emplace_back(std::regex{ ".+\\.h$" }, '/');
-	mathingFileTypes.emplace_back(std::regex{ ".+\\.inl$" }, '/');
-	mathingFileTypes.emplace_back(std::regex{ "^mst\\.natvis$" }, '/');
-	mathingFileTypes.emplace_back(
+	matchingFileTypes.emplace_back(std::regex{ ".+\\.cpp$" }, '/');
+	matchingFileTypes.emplace_back(std::regex{ ".+\\.h$" }, '/');
+	matchingFileTypes.emplace_back(std::regex{ ".+\\.inl$" }, '/');
+	matchingFileTypes.emplace_back(std::regex{ "^mst\\.natvis$" }, '/');
+	matchingFileTypes.emplace_back(
 		std::regex{ "^CMakeLists\\.txt$", std::regex_constants::ECMAScript }, '#');
 
 	std::string buffer;
@@ -273,7 +278,7 @@ int main(int argc, const char* const* argv)
 			auto filename = filenode.path().filename().string();
 
 			FileType* foundType = nullptr;
-			for(auto& ft : mathingFileTypes)
+			for(auto& ft : matchingFileTypes)
 			{
 				if(std::regex_match(filename, ft.first))
 				{
@@ -322,10 +327,25 @@ int main(int argc, const char* const* argv)
 		auto newBody =
 			std::regex_replace(licenseBody, std::regex{ "\\d\\d\\d\\d" }, GetCurrentYear());
 
-		std::ofstream newLicense{ std::string(directory) + mst::platform::directory_separator() +
-									  "LICENSE",
-			std::ios::binary };
-
-		newLicense.write(newBody.data(), newBody.length());
+		if(newBody != licenseBody)
+		{
+			if(g_failOnMissmatch)
+			{
+				g_failOnMissmatch->push_back("LICENSE");
+			}
+			else
+			{
+				std::ofstream newLicense{ std::string(directory) + mst::platform::directory_separator() + "LICENSE", std::ios::binary };
+				newLicense.write(newBody.data(), newBody.length());
+			}
+		}
+	}
+	if(g_failOnMissmatch && !g_failOnMissmatch->empty())
+	{
+		for(auto& file : *g_failOnMissmatch)
+		{
+			std::cout << file << std::endl;
+		}
+		exit(1);
 	}
 }

@@ -90,10 +90,9 @@ static uint64_t random_seed()
 
 std::array<uint8_t, 16> mst::_Details::uuid_helper::generate()
 {
-	thread_local static std::unique_ptr<std::mt19937_64> rng =
-		std::make_unique<std::mt19937_64>(random_seed());
+	thread_local static std::mt19937_64 rng{ random_seed() };
 
-	std::array numbers{ (*rng)(), (*rng)() };
+	std::array numbers{ rng(), rng() };
 
 
 	std::array<uint8_t, 16> data;

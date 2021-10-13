@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-   codecov:
+   check:
     
     # Run on Ubuntu
     runs-on: ubuntu-latest
@@ -28,5 +28,5 @@ jobs:
       run: cmake --build . --target util_update_licenses
 
     - name: Run tests
-    - working-directory: build
+      working-directory: build
       run: ./util_update_licenses ${{ github.workspace }} --fail-on-missmatch

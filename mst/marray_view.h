@@ -128,4 +128,4 @@ private:
 
 }; // class array_view
 
-}; // namespace mst
+} // namespace mst

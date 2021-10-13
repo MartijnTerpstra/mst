@@ -260,5 +260,5 @@ private:
 
 }; // class lock_guard<critical_section>
 
-}; // namespace threading
-}; // namespace mst
+} // namespace threading
+} // namespace mst

@@ -34,4 +34,4 @@ struct none_t
 
 const none_t none;
 
-}; // namespace mst
+} // namespace mst

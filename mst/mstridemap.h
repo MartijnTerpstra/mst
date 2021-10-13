@@ -607,4 +607,4 @@ iterator_range<stridemap_iterator<const T>> crange(const stridemap& strideMap)
 	return iterator_range<stridemap_iterator<const T>>(strideMap.cbegin<T>(), strideMap.cend<T>());
 }
 
-}; // namespace mst
+} // namespace mst

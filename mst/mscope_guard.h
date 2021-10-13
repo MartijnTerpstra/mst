@@ -76,7 +76,7 @@ public:
 
 }; // class _on_exit_scope_guard
 
-}; // namespace _Details
+} // namespace _Details
 
 template<typename _Fun>
 ::mst::_Details::_scope_guard<_Fun> scope_guard(_Fun _Func)
@@ -87,4 +87,4 @@ template<typename _Fun>
 #define mst_on_exit_scope                                                                          \
 	auto _MST_ANONYMOUS_VAR(__ONEXITSTATE) = ::mst::_Details::_on_exit_scope_guard() + [&]()
 
-}; // namespace mst
+} // namespace mst

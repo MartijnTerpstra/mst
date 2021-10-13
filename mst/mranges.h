@@ -121,4 +121,4 @@ inline iterator_range<const T*> crange(T (&arr)[Size])
 	return iterator_range<const T*>(arr, arr + Size);
 }
 
-}; // namespace mst
+} // namespace mst

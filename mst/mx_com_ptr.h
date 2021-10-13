@@ -92,5 +92,5 @@ _Com_ptr_combiner_ppv_args<T> _Initialize_ppv_args(::mst::com_ptr<T>& _Ptr)
 	return _Com_ptr_combiner_ppv_args<T>(_Ptr);
 }
 
-}; // namespace _Details
-}; // namespace mst
+} // namespace _Details
+} // namespace mst

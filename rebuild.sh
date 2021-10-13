@@ -1,4 +1,4 @@
 #!/bin/bash
 
-REBUILD=1 ./build.sh "#@"
+REBUILD=1 ./build.sh "$@"
 

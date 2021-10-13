@@ -211,4 +211,4 @@ private:
 
 }; // class optional<T>
 
-}; // namespace mst
+} // namespace mst

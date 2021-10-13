@@ -78,5 +78,5 @@ public:
 
 }; // class _MemAllocator<1>
 
-}; // namespace _Details
-}; // namespace mst
+} // namespace _Details
+} // namespace mst

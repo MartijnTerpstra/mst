@@ -254,7 +254,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			{
 				MST_FATAL_ERROR("Invalid format specifier");
 			}
-			if(arg >= SCHAR_MIN && arg <= SCHAR_MAX)
+			if(arg <= SCHAR_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= SCHAR_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<signed char>(arg));
 				buffer.append(fmt);
@@ -270,7 +271,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			{
 				MST_FATAL_ERROR("Invalid format specifier");
 			}
-			if(arg >= LLONG_MIN && arg <= LLONG_MAX)
+			if(arg <= LLONG_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= LLONG_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<long long int>(arg));
 				buffer.append(fmt);
@@ -290,7 +292,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 		switch(formatString[stringLength - 2])
 		{
 		case 'h': // '%hd' or '%hi' => short int type
-			if(arg >= SHRT_MIN && arg <= SHRT_MAX)
+			if(arg <= SHRT_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= SHRT_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<short int>(arg));
 				buffer.append(fmt);
@@ -302,7 +305,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			return;
 		case 'l': // '%ld' or '%li' => long int type
-			if(arg >= LONG_MIN && arg <= LONG_MAX)
+			if(arg <= LONG_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= LONG_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<long int>(arg));
 				buffer.append(fmt);
@@ -314,7 +318,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			return;
 		case 'j': // '%jd' or '%ji' => intmax_t type
-			if(arg >= INTMAX_MIN && arg <= INTMAX_MAX)
+			if(arg <= INTMAX_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= INTMAX_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<intmax_t>(arg));
 				buffer.append(fmt);
@@ -338,7 +343,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			return;
 		case 't': // '%td' or '%ti' => ptrdiff_t type
-			if(arg >= PTRDIFF_MIN && arg <= PTRDIFF_MAX)
+			if(arg <= PTRDIFF_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= PTRDIFF_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<ptrdiff_t>(arg));
 				buffer.append(fmt);
@@ -355,7 +361,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 	}
 
 	// '%d' or '%i' => int type
-	if(arg >= INT_MIN && arg <= INT_MAX)
+	if(arg <= INT_MAX && (std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= INT_MIN))
 	{
 		_To_string(fmt, formatString, static_cast<int>(arg));
 		buffer.append(fmt);

@@ -511,5 +511,5 @@ struct MST_ALIGN(16) SSEcolor
 
 }; // struct SSEcolor
 
-}; // namespace SSE2
-}; // namespace mst
+} // namespace SSE2
+} // namespace mst

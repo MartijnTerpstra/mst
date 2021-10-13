@@ -254,11 +254,11 @@ int main(int argc, const char* const* argv)
 		checkFile.close();
 	}
 
-	matchingFileTypes.emplace_back(std::regex{ ".+\\.cpp$" }, '/');
-	matchingFileTypes.emplace_back(std::regex{ ".+\\.h$" }, '/');
-	matchingFileTypes.emplace_back(std::regex{ ".+\\.inl$" }, '/');
-	matchingFileTypes.emplace_back(std::regex{ "^mst\\.natvis$" }, '/');
-	matchingFileTypes.emplace_back(
+	g_matchingFileTypes.emplace_back(std::regex{ ".+\\.cpp$" }, '/');
+	g_matchingFileTypes.emplace_back(std::regex{ ".+\\.h$" }, '/');
+	g_matchingFileTypes.emplace_back(std::regex{ ".+\\.inl$" }, '/');
+	g_matchingFileTypes.emplace_back(std::regex{ "^mst\\.natvis$" }, '/');
+	g_matchingFileTypes.emplace_back(
 		std::regex{ "^CMakeLists\\.txt$", std::regex_constants::ECMAScript }, '#');
 
 	std::string buffer;
@@ -278,7 +278,7 @@ int main(int argc, const char* const* argv)
 			auto filename = filenode.path().filename().string();
 
 			FileType* foundType = nullptr;
-			for(auto& ft : matchingFileTypes)
+			for(auto& ft : g_matchingFileTypes)
 			{
 				if(std::regex_match(filename, ft.first))
 				{

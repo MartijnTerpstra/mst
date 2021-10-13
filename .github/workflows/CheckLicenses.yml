@@ -27,6 +27,6 @@ jobs:
       working-directory: build
       run: cmake --build . --target util_update_licenses
 
-    - name: Run tests
+    - name: Run checker
       working-directory: build
       run: ./util_update_licenses ${{ github.workspace }} --fail-on-missmatch

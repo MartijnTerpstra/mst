@@ -29,7 +29,7 @@ jobs:
     - name: Build
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE --parallel 10
+      run: cmake --build . --config $BUILD_TYPE
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
@@ -40,7 +40,7 @@ jobs:
     name: Clang Unit Tests
     strategy:
       matrix:
-        platforms: [ubuntu-latest, macos-latest]
+        platforms: [ubuntu-latest, macos-latest, arm-cpu]
     
     runs-on: ${{ matrix.platforms }}
 
@@ -61,7 +61,7 @@ jobs:
     - name: Build
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE --parallel 10
+      run: cmake --build . --config $BUILD_TYPE
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
@@ -70,8 +70,11 @@ jobs:
       
   gcc-unit-tests:
     name: GCC Unit Tests
+    strategy:
+      matrix:
+        platforms: [ubuntu-latest, arm-cpu]
     
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platforms }}
 
     steps:
     - uses: actions/checkout@v2
@@ -90,7 +93,7 @@ jobs:
     - name: Build
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE --parallel 10
+      run: cmake --build . --config $BUILD_TYPE
 
     - name: Test
       working-directory: ${{runner.workspace}}/build

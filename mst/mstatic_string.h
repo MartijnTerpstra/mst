@@ -118,7 +118,7 @@ public:
 	constexpr basic_static_string(IteratorType begin, IteratorType end)
 	{
 		MST_ASSERT(end >= begin, "iterator range: begin should not be past end iterator");
-		MST_ASSERT((end - begin) <= max_size(), "iterator range: length overflow");
+		MST_ASSERT(static_cast<size_t>(end - begin) <= max_size(), "iterator range: length overflow");
 
 		while(begin != end)
 		{

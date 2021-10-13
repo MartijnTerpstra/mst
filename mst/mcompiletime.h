@@ -68,5 +68,5 @@ constexpr uint64_t hash_of64()
 	return ::mst::_Details::compiletime_hash_of64<T>();
 }
 
-}; // namespace compiletime
-}; // namespace mst
+} // namespace compiletime
+} // namespace mst

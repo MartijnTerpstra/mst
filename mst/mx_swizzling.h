@@ -341,4 +341,4 @@ public:
 	};
 };
 
-}; // namespace mst::math::_Details
+} // namespace mst::math::_Details

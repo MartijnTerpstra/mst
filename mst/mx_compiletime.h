@@ -242,5 +242,5 @@ struct compiletime_enforcer
 	}
 };
 
-}; // namespace _Details
-}; // namespace mst
+} // namespace _Details
+} // namespace mst

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-TESTING=1 ./build.sh "#@"
+TESTING=1 ./build.sh "$@"

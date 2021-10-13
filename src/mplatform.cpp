@@ -24,11 +24,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <mplatform.h>
+#include <array>
 
 #if MST_PLATFORM_MAC || MST_PLATFORM_LINUX
 
 #include <mutex>
-#include <cpuid.h>
 
 #include <string.h>
 
@@ -255,6 +255,9 @@ static ProcCpuInfo get_proc_cpuinfo_init() noexcept
 		if(line.find("processor") == 0)
 		{
 			++threadCount;
+#if _MST_HAS_ARM
+			cores.insert(std::to_string(threadCount));
+#endif
 		}
 		if(line.find("core id") == 0)
 		{
@@ -297,122 +300,6 @@ uint32_t mst::_Details::get_processor_core_count_impl() noexcept
 uint32_t mst::_Details::get_processor_thread_count_impl() noexcept
 {
 	return get_proc_cpuinfo_impl().threadCount;
-}
-
-#define EDX_MMX_bit		 0x800000	// 23 bit
-#define EDX_SSE_bit		 0x2000000	// 25 bit
-#define EDX_SSE2_bit	 0x4000000	// 26 bit
-#define EDX_3DnowExt_bit 0x40000000 // 30 bit
-#define EDX_3Dnow_bit	 0x80000000 // 31 bit
-#define EDX_MMXplus_bit	 0x400000	// 22 bit
-
-#define ECX_SSE3_bit  0x1	   // 0 bit
-#define ECX_SSSE3_bit 0x200	   // 9 bit
-#define ECX_SSE41_bit 0x80000  // 19 bit
-#define ECX_SSE42_bit 0x100000 // 20 bit
-
-#define ECX_SSE4A_bit 0x40	// 6 bit
-#define ECX_SSE5_bit  0x800 // 11 bit
-
-#define ECX_AES_bit 0x2000000  // 25 bit
-#define ECX_AVX_bit 0x10000000 // 28 bit
-
-#define EBX_AVX2_bit	 (1U << 5U)	 // 5 bit
-#define EBX_AVX512F_bit	 (1U << 16U) // 25 bit
-#define EBX_AVX512ER_bit (1U << 27U) // 27 bit
-#define EBX_AVX512PF_bit (1U << 26U) // 26 bit
-#define EBX_AVX512VL_bit (1U << 31U) // 26 bit
-#define EBX_AVX512DQ_bit (1U << 17U) // 26 bit
-#define EBX_AVX512BW_bit (1U << 30U) // 26 bit
-
-static inline mst::flag<mst::platform::processor_feature_flags> processor_features_init() noexcept
-{
-	using mst::platform::processor_feature_flags;
-
-	uint32_t CPUInfo[4];
-	uint32_t dwECX = 0;
-	uint32_t dwEDX = 0;
-	uint32_t dwEBX = 0;
-
-	__get_cpuid(0, CPUInfo, CPUInfo + 1, CPUInfo + 2, CPUInfo + 3);
-
-	int id_count = CPUInfo[0];
-
-	if(id_count >= 1)
-	{
-		__get_cpuid(1, &CPUInfo[0], &CPUInfo[1], &CPUInfo[2], &CPUInfo[3]);
-		dwECX = static_cast<uint32_t>(CPUInfo[2]);
-		dwEDX = static_cast<uint32_t>(CPUInfo[3]);
-	}
-
-	mst::flag<processor_feature_flags> features;
-
-	if(ECX_AES_bit & dwECX)
-		features.enable(processor_feature_flags::aes);
-
-	if(EDX_MMX_bit & dwEDX)
-		features.enable(processor_feature_flags::mmx);
-
-	if(EDX_SSE_bit & dwEDX)
-		features.enable(processor_feature_flags::sse);
-
-	if(EDX_SSE2_bit & dwEDX)
-		features.enable(processor_feature_flags::sse2);
-
-	if(ECX_SSE3_bit & dwECX)
-		features.enable(processor_feature_flags::sse3);
-
-	if(ECX_SSSE3_bit & dwECX)
-		features.enable(processor_feature_flags::ssse3);
-
-	if(ECX_SSE41_bit & dwECX)
-		features.enable(processor_feature_flags::sse4_1);
-
-	if(ECX_SSE42_bit & dwECX)
-		features.enable(processor_feature_flags::sse4_2);
-
-	if(ECX_AVX_bit & dwECX)
-		features.enable(processor_feature_flags::avx);
-
-	const uint32_t ref = 43806655;
-
-	if(id_count >= 7)
-	{
-		memset(CPUInfo, 0, sizeof(CPUInfo));
-		CPUInfo[0] = 7;
-		__get_cpuid(0, &CPUInfo[0], &CPUInfo[1], &CPUInfo[2], &CPUInfo[3]);
-		dwEBX = static_cast<uint32_t>(CPUInfo[1]);
-	}
-
-	if(EBX_AVX2_bit & dwEBX)
-		features.enable(processor_feature_flags::avx2);
-
-	if(EBX_AVX512F_bit & dwEBX)
-		features.enable(processor_feature_flags::avx512f);
-
-	if(EBX_AVX512ER_bit & dwEBX)
-		features.enable(processor_feature_flags::avx512er);
-
-	if(EBX_AVX512PF_bit & dwEBX)
-		features.enable(processor_feature_flags::avx512pf);
-
-	if(EBX_AVX512VL_bit & dwEBX)
-		features.enable(processor_feature_flags::avx512vl);
-
-	if(EBX_AVX512DQ_bit & dwEBX)
-		features.enable(processor_feature_flags::avx512dq);
-
-	if(EBX_AVX512BW_bit & dwEBX)
-		features.enable(processor_feature_flags::avx512bw);
-
-	return features;
-}
-
-uint32_t mst::_Details::processor_features_impl() noexcept
-{
-	static uint32_t features = processor_features_init().get();
-
-	return features;
 }
 
 // check pthread_self type
@@ -720,6 +607,36 @@ uint32_t mst::_Details::get_processor_thread_count_impl() noexcept
 	return pageSize;
 }
 
+static thread_local uint64_t tl_tid = GetCurrentThreadId();
+uint64_t mst::_Details::get_current_thread_id() noexcept
+{
+	return tl_tid;
+}
+
+#else
+
+#error "Operating system not supported"
+
+#endif
+
+#if defined(_MST_HAS_X86) || defined(_MST_HAS_X64)
+
+#if MST_PLATFORM_WINDOWS
+#include <intrin.h>
+#else
+#include <cpuid.h>
+#endif
+
+static void get_cpuid(std::array<int, 4>& info, int id)
+{
+#if MST_PLATFORM_WINDOWS
+	__cpuid(info.data(), 0);
+#else
+	__cpuid(id, info[0], info[1], info[2], info[3]);
+#endif
+}
+
+
 #define EDX_MMX_bit	 0x800000  // 23 bit
 #define EDX_SSE_bit	 0x2000000 // 25 bit
 #define EDX_SSE2_bit 0x4000000 // 26 bit
@@ -744,18 +661,19 @@ static inline mst::flag<mst::platform::processor_feature_flags> processor_featur
 {
 	using mst::platform::processor_feature_flags;
 
-	int CPUInfo[4];
+	std::array<int, 4> CPUInfo;
 	uint32_t dwECX = 0;
 	uint32_t dwEDX = 0;
 	uint32_t dwEBX = 0;
 
-	__cpuid(CPUInfo, 0);
+
+	get_cpuid(CPUInfo, 0);
 
 	int id_count = CPUInfo[0];
 
 	if(id_count >= 1)
 	{
-		__cpuid(CPUInfo, 1);
+		get_cpuid(CPUInfo, 1);
 		dwECX = static_cast<uint32_t>(CPUInfo[2]);
 		dwEDX = static_cast<uint32_t>(CPUInfo[3]);
 	}
@@ -789,11 +707,9 @@ static inline mst::flag<mst::platform::processor_feature_flags> processor_featur
 	if(ECX_AVX_bit & dwECX)
 		features.enable(processor_feature_flags::avx);
 
-	const uint32_t ref = 43806655;
-
 	if(id_count >= 7)
 	{
-		__cpuid(CPUInfo, 7);
+		get_cpuid(CPUInfo, 7);
 		dwEBX = static_cast<uint32_t>(CPUInfo[1]);
 	}
 
@@ -821,21 +737,55 @@ static inline mst::flag<mst::platform::processor_feature_flags> processor_featur
 	return features;
 }
 
-uint32_t mst::_Details::processor_features_impl() noexcept
+#elif _MST_HAS_ARM
+
+#if MST_PLATFORM_MAC || MST_PLATFORM_LINUX
+#include <sys/auxv.h>
+#include <asm/hwcap.h>
+#else
+#error "ARM not implemented for platform"
+#endif
+
+static inline mst::flag<mst::platform::processor_feature_flags> processor_features_init() noexcept
+{
+	using mst::platform::processor_feature_flags;
+
+	mst::flag<processor_feature_flags> features;
+
+#ifdef HWCAP_NEON
+	if(getauxval(AT_HWCAP) & HWCAP_NEON)
+		features.enable(processor_feature_flags::neon);
+#endif
+#ifdef HWCAP2_AES
+	if(getauxval(AT_HWCAP2) & HWCAP2_AES)
+	{
+		features.enable(processor_feature_flags::aes);
+	}
+#endif
+#ifdef HWCAP_AES
+	if(getauxval(AT_HWCAP) & HWCAP_AES)
+	{
+		features.enable(processor_feature_flags::aes);
+	}
+#endif
+#ifdef HWCAP_ASIMD
+	if(getauxval(AT_HWCAP) & HWCAP_ASIMD)
+	{
+		features.enable(processor_feature_flags::asimd);
+	}
+#endif
+	return features;
+}
+
+#else
+
+#error "CPU architecture not supported"
+
+#endif
+
+uint64_t mst::_Details::processor_features_impl() noexcept
 {
 	static uint32_t features = processor_features_init().get();
 
 	return features;
 }
-
-static thread_local uint64_t tl_tid = GetCurrentThreadId();
-uint64_t mst::_Details::get_current_thread_id() noexcept
-{
-	return tl_tid;
-}
-
-#else
-
-#error "Operating system not supported"
-
-#endif

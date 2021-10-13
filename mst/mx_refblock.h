@@ -378,5 +378,5 @@ private:
 _MST_ADD_CV_TO_POINTER_TO_CONST(::mst::smart_ptr<T>, ::mst::smart_ptr<const T>)
 _MST_ADD_CV_TO_POINTER_TO_CONST(::mst::back_ptr<T>, ::mst::back_ptr<const T>)
 
-};
-}; // namespace mst::_Details
+} // namespace _Details
+} // namespace mst

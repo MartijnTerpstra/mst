@@ -257,7 +257,7 @@ int main(int argc, const char* const* argv)
 	g_matchingFileTypes.emplace_back(
 		std::regex{ "^CMakeLists\\.txt$", std::regex_constants::ECMAScript }, '#');
 
-	std::vector<std::string> folders = { "mst", "src", "tests", "dependencies", "utils" };
+	std::vector<std::string> folders = { "mst", "src", "tests", "utils" };
 
 	for(auto& folder : folders)
 	{

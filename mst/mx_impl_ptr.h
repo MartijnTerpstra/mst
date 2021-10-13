@@ -35,5 +35,5 @@ void _Impl_release(_Ty* _ptr)
 	free(reinterpret_cast<byte*>(_ptr) - std::alignment_of<std::max_align_t>::value);
 }
 
-}; // namespace _Details
-}; // namespace mst
+} // namespace _Details
+} // namespace mst

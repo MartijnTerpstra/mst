@@ -37,13 +37,14 @@
 #include <cmath>
 #include <mx_math2.h>
 
-#if MST_MATH_NO_SIMD || MST_NO_SIMD
+#if MST_MATH_NO_SIMD
 #define _MST_MATH_SIMD_ENABLED 0
-#else // !MST_MATH_NO_SIMD
-
-#ifndef _MST_MATH_SIMD_ENABLED
+#elif MST_NO_SIMD
+#define _MST_MATH_SIMD_ENABLED 0
+#elif _MST_HAS_ARM
+#define _MST_MATH_SIMD_ENABLED 0
+#else
 #define _MST_MATH_SIMD_ENABLED 1
-#endif
 
 #include <xmmintrin.h>
 #include <emmintrin.h>

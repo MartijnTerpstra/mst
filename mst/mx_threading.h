@@ -91,6 +91,6 @@ public:
 	_Ty _Myfun;
 };
 
-}; // namespace _Details
-}; // namespace threading
-}; // namespace mst
+} // namespace _Details
+} // namespace threading
+} // namespace mst

@@ -275,6 +275,6 @@ template<typename T>
 	__uuidof(::std::remove_reference<decltype(comPtr)>::type::element_type),                       \
 		::mst::_Details::_Initialize_ppv_args(comPtr)
 
-}; // namespace mst
+} // namespace mst
 
 #endif /* MCOM_PTR_H */

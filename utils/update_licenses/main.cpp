@@ -105,6 +105,8 @@ std::string g_newHeaderHash =
 ##                                                                                          ##
 ##############################################################################################)";
 
+bool g_failOnMissmatch = false;
+
 std::string GetCurrentYear()
 {
 	time_t now = time(0);
@@ -196,6 +198,10 @@ void ProcessFile(
 		file.read(buffer.data() + headerCheckSize, filesize - headerCheckSize);
 	}
 	file.close();
+	if(g_failOnMissmatch)
+	{
+		exit(1);
+	}
 	FixFileHeader(path, delimiter, { buffer.data(), filesize });
 }
 
@@ -209,6 +215,8 @@ int main(int argc, const char* const* argv)
 		return 1;
 	}
 	auto directory = argv[1];
+
+	g_failOnMissmatch = (argc >= 3 && strcmp(argv[2], "--fail-on-missmatch") == 0);
 
 	std::ifstream checkFile{ std::string{ directory } + mst::platform::directory_separator() +
 							 "CMakeLists.txt" };

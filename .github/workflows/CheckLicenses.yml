@@ -1,0 +1,32 @@
+name: Check Licenses
+
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+
+   check:
+    
+    # Run on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build CMake
+      env:
+        CXXFLAGS: "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+        CXX: g++
+      run: cmake -B build . -DMST_UTILS=ON
+
+    - name: Build Project
+      working-directory: build
+      run: cmake --build . --target util_update_licenses
+
+    - name: Run tests
+      working-directory: build
+      run: ./util_update_licenses ${{ github.workspace }} --fail-on-missmatch

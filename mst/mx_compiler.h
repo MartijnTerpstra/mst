@@ -174,6 +174,12 @@
 #define _MST_HAS_INVOKE 1
 #endif
 
+#if __cpp_concepts >= 201907L
+#if __cpp_lib_concepts >= 202002L
+#define _MST_HAS_CONCEPTS 1
+#endif
+#endif
+
 // Attibutes
 #ifdef __has_cpp_attribute
 

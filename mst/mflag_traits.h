@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <mtype_traits.h>
+
 namespace mst {
 
 #define MST_DECLARE_PRESHIFTED_ENUM(EnumType)                                                      \

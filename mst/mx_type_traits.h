@@ -102,4 +102,6 @@ using to_pointer_to_const_t = typename ::mst::to_pointer_to_const<_Ty>::type;
 
 #endif // _MST_HAS_TEMPLATE_ALIASES
 
+#endif
+
 }; // namespace mst

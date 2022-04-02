@@ -91,9 +91,6 @@ public:
 
 	inline static uuid parse(_Details::string_view_type _Str) noexcept
 	{
-		if(_Str.length() < 36) // _MST_UNLIKELY
-			std::abort();
-
 		uuid retval;
 		retval._Mydata = _Details::uuid_helper::parse(_Str.data());
 		return retval;

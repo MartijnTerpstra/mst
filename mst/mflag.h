@@ -29,6 +29,7 @@
 #include <mcore.h>
 #include <mflag_traits.h>
 #include <initializer_list>
+#include <concepts>
 
 namespace mst {
 

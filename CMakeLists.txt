@@ -36,7 +36,7 @@ add_library(mst STATIC
     src/muuid.cpp)
 
 target_compile_features(mst
-    PUBLIC cxx_std_17)
+    PUBLIC cxx_std_20)
 
 if(APPLE OR UNIX)
 target_link_libraries(mst

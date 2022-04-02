@@ -36,6 +36,9 @@
 namespace mst {
 
 template<typename T>
+::mst::_Details::_Com_ptr_combiner<T> initialize(::mst::com_ptr<T>& comObject);
+
+template<typename T>
 class com_ptr
 {
 
@@ -145,7 +148,8 @@ public:
 	{
 		if(_MyPtr == nullptr)
 		{
-			ERROR_MESG("com_ptr<T>::as(): invalid call: pointer does not point to a valid object");
+			MST_FATAL_ERROR(
+				"com_ptr<T>::as(): invalid call: pointer does not point to a valid object");
 		}
 
 		static_assert(::std::is_base_of<IUnknown, T2>::value, "T2 must inherit from IUnknown");
@@ -153,11 +157,12 @@ public:
 	}
 
 	template<typename T2>
-	bool is() const
+	inline bool is() const
 	{
 		if(_MyPtr == nullptr)
 		{
-			ERROR_MESG("com_ptr<T>::is(): invalid call: pointer does not point to a valid object");
+			MST_FATAL_ERROR(
+				"com_ptr<T>::is(): invalid call: pointer does not point to a valid object");
 		}
 
 		com_ptr<T2> _Right;
@@ -207,15 +212,14 @@ public:
 
 private:
 	template<typename T2>
-	com_ptr<T2> _As(::std::true_type) const noexcept
+	inline com_ptr<T2> _As(::std::true_type) const noexcept
 	{
 		return *this;
 	}
 
 	template<typename T2>
-	com_ptr<T2> _As(::std::false_type) const
+	inline com_ptr<T2> _As(::std::false_type) const
 	{
-
 		com_ptr<T2> _Right;
 		if(FAILED(_MyPtr->QueryInterface<T2>(::mst::initialize(_Right))))
 		{

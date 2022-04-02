@@ -45,6 +45,18 @@ TEST_CASE("colony<T>: creation", "[colony]")
 	colony<data> container;
 }
 
+TEST_CASE("colony<T>: delete middel left right", "[colony]")
+{
+	colony<int> container;
+	auto b = container.emplace(0);
+	auto m = container.emplace(0);
+	auto e = container.emplace(0);
+
+	container.erase(m);
+	container.erase(b);
+	container.erase(e);
+}
+
 TEST_CASE("colony<T>: expand and clear", "[colony]")
 {
 	random_data_generator rdg{ true };

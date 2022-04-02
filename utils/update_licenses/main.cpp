@@ -35,6 +35,7 @@
 #include <regex>
 #include <vector>
 #include <utility>
+#include <optional>
 #include <stdexcept>
 #include <chrono>
 #include <ctime>

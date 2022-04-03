@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2022 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -39,6 +39,7 @@
 #include <chrono>
 #include <ctime>
 #include <iostream>
+#include <optional>
 
 const std::regex g_oldHeader{
 	R"(\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tMST Utility Library\t\t\t\t\t\t\t \t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tCopyright \(c\)\d\d\d\d Martinus Terpstra\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tPermission is hereby granted, free of charge, to any person obtaining a copy\t\t\/\/\n\/\/\t\tof this software and associated documentation files \(the "Software"\), to deal\t\t\/\/\n\/\/\t\tin the Software without restriction, including without limitation the rights\t\t\/\/\n\/\/\t\tto use, copy, modify, merge, publish, distribute, sublicense, and\/or sell\t\t\t\/\/\n\/\/\t\tcopies of the Software, and to permit persons to whom the Software is\t\t\t\t\/\/\n\/\/\t\tfurnished to do so, subject to the following conditions:\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tThe above copyright notice and this permission notice shall be included in\t\t\t\/\/\n\/\/\t\tall copies or substantial portions of the Software\.\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\t\t\t\/\/\n\/\/\t\tIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\t\t\t\/\/\n\/\/\t\tFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\. IN NO EVENT SHALL THE\t\t\t\/\/\n\/\/\t\tAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\t\t\t\t\/\/\n\/\/\t\tLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\t\t\/\/\n\/\/\t\tOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\t\t\t\/\/\n\/\/\t\tTHE SOFTWARE\.\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/)"
@@ -164,47 +165,41 @@ void FixFileHeader(const std::filesystem::path& path, char delimiter, std::strin
 	file.write(fileData.data(), fileData.length());
 }
 
-void ProcessFile(
-	std::string& buffer, const std::filesystem::directory_entry& filenode, char delimiter)
+void ProcessFile(const std::filesystem::directory_entry& filenode, char delimiter)
 {
 	auto& path = filenode.path();
 
 	std::ifstream file(path.string());
 
-	auto filesize = filenode.file_size();
-
 	auto newHeader = DelimitedNewHeader(delimiter);
 
 	auto headerCheckSize = newHeader.length() + 2 * g_newline.length();
 
-	if(buffer.length() < filesize)
+	std::string buffer(headerCheckSize, '\0');
+	file.read(buffer.data(), headerCheckSize);
+	if(memcmp(buffer.data(), newHeader.data(), newHeader.length()) == 0 &&
+		memcmp(buffer.data() + newHeader.length(), g_newline.data(), g_newline.length()) == 0 &&
+		memcmp(buffer.data() + newHeader.length() + g_newline.length(), g_newline.data(),
+			g_newline.length()) == 0)
 	{
-		buffer.resize(filesize);
-	}
-
-	if(filesize < headerCheckSize)
-	{
-		file.read(buffer.data(), filesize);
-	}
-	else
-	{
-		file.read(buffer.data(), headerCheckSize);
-		if(memcmp(buffer.data(), newHeader.data(), newHeader.length()) == 0 &&
-			memcmp(buffer.data() + newHeader.length(), g_newline.data(), g_newline.length()) == 0 &&
-			memcmp(buffer.data() + newHeader.length() + g_newline.length(), g_newline.data(),
-				g_newline.length()) == 0)
-		{
-			return;
-		}
-		file.read(buffer.data() + headerCheckSize, filesize - headerCheckSize);
-	}
-	file.close();
-	if(g_failOnMissmatch)
-	{
-		g_failOnMissmatch->push_back(path.filename());
 		return;
 	}
-	FixFileHeader(path, delimiter, { buffer.data(), filesize });
+	else if(g_failOnMissmatch)
+	{
+		g_failOnMissmatch->push_back(path.filename().string());
+		return;
+	}
+	while(!file.eof())
+	{
+		buffer.push_back('\0');
+		file.read(&buffer.back(), 1);
+	}
+	while(!buffer.empty() && buffer.back() == '\0')
+	{
+		buffer.pop_back();
+	}
+	file.close();
+	FixFileHeader(path, delimiter, std::move(buffer));
 }
 
 std::vector<FileType> g_matchingFileTypes;
@@ -261,8 +256,6 @@ int main(int argc, const char* const* argv)
 	g_matchingFileTypes.emplace_back(
 		std::regex{ "^CMakeLists\\.txt$", std::regex_constants::ECMAScript }, '#');
 
-	std::string buffer;
-
 	std::vector<std::string> folders = { "mst", "src", "tests", "dependencies", "utils" };
 
 	for(auto& folder : folders)
@@ -293,7 +286,7 @@ int main(int argc, const char* const* argv)
 				continue;
 			}
 
-			ProcessFile(buffer, filenode, foundType->second);
+			ProcessFile(filenode, foundType->second);
 		}
 	}
 
@@ -309,9 +302,9 @@ int main(int argc, const char* const* argv)
 		std::string(directory) + mst::platform::directory_separator() + "CMakeLists.txt"
 	};
 
-	ProcessFile(buffer, clang_format, '#');
-	ProcessFile(buffer, git_ignore, '#');
-	ProcessFile(buffer, rootCMakeLists, '#');
+	ProcessFile(clang_format, '#');
+	ProcessFile(git_ignore, '#');
+	ProcessFile(rootCMakeLists, '#');
 
 	std::ifstream licence{ std::string(directory) + mst::platform::directory_separator() +
 							   "LICENSE",
@@ -335,7 +328,9 @@ int main(int argc, const char* const* argv)
 			}
 			else
 			{
-				std::ofstream newLicense{ std::string(directory) + mst::platform::directory_separator() + "LICENSE", std::ios::binary };
+				std::ofstream newLicense{ std::string(directory) +
+											  mst::platform::directory_separator() + "LICENSE",
+					std::ios::binary };
 				newLicense.write(newBody.data(), newBody.length());
 			}
 		}

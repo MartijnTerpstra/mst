@@ -59,6 +59,16 @@ TEST_CASE("printf: fail on too much arguments", "[!shouldfail][common]")
 	mst::to_printf_string("%c", 'c', 111);
 }
 
+TEST_CASE("printf: forward non-format characters", "[common]")
+{
+	REQUIRE(mst::to_printf_string("Prefix%dPostFix--", 111) == "Prefix111PostFix--");
+}
+
+TEST_CASE("printf: prints excaped % once", "[common]")
+{
+	REQUIRE(mst::to_printf_string("pre%%post") == "pre%post");
+}
+
 TEST_CASE("printf: char", "[common]")
 {
 	for(char c = 32; c <= 126; ++c)
@@ -67,13 +77,39 @@ TEST_CASE("printf: char", "[common]")
 	}
 }
 
-TEST_CASE("printf: wchar_t", "[common]")
+TEST_CASE("printf: char safe downcast", "[common]")
 {
-	char c = 32;
-	for(wchar_t w = 32; w <= 126; ++w, ++c)
+	REQUIRE(mst::to_printf_string("%c", std::intmax_t(32)) == std::string(1, 32));
+}
+
+TEST_CASE("printf: fail char on downcast outside int_t range", "[!shouldfail][common]")
+{
+	static_assert(std::numeric_limits<std::uintmax_t>::max() > INT_MAX);
+	mst::to_printf_string("%c", std::uintmax_t(INT_MAX) + 1);
+}
+
+TEST_CASE("printf: fail on char type", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%c", 1.0f);
+}
+
+TEST_CASE("printf: wide char", "[common]")
+{
+	for(wchar_t c = 32; c <= 126; ++c)
 	{
-		REQUIRE(mst::to_printf_string("%lc", w) == std::string(1, c));
+		REQUIRE(mst::to_printf_string("%lc", c) == std::string(1, c));
 	}
+}
+
+TEST_CASE("printf: wide char safe downcast", "[common]")
+{
+	REQUIRE(mst::to_printf_string("%lc", std::intmax_t(32)) == std::string(1, 32));
+}
+
+TEST_CASE("printf: fail wide char on downcast outside wint_t range", "[!shouldfail][common]")
+{
+	static_assert(std::numeric_limits<std::uintmax_t>::max() > WINT_MAX);
+	mst::to_printf_string("%lc", std::uintmax_t(WINT_MAX) + 1);
 }
 
 TEST_CASE("printf: std::string", "[common]")
@@ -81,9 +117,39 @@ TEST_CASE("printf: std::string", "[common]")
 	REQUIRE(mst::to_printf_string("%s", std::string("Test")) == "Test");
 }
 
+TEST_CASE("printf: std::string_view", "[common]")
+{
+	REQUIRE(mst::to_printf_string("%s", std::string_view("Test")) == "Test");
+}
+
 TEST_CASE("printf: char string", "[common]")
 {
 	REQUIRE(mst::to_printf_string("%s", "Test") == "Test");
+}
+
+TEST_CASE("printf: char string with explicit padding", "[common]")
+{
+	REQUIRE(mst::to_printf_string("%7s", "Test") == "   Test");
+}
+
+TEST_CASE("printf: char string with explict shorter length", "[common]")
+{
+	REQUIRE(mst::to_printf_string("%2.3s", "Test") == "Tes");
+}
+
+TEST_CASE("printf: fail char string type mismatch", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%s", 613);
+}
+
+TEST_CASE("printf: fail char string invalid padding", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%B.s", L"Test");
+}
+
+TEST_CASE("printf: fail char string invalid length", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%.Bs", L"Test");
 }
 
 TEST_CASE("printf: std::wstring", "[common]")
@@ -94,6 +160,31 @@ TEST_CASE("printf: std::wstring", "[common]")
 TEST_CASE("printf: wchar_t string", "[common]")
 {
 	REQUIRE(mst::to_printf_string("%ls", L"Test") == "Test");
+}
+
+TEST_CASE("printf: wchar_t string with explict padding", "[common]")
+{
+	REQUIRE(mst::to_printf_string("%7ls", L"Test") == "   Test");
+}
+
+TEST_CASE("printf: wchar_t string with explict shorter length", "[common]")
+{
+	REQUIRE(mst::to_printf_string("%2.3ls", L"Test") == "Tes");
+}
+
+TEST_CASE("printf: fail wchar_t string type mismatch", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%ls", 613);
+}
+
+TEST_CASE("printf: fail wchar_t string invalid padding", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%B.ls", L"Test");
+}
+
+TEST_CASE("printf: fail wchar_t string invalid length", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%.Bls", L"Test");
 }
 
 TEST_CASE("printf: null pointer", "[common]")
@@ -276,16 +367,22 @@ TEST_CASE("printf: double", "[common]")
 		WithinRel(value, 0.00001) || Catch::Matchers::WithinAbs(value, 0.0000001));
 }
 
-template<typename IntType>
-inline IntType Negate(IntType value, std::true_type)
+TEST_CASE("printf: n receives current length", "[common]")
 {
-	return -value;
+	size_t elem = 0;
+	mst::to_printf_string("prefix%npostfix", &elem);
+	REQUIRE(elem == strlen("prefix"));
 }
 
-template<typename IntType>
-inline IntType Negate(IntType value, std::false_type)
+TEST_CASE("printf: fail n received invalid type", "[!shouldfail][common]")
 {
-	return value;
+	mst::to_printf_string("prefix%npostfix", 1.0f);
+}
+
+TEST_CASE("printf: fail n does not fit in output type", "[!shouldfail][common]")
+{
+	int8_t s = 0;
+	mst::to_printf_string("%266s%npostfix", &s);
 }
 
 template<typename IntType>
@@ -298,10 +395,13 @@ std::string ToOctStr(IntType value)
 
 	bool isNegative = false;
 
-	if(value < 0)
+	if constexpr(std::is_signed_v<IntType>)
 	{
-		isNegative = true;
-		value = Negate<IntType>(value, typename std::is_signed<IntType>::type());
+		if(value < 0)
+		{
+			isNegative = true;
+			value = -value;
+		}
 	}
 
 	while(value != 0)
@@ -310,8 +410,11 @@ std::string ToOctStr(IntType value)
 		value >>= 3;
 	}
 
-	if(isNegative)
-		oct.insert(0, 1, '-');
+	if constexpr(std::is_signed_v<IntType>)
+	{
+		if(isNegative)
+			oct.insert(0, 1, '-');
+	}
 
 	return oct;
 }
@@ -332,10 +435,13 @@ std::string ToHexStr(IntType value, bool upper)
 
 	bool isNegative = false;
 
-	if(value < 0)
+	if constexpr(std::is_signed_v<IntType>)
 	{
-		isNegative = true;
-		value = Negate<IntType>(value, typename std::is_signed<IntType>::type());
+		if(value < 0)
+		{
+			isNegative = true;
+			value = -value;
+		}
 	}
 
 	while(value != 0)
@@ -346,8 +452,11 @@ std::string ToHexStr(IntType value, bool upper)
 		value >>= 4;
 	}
 
-	if(isNegative)
-		oct.insert(0, 1, '-');
+	if constexpr(std::is_signed_v<IntType>)
+	{
+		if(isNegative)
+			oct.insert(0, 1, '-');
+	}
 
 	return oct;
 }

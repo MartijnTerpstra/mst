@@ -59,6 +59,11 @@ TEST_CASE("printf: fail on too much arguments", "[!shouldfail][common]")
 	mst::to_printf_string("%c", 'c', 111);
 }
 
+TEST_CASE("printf: wstring support", "[common]")
+{
+	REQUIRE(mst::to_printf_string(L"pre%d%s%zupost", 123, "hello", 644) == L"pre123hello644post");
+}
+
 TEST_CASE("printf: forward non-format characters", "[common]")
 {
 	REQUIRE(mst::to_printf_string("Prefix%dPostFix--", 111) == "Prefix111PostFix--");
@@ -132,9 +137,19 @@ TEST_CASE("printf: char string with explicit padding", "[common]")
 	REQUIRE(mst::to_printf_string("%7s", "Test") == "   Test");
 }
 
+TEST_CASE("printf(wchar_t): char string with explicit padding", "[common]")
+{
+	REQUIRE(mst::to_printf_string(L"%7s", "Test") == L"   Test");
+}
+
 TEST_CASE("printf: char string with explict shorter length", "[common]")
 {
 	REQUIRE(mst::to_printf_string("%2.3s", "Test") == "Tes");
+}
+
+TEST_CASE("printf (wchar_t): char string with explict shorter length", "[common]")
+{
+	REQUIRE(mst::to_printf_string(L"%2.3s", "Test") == L"Tes");
 }
 
 TEST_CASE("printf: fail char string type mismatch", "[!shouldfail][common]")
@@ -144,12 +159,32 @@ TEST_CASE("printf: fail char string type mismatch", "[!shouldfail][common]")
 
 TEST_CASE("printf: fail char string invalid padding", "[!shouldfail][common]")
 {
-	mst::to_printf_string("%B.s", L"Test");
+	mst::to_printf_string("%B.s", "Test");
+}
+
+TEST_CASE("printf: fail char string invalid padding (no dot)", "[!shouldfail][common]")
+{
+	mst::to_printf_string("%Bs", "Test");
+}
+
+TEST_CASE("printf (wchar_t): fail char string invalid padding", "[!shouldfail][common]")
+{
+	mst::to_printf_string(L"%B.s", "Test");
+}
+
+TEST_CASE("printf (wchar_t): fail char string invalid padding (no dot)", "[!shouldfail][common]")
+{
+	mst::to_printf_string(L"%Bs", "Test");
 }
 
 TEST_CASE("printf: fail char string invalid length", "[!shouldfail][common]")
 {
-	mst::to_printf_string("%.Bs", L"Test");
+	mst::to_printf_string("%.Bs", "Test");
+}
+
+TEST_CASE("printf (wchar_t): fail char string invalid length", "[!shouldfail][common]")
+{
+	mst::to_printf_string(L"%.Bs", "Test");
 }
 
 TEST_CASE("printf: std::wstring", "[common]")
@@ -167,9 +202,19 @@ TEST_CASE("printf: wchar_t string with explict padding", "[common]")
 	REQUIRE(mst::to_printf_string("%7ls", L"Test") == "   Test");
 }
 
+TEST_CASE("printf (wchar_t): wchar_t string with explict padding", "[common]")
+{
+	REQUIRE(mst::to_printf_string(L"%7ls", L"Test") == L"   Test");
+}
+
 TEST_CASE("printf: wchar_t string with explict shorter length", "[common]")
 {
 	REQUIRE(mst::to_printf_string("%2.3ls", L"Test") == "Tes");
+}
+
+TEST_CASE("printf (wchar_t): wchar_t string with explict shorter length", "[common]")
+{
+	REQUIRE(mst::to_printf_string(L"%2.3ls", L"Test") == L"Tes");
 }
 
 TEST_CASE("printf: fail wchar_t string type mismatch", "[!shouldfail][common]")

@@ -138,16 +138,6 @@ inline void _To_string(wchar_t (&buffer)[StrSize], const wchar_t* formatString, 
 	_MST_SWPRINTF(buffer, StrSize, formatString, std::forward<Arg>(arg));
 }
 
-inline size_t _Strlen(const char* arg)
-{
-	return ::strlen(arg);
-}
-
-inline size_t _Strlen(const wchar_t* arg)
-{
-	return ::wcslen(arg);
-}
-
 template<typename _Elem>
 inline void _To_ptr_str(_Elem* buffer, size_t value)
 {
@@ -163,6 +153,32 @@ inline void _To_ptr_str(_Elem* buffer, size_t value)
 		--idx;
 		buffer[charIdx++] = hexChar[(value >> (idx * 4)) & 0xF];
 	} while(idx != 0);
+}
+
+template<bool IsWideChar>
+inline void length_format_string(char* buffer, size_t length, size_t fmtLength)
+{
+	if constexpr(IsWideChar)
+	{
+		_MST_SPRINTF(buffer, length, "%%.%zuls", fmtLength);
+	}
+	else
+	{
+		_MST_SPRINTF(buffer, length, "%%.%zus", fmtLength);
+	}
+}
+
+template<bool IsWideChar>
+inline void length_format_string(wchar_t* buffer, size_t length, size_t fmtLength)
+{
+	if constexpr(IsWideChar)
+	{
+		_MST_SWPRINTF(buffer, length, L"%%.%zuls", fmtLength);
+	}
+	else
+	{
+		_MST_SWPRINTF(buffer, length, L"%%.%zus", fmtLength);
+	}
 }
 
 template<typename Arg>
@@ -531,12 +547,32 @@ inline void get_string_format_arguments(std::basic_string_view<_ArgElem> arg,
 	if(pointIndex == std::string_view::npos)
 	{ // Example %255s
 		size_t value = 0;
-		const auto [ptr, _] =
-			std::from_chars(formatting.data(), formatting.data() + formatting.length(), value);
-
-		if(ptr != formatting.data() + formatting.length())
+		if constexpr(std::is_same_v<_FormatElem, char>)
 		{
-			MST_FATAL_ERROR("Invalid characters encountered during string argument parsing");
+			const auto [ptr, _] =
+				std::from_chars(formatting.data(), formatting.data() + formatting.length(), value);
+			if(ptr != formatting.data() + formatting.length())
+			{
+				MST_FATAL_ERROR("Invalid characters encountered during string argument parsing");
+			}
+		}
+		else
+		{
+			size_t processed = 0;
+			try
+			{
+				value = std::stoull(
+					std::basic_string<_FormatElem>{ formatting.begin(), formatting.end() },
+					&processed);
+			}
+			catch(...)
+			{
+				processed = 0;
+			}
+			if(processed != formatting.length())
+			{
+				MST_FATAL_ERROR("Invalid characters encountered during string argument parsing");
+			}
 		}
 		totalCount = std::max(arg.length(), value);
 	}
@@ -546,25 +582,70 @@ inline void get_string_format_arguments(std::basic_string_view<_ArgElem> arg,
 		totalCount = 0;
 		if(pointIndex < formatting.length() - 1)
 		{
-			const auto [ptr, _] = std::from_chars(formatting.data() + pointIndex + 1,
-				formatting.data() + formatting.length(), charCount);
-
-			if(ptr != formatting.data() + formatting.length())
+			if constexpr(std::is_same_v<_FormatElem, char>)
 			{
-				MST_FATAL_ERROR("Invalid characters encountered during string "
-								"argument parsing");
+				const auto [ptr, _] = std::from_chars(formatting.data() + pointIndex + 1,
+					formatting.data() + formatting.length(), charCount);
+
+				if(ptr != formatting.data() + formatting.length())
+				{
+					MST_FATAL_ERROR("Invalid characters encountered during string "
+									"argument parsing");
+				}
+			}
+			else
+			{
+				size_t processed = 0;
+				try
+				{
+					charCount = std::stoull(
+						std::basic_string<_FormatElem>{
+							formatting.begin() + pointIndex + 1, formatting.end() },
+						&processed);
+				}
+				catch(...)
+				{
+					processed = 0;
+				}
+				if(processed != (formatting.length() - pointIndex - 1))
+				{
+					MST_FATAL_ERROR(
+						"Invalid characters encountered during string argument parsing");
+				}
 			}
 			charCount = std::min(arg.length(), charCount);
 		}
 		if(pointIndex != 0)
 		{ // Example %25.s or %25.32s
-			const auto [ptr, _] =
-				std::from_chars(formatting.data(), formatting.data() + pointIndex, totalCount);
-
-			if(ptr != formatting.data() + pointIndex)
+			if constexpr(std::is_same_v<_FormatElem, char>)
 			{
-				MST_FATAL_ERROR("Invalid characters encountered during string "
-								"argument parsing");
+				const auto [ptr, _] =
+					std::from_chars(formatting.data(), formatting.data() + pointIndex, totalCount);
+
+				if(ptr != formatting.data() + pointIndex)
+				{
+					MST_FATAL_ERROR("Invalid characters encountered during string "
+									"argument parsing");
+				}
+			}
+			else
+			{
+				size_t processed = 0;
+				try
+				{
+					totalCount = std::stoull(std::basic_string<_FormatElem>{ formatting.begin(),
+												 formatting.begin() + pointIndex },
+						&processed);
+				}
+				catch(...)
+				{
+					processed = 0;
+				}
+				if(processed != pointIndex)
+				{
+					MST_FATAL_ERROR(
+						"Invalid characters encountered during string argument parsing");
+				}
 			}
 			totalCount = std::max(charCount, totalCount);
 		}
@@ -596,7 +677,7 @@ inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>&
 				}
 
 				_Elem tmpFmt[32];
-				_String_to_string(tmpFmt, 32, "%%.%zuls", charCount);
+				length_format_string<true>(tmpFmt, 32, charCount);
 
 				buffer.resize(startpos + totalCount + 1);
 				const auto paddingCount = totalCount - charCount;
@@ -635,7 +716,7 @@ inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>&
 		}
 
 		_Elem tmpFmt[32];
-		_String_to_string(tmpFmt, 32, "%%.%zus", std::min(charCount, argView.length()));
+		length_format_string<false>(tmpFmt, 32, std::min(charCount, argView.length()));
 
 		buffer.resize(startpos + totalCount + 1);
 		const auto paddingCount = totalCount - charCount;

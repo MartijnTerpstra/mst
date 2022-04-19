@@ -164,7 +164,11 @@ inline void length_format_string(char* buffer, size_t length, size_t fmtLength)
 	}
 	else
 	{
+#if _MST_USING_VC_COMPILER
+		_MST_SPRINTF(buffer, length, "%%.%zuhs", fmtLength);
+#else
 		_MST_SPRINTF(buffer, length, "%%.%zus", fmtLength);
+#endif
 	}
 }
 
@@ -177,7 +181,11 @@ inline void length_format_string(wchar_t* buffer, size_t length, size_t fmtLengt
 	}
 	else
 	{
+#if _MST_USING_VC_COMPILER
+		_MST_SWPRINTF(buffer, length, L"%%.%zuhs", fmtLength);
+#else
 		_MST_SWPRINTF(buffer, length, L"%%.%zus", fmtLength);
+#endif
 	}
 }
 

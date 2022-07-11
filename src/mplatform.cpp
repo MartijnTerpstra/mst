@@ -739,12 +739,9 @@ static inline mst::flag<mst::platform::processor_feature_flags> processor_featur
 
 #elif _MST_HAS_ARM
 
-#if MST_PLATFORM_MAC || MST_PLATFORM_LINUX
+#if MST_PLATFORM_LINUX
 #include <sys/auxv.h>
 #include <asm/hwcap.h>
-#else
-#error "ARM not implemented for platform"
-#endif
 
 static inline mst::flag<mst::platform::processor_feature_flags> processor_features_init() noexcept
 {
@@ -776,6 +773,23 @@ static inline mst::flag<mst::platform::processor_feature_flags> processor_featur
 #endif
 	return features;
 }
+
+#elif MST_PLATFORM_MAC
+
+static inline mst::flag<mst::platform::processor_feature_flags> processor_features_init() noexcept
+{
+	using mst::platform::processor_feature_flags;
+
+	// Apple does not provide a way to poll CPU features yet.
+	constexpr mst::flag<processor_feature_flags> features = { processor_feature_flags::neon,
+		processor_feature_flags::aes };
+
+	return features;
+}
+
+#else
+#error "ARM not implemented for platform"
+#endif
 
 #else
 

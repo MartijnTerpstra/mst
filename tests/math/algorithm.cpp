@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2022 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -28,8 +28,6 @@
 
 #include <set_assertions.h>
 #include <helpers.h>
-
-//#define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
 #include <mmath2.h>
 #include <mcommon.h>
 #include <vector>
@@ -309,4 +307,11 @@ TEST_CASE("math::cubic_interp: scalar", "[math][algorithm]")
 	REQUIRE(cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, 1.f) == 1.f);
 	REQUIRE_THAT(
 		cubic_interp(-0.5f, 0.0f, 1.0f, 1.5f, .5f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
+}
+
+TEST_CASE("math::clamp: scalar", "[math][algorithm]")
+{
+	REQUIRE(clamp(-1.f, 0, std::numeric_limits<float>::max()) == 0.f);
+	REQUIRE(clamp(-40.f, -100.f, std::numeric_limits<float>::max()) == -40.f);
+	REQUIRE(clamp(100.f, 0, 10) == 10.f);
 }

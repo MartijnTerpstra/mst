@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2022 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -152,8 +152,6 @@ TEST_CASE("colony<T>: should call T constructor & destructor", "[colony]")
 
 		std::mt19937 rand;
 
-		int32_t loopIndex = 0;
-
 		while(iters.size() > 8192)
 		{
 			std::uniform_int_distribution<> range(0, (int)iters.size() - 1);
@@ -163,8 +161,6 @@ TEST_CASE("colony<T>: should call T constructor & destructor", "[colony]")
 			intint.erase(iters[(size_t)iterIndex]);
 
 			iters.erase(iters.begin() + iterIndex);
-
-			++loopIndex;
 		}
 
 		for(int i = 0; i < 8192; ++i)

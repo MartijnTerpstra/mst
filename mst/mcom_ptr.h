@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2022 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -37,6 +37,15 @@ namespace mst {
 
 template<typename T>
 ::mst::_Details::_Com_ptr_combiner<T> initialize(::mst::com_ptr<T>& comObject);
+
+#if _MST_HAS_CONCEPTS
+template<typename T>
+concept ComObjectType requires(T t)
+{
+	{ t.AddRef() } -> std::uint32_t;
+	{ t.Release() } -> std::uint32_t;
+};
+#endif
 
 template<typename T>
 class com_ptr
@@ -121,14 +130,14 @@ public:
 		return (_MyPtr != 0);
 	}
 
-	inline ULONG reset() noexcept
+	inline std::uint32_t reset() noexcept
 	{
 		T* _Released = release();
 		if(_Released)
 		{
 			return _Released->Release();
 		}
-		return (ULONG)-1;
+		return 0;
 	}
 
 	inline T* release() noexcept

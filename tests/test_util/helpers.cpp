@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2022 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -27,3 +27,23 @@
 #include <catch2/catch.hpp>
 
 #include <helpers.h>
+#include <mmath2.h>
+
+using namespace mst::test_util;
+
+using vec3 = mst::math::vector<float, 3>;
+
+TEST_CASE("mst::test_util::helpers::approx_equal: epsilon", "[test_util]")
+{
+	const vec3 value = { 1.0f, 1.0f, 1.0f };
+	REQUIRE_THAT(value, approx_equal(vec3::zero, 1.0f));
+	REQUIRE_THAT(value, approx_equal(vec3{1.0f}, 0.0f));
+	REQUIRE_THAT(value, approx_equal(vec3{0.5f}, 0.50001f));
+	REQUIRE_THAT(value, approx_equal(vec3{-0.5f}, 1.50001f));
+}
+
+TEST_CASE("mst::test_util::helpers::approx_equal: difference bigger than epsilon", "[test_util][!shouldfail]")
+{
+	const vec3 value = { 1.0f, 1.0f, 1.0f };
+	REQUIRE_THAT(value, approx_equal(vec3{-0.5f}, 1.499999f));
+}

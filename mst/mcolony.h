@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2022 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -532,37 +532,6 @@ private:
 	inline void destroy_impl(T&, std::true_type) noexcept
 	{
 		// do nothing
-	}
-
-	inline void destroy_impl(T& t, std::false_type) noexcept
-	{
-		t.~T();
-	}
-
-	inline void destroy(T& t) noexcept
-	{
-		destroy_impl(t, typename std::is_trivially_destructible<T>::type{});
-	}
-
-	inline void destroy_pages_impl(ElemType**, int32_t, std::true_type) noexcept
-	{
-		// do nothing
-	}
-
-	inline void destroy_pages_impl(ElemType** pages, int32_t pageCount, std::false_type) noexcept
-	{
-		for(int32_t p = 0; p < pageCount; ++p)
-		{
-			for(int32_t e; e < ElementsPerPage; ++e)
-			{
-				pages[p].elements[e].elem.~T();
-			}
-		}
-	}
-
-	inline void destroy_pages(ElemType** pages, int32_t pageCount) noexcept
-	{
-		destroy_pages_impl(pages, pageCount, typename std::is_trivially_destructible<T>::type{});
 	}
 
 	inline void destroy_all()

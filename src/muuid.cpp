@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2022 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -27,11 +27,12 @@
 
 #include <random>
 #include <mutex>
+#include <memory>
 
 ::std::string mst::_Details::uuid_helper::to_string(std::array<uint8_t, 16> const& data)
 {
-	constexpr char chars[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
-		'D', 'E', 'F' };
+	constexpr char chars[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+		'E', 'F' };
 
 	std::string retval;
 	retval.reserve(36);
@@ -89,9 +90,10 @@ static uint64_t random_seed()
 
 std::array<uint8_t, 16> mst::_Details::uuid_helper::generate()
 {
-	thread_local static std::mt19937_64 rng{ random_seed() };
+	thread_local static std::unique_ptr<std::mt19937_64> rng =
+		std::make_unique<std::mt19937_64>(random_seed());
 
-	std::array numbers{ rng(), rng() };
+	std::array numbers{ (*rng)(), (*rng)() };
 
 
 	std::array<uint8_t, 16> data;

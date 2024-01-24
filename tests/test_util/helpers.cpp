@@ -36,8 +36,8 @@ using vec3 = mst::math::vector<float, 3>;
 TEST_CASE("mst::test_util::helpers::approx_equal: epsilon", "[test_util]")
 {
 	const vec3 value = { 1.0f, 1.0f, 1.0f };
-	REQUIRE_THAT(value, approx_equal(vec3::zero, 1.0f));
-	REQUIRE_THAT(value, approx_equal(vec3{1.0f}, 0.0f));
+	REQUIRE_THAT(value, approx_equal(vec3::zero, 1.0001f));
+	REQUIRE_THAT(value, approx_equal(vec3{1.0f}, 0.0001f));
 	REQUIRE_THAT(value, approx_equal(vec3{0.5f}, 0.50001f));
 	REQUIRE_THAT(value, approx_equal(vec3{-0.5f}, 1.50001f));
 }

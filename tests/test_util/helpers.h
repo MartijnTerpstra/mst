@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -63,16 +63,13 @@ public:
 		return _Match(left, m_right, [this](const value_type& l, const value_type& r) {
 			if(m_percentage == 0)
 			{
-				return abs(l - r) < m_epsilon;
+				return absolute(l - r) < m_epsilon;
 			}
-			else if(abs(r) < m_epsilon)
+			else if(absolute(r) < m_epsilon)
 			{
-				return l < m_epsilon;
+				return absolute(l) < m_epsilon;
 			}
-			else
-			{
-				return abs(l - r) / r < m_percentage;
-			}
+			return absolute(l - r) / r < m_percentage;
 		});
 	}
 
@@ -131,6 +128,20 @@ private:
 		}
 
 		return success;
+	}
+
+	template<typename T>
+	inline static T absolute(T const& t)
+	{
+		if constexpr(std::is_floating_point_v<T>)
+		{
+			return std::fabs(t);
+		}
+		else if constexpr(std::is_unsigned_v<T>)
+		{
+			return t;
+		}
+		return std::abs(t);
 	}
 
 private:

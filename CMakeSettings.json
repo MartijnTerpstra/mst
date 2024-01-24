@@ -5,12 +5,12 @@
       "generator": "Unix Makefiles",
       "remoteMachineName": "${defaultRemoteMachineName}",
       "configurationType": "Debug",
-      "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
+      "remoteCMakeListsRoot": "/var/tmp/src/mst/${name}",
       "cmakeExecutable": "/usr/local/bin/cmake",
       "buildRoot": "${projectDir}\\..\\_build\\${name}",
       "installRoot": "${projectDir}\\..\\_install\\${name}",
-      "remoteBuildRoot": "/home/martijn/project/build/${name}",
-      "remoteInstallRoot": "/home/martijn/project/install/${name}",
+      "remoteBuildRoot": "~/projects/build/${name}",
+      "remoteInstallRoot": "~/projects/install/${name}",
       "remoteCopySources": true,
       "remoteCopySourcesOutputVerbosity": "Normal",
       "remoteCopySourcesConcurrentCopies": "10",
@@ -76,7 +76,7 @@
       "generator": "Unix Makefiles",
       "remoteMachineName": "${defaultRemoteMachineName}",
       "configurationType": "Debug",
-      "remoteCMakeListsRoot": "~/projects/mst/${name}",
+      "remoteCMakeListsRoot": "/tmp/projects/mst/${name}",
       "cmakeExecutable": "/usr/local/bin/cmake",
       "buildRoot": "${projectDir}\\..\\_build\\${name}",
       "installRoot": "${projectDir}\\..\\_install\\${name}",
@@ -85,7 +85,7 @@
       "remoteCopySources": true,
       "remoteCopySourcesOutputVerbosity": "Normal",
       "remoteCopySourcesConcurrentCopies": "10",
-      "remoteCopySourcesMethod": "sftp",
+      "remoteCopySourcesMethod": "rsync",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", ".svn", "_build", "_install" ],
       "rsyncCommandArgs": "-t --delete --delete-excluded",
       "remoteCopyBuildOutput": false,
@@ -103,6 +103,16 @@
           "name": "BUILD_TESTING",
           "value": "True",
           "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "g++",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "gcc",
+          "type": "STRING"
         }
       ]
     },
@@ -203,7 +213,7 @@
       "remoteCopySources": true,
       "rsyncCommandArgs": "-t --delete --delete-excluded",
       "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "sftp"
+      "remoteCopySourcesMethod": "rsync"
     },
     {
       "name": "Linux-x64-Clang-Test",
@@ -212,7 +222,7 @@
       "buildRoot": "${projectDir}\\..\\_build\\${name}",
       "installRoot": "${projectDir}\\..\\_install\\${name}",
       "cmakeExecutable": "/usr/local/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", ".svn", "_build", "_install" ],
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", ".svn", "_build", "_install", "build" ],
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",

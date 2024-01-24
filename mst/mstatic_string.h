@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -118,7 +118,7 @@ public:
 	constexpr basic_static_string(IteratorType begin, IteratorType end)
 	{
 		MST_ASSERT(end >= begin, "iterator range: begin should not be past end iterator");
-		MST_ASSERT((end - begin) <= max_size(), "iterator range: length overflow");
+		MST_ASSERT(static_cast<size_t>(end - begin) <= max_size(), "iterator range: length overflow");
 
 		while(begin != end)
 		{

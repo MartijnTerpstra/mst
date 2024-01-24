@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -37,13 +37,14 @@
 #include <cmath>
 #include <mx_math2.h>
 
-#if MST_MATH_NO_SIMD || MST_NO_SIMD
+#if MST_MATH_NO_SIMD
 #define _MST_MATH_SIMD_ENABLED 0
-#else // !MST_MATH_NO_SIMD
-
-#ifndef _MST_MATH_SIMD_ENABLED
+#elif MST_NO_SIMD
+#define _MST_MATH_SIMD_ENABLED 0
+#elif _MST_HAS_ARM
+#define _MST_MATH_SIMD_ENABLED 0
+#else
 #define _MST_MATH_SIMD_ENABLED 1
-#endif
 
 #include <xmmintrin.h>
 #include <emmintrin.h>

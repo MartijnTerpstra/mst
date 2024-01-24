@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -53,11 +53,17 @@ TEST_CASE("uuid: string conversions", "[uuid]")
 	auto random = mst::uuid::create();
 	auto random2 = mst::create_zero_uuid();
 
-	auto res = random.to_string();
-
 	REQUIRE(mst::uuid::try_parse(random.to_string(), random2));
+	REQUIRE(mst::uuid::parse(random.to_string()) == random2);
 
 	REQUIRE(random.to_string() != mst::create_zero_uuid().to_string());
 	REQUIRE(random == random2);
 	REQUIRE(random.to_string() == random2.to_string());
+}
+
+TEST_CASE("uuid: try_parse returns false on invalid string", "[uuid]")
+{
+	auto random2 = mst::create_zero_uuid();
+
+	REQUIRE(!mst::uuid::try_parse("12BCDEF;~{dwgrgaRE df;f- 1403- /*-+", random2));
 }

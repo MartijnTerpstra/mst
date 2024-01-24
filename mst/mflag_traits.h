@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -24,6 +24,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+
+#include <mtype_traits.h>
 
 namespace mst {
 
@@ -91,4 +93,4 @@ struct flag_traits
 #endif // MST_USE_PRESHIFTED_FLAGS_AS_DEFAULT
 { };
 
-}; // namespace mst
+} // namespace mst

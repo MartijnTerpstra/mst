@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -121,4 +121,4 @@ inline iterator_range<const T*> crange(T (&arr)[Size])
 	return iterator_range<const T*>(arr, arr + Size);
 }
 
-}; // namespace mst
+} // namespace mst

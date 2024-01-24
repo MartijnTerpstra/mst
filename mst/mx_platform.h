@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -69,7 +69,7 @@ bool set_current_directory_impl(const char* path) noexcept;
 uint32_t get_page_size_impl() noexcept;
 uint32_t get_processor_core_count_impl() noexcept;
 uint32_t get_processor_thread_count_impl() noexcept;
-uint32_t processor_features_impl() noexcept;
+uint64_t processor_features_impl() noexcept;
 
 uint64_t get_current_thread_id() noexcept;
 

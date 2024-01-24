@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -104,7 +104,7 @@ inline void _Check_printf(const char* formatString, size_t strIndex, size_t strL
 	}
 }
 
-}; // namespace _Details
+} // namespace _Details
 
 MST_VARIADIC_TEMPLATE_DECL
 inline void printf(const char* formatString MST_VARIADIC_TEMPLATE_REFFS_COMMA)

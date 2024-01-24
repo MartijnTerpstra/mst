@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <array>
+
 namespace mst {
 
 class alignas(16) uuid;
@@ -34,13 +36,9 @@ namespace _Details {
 class uuid_helper
 {
 public:
-	static ::std::string to_string(__m128i _Data);
+	static ::std::string to_string(std::array<uint8_t, 16> const& data);
 
-	static bool try_parse(const char* str, __m128i& data) noexcept;
-
-	static __m128i parse(const char* str) noexcept;
-
-	static void generate(__m128i& data);
+	static std::array<uint8_t, 16> generate();
 };
 
 } // namespace _Details

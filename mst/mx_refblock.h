@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -378,5 +378,5 @@ private:
 _MST_ADD_CV_TO_POINTER_TO_CONST(::mst::smart_ptr<T>, ::mst::smart_ptr<const T>)
 _MST_ADD_CV_TO_POINTER_TO_CONST(::mst::back_ptr<T>, ::mst::back_ptr<const T>)
 
-};
-}; // namespace mst::_Details
+} // namespace _Details
+} // namespace mst

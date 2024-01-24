@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -92,5 +92,5 @@ _Com_ptr_combiner_ppv_args<T> _Initialize_ppv_args(::mst::com_ptr<T>& _Ptr)
 	return _Com_ptr_combiner_ppv_args<T>(_Ptr);
 }
 
-}; // namespace _Details
-}; // namespace mst
+} // namespace _Details
+} // namespace mst

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -60,4 +60,4 @@ bool contains(_Container& _Cont, const _Type& _Ty)
 	return ::std::find(::std::begin(_Cont), ::std::end(_Cont), _Ty) != ::std::end(_Cont);
 }
 
-}; // namespace mst
+} // namespace mst

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -68,5 +68,5 @@ constexpr uint64_t hash_of64()
 	return ::mst::_Details::compiletime_hash_of64<T>();
 }
 
-}; // namespace compiletime
-}; // namespace mst
+} // namespace compiletime
+} // namespace mst

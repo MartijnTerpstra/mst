@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -28,6 +28,7 @@
 #include <limits.h>
 #include <float.h>
 #include <cstring>
+#include <charconv>
 #include <mx_is_string_type.h>
 
 namespace mst {
@@ -35,68 +36,6 @@ namespace mst {
 namespace _Details {
 
 #define _MST_FORMAT_STRING_SIZE (512)
-
-template<typename T>
-inline const char* _To_char_pointer_impl(const T& _Val, ::std::false_type)
-{
-	_MST_UNUSED(_Val);
-	MST_FATAL_ERROR("Value does not convert to a string pointer");
-	return nullptr;
-}
-
-template<typename T>
-inline const char* _To_char_pointer_impl(const T& _Val, ::std::true_type)
-{
-	return _Val.c_str();
-}
-
-template<typename T>
-inline const char* _To_char_pointer(const T& _Val)
-{
-	return _To_char_pointer_impl(_Val, typename ::mst::is_string_type<T>::type());
-}
-
-inline const char* _To_char_pointer(const char* const& _Val)
-{
-	return _Val;
-}
-
-template<size_t _Elemcount>
-inline const char* _To_char_pointer(const char (&_Val)[_Elemcount])
-{
-	return _Val;
-}
-
-template<typename T>
-inline const wchar_t* _To_wchar_t_pointer_impl(const T& _Val, std::true_type)
-{
-	return _Val.c_str();
-}
-
-template<typename T>
-inline const wchar_t* _To_wchar_t_pointer_impl(const T& _Val, std::false_type)
-{
-	_MST_UNUSED(_Val);
-	MST_FATAL_ERROR("Value does not convert to a string pointer");
-	return nullptr;
-}
-
-template<typename T>
-inline const wchar_t* _To_wchar_t_pointer(const T& _Val)
-{
-	return _To_wchar_t_pointer_impl(_Val, typename ::mst::is_wstring_type<T>::type());
-}
-
-inline const wchar_t* _To_wchar_t_pointer(const wchar_t* const& _Val)
-{
-	return _Val;
-}
-
-template<size_t _Elemcount>
-inline const wchar_t* _To_wchar_t_pointer(const wchar_t (&_Val)[_Elemcount])
-{
-	return _Val;
-}
 
 inline bool _Is_format_char(char _Val)
 {
@@ -199,16 +138,6 @@ inline void _To_string(wchar_t (&buffer)[StrSize], const wchar_t* formatString, 
 	_MST_SWPRINTF(buffer, StrSize, formatString, std::forward<Arg>(arg));
 }
 
-inline size_t _Strlen(const char* arg)
-{
-	return ::strlen(arg);
-}
-
-inline size_t _Strlen(const wchar_t* arg)
-{
-	return ::wcslen(arg);
-}
-
 template<typename _Elem>
 inline void _To_ptr_str(_Elem* buffer, size_t value)
 {
@@ -226,6 +155,40 @@ inline void _To_ptr_str(_Elem* buffer, size_t value)
 	} while(idx != 0);
 }
 
+template<bool IsWideChar>
+inline void length_format_string(char* buffer, size_t length, size_t fmtLength)
+{
+	if constexpr(IsWideChar)
+	{
+		_MST_SPRINTF(buffer, length, "%%.%zuls", fmtLength);
+	}
+	else
+	{
+#if _MST_USING_VC_COMPILER
+		_MST_SPRINTF(buffer, length, "%%.%zuhs", fmtLength);
+#else
+		_MST_SPRINTF(buffer, length, "%%.%zus", fmtLength);
+#endif
+	}
+}
+
+template<bool IsWideChar>
+inline void length_format_string(wchar_t* buffer, size_t length, size_t fmtLength)
+{
+	if constexpr(IsWideChar)
+	{
+		_MST_SWPRINTF(buffer, length, L"%%.%zuls", fmtLength);
+	}
+	else
+	{
+#if _MST_USING_VC_COMPILER
+		_MST_SWPRINTF(buffer, length, L"%%.%zuhs", fmtLength);
+#else
+		_MST_SWPRINTF(buffer, length, L"%%.%zus", fmtLength);
+#endif
+	}
+}
+
 template<typename Arg>
 inline void _String_to_string(char* buffer, size_t length, const char* formatString, Arg&& arg)
 {
@@ -241,7 +204,7 @@ inline void _String_to_string(
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::true_type)
+	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
 	_Elem fmt[32] = {};
 
@@ -254,7 +217,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			{
 				MST_FATAL_ERROR("Invalid format specifier");
 			}
-			if(arg >= SCHAR_MIN && arg <= SCHAR_MAX)
+			if(arg <= SCHAR_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= SCHAR_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<signed char>(arg));
 				buffer.append(fmt);
@@ -270,7 +234,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			{
 				MST_FATAL_ERROR("Invalid format specifier");
 			}
-			if(arg >= LLONG_MIN && arg <= LLONG_MAX)
+			if(arg <= LLONG_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= LLONG_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<long long int>(arg));
 				buffer.append(fmt);
@@ -290,7 +255,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 		switch(formatString[stringLength - 2])
 		{
 		case 'h': // '%hd' or '%hi' => short int type
-			if(arg >= SHRT_MIN && arg <= SHRT_MAX)
+			if(arg <= SHRT_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= SHRT_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<short int>(arg));
 				buffer.append(fmt);
@@ -302,7 +268,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			return;
 		case 'l': // '%ld' or '%li' => long int type
-			if(arg >= LONG_MIN && arg <= LONG_MAX)
+			if(arg <= LONG_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= LONG_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<long int>(arg));
 				buffer.append(fmt);
@@ -314,7 +281,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			return;
 		case 'j': // '%jd' or '%ji' => intmax_t type
-			if(arg >= INTMAX_MIN && arg <= INTMAX_MAX)
+			if(arg <= INTMAX_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= INTMAX_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<intmax_t>(arg));
 				buffer.append(fmt);
@@ -338,7 +306,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 			}
 			return;
 		case 't': // '%td' or '%ti' => ptrdiff_t type
-			if(arg >= PTRDIFF_MIN && arg <= PTRDIFF_MAX)
+			if(arg <= PTRDIFF_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= PTRDIFF_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<ptrdiff_t>(arg));
 				buffer.append(fmt);
@@ -355,7 +324,7 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 	}
 
 	// '%d' or '%i' => int type
-	if(arg >= INT_MIN && arg <= INT_MAX)
+	if(arg <= INT_MAX && (std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= INT_MIN))
 	{
 		_To_string(fmt, formatString, static_cast<int>(arg));
 		buffer.append(fmt);
@@ -368,19 +337,8 @@ inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, 
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
-inline void _Append_signed_integer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::false_type)
-{
-	_MST_UNUSED(buffer);
-	_MST_UNUSED(formatString);
-	_MST_UNUSED(stringLength);
-	_MST_UNUSED(arg);
-	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
-}
-
-template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::true_type)
+	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
 	_Elem fmt[32] = {};
 
@@ -507,19 +465,8 @@ inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
-inline void _Append_unsigned_integer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::false_type)
-{
-	_MST_UNUSED(buffer);
-	_MST_UNUSED(formatString);
-	_MST_UNUSED(stringLength);
-	_MST_UNUSED(arg);
-	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
-}
-
-template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::true_type)
+	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
 	// Double can get quite big
 	_Elem fmt[512] = {};
@@ -550,50 +497,18 @@ inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, 
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
-inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::false_type)
-{
-	_MST_UNUSED(buffer);
-	_MST_UNUSED(formatString);
-	_MST_UNUSED(stringLength);
-	_MST_UNUSED(arg);
-	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
-}
-
-template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_pointer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::true_type)
+	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
 	_MST_UNUSED(stringLength);
 	_Elem fmt[32] = {};
-
-	// '%p' => pointer type
-	if constexpr(std::is_pointer_v<std::decay_t<Arg>>)
-	{
-		_To_ptr_str(fmt, reinterpret_cast<size_t>(arg));
-		buffer.append(fmt);
-		return;
-	}
-	else
-	{
-		MST_FATAL_ERROR("Argument could not be contained by this format specifier");
-	}
-}
-
-template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
-inline void _Append_pointer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::false_type)
-{
-	_MST_UNUSED(buffer);
-	_MST_UNUSED(formatString);
-	_MST_UNUSED(stringLength);
-	_MST_UNUSED(arg);
-	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+	_To_ptr_str(fmt, reinterpret_cast<size_t>(arg));
+	buffer.append(fmt);
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::true_type)
+	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
 	_Elem fmt[32] = {};
 
@@ -602,7 +517,8 @@ inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Allo
 		switch(formatString[stringLength - 2])
 		{
 		case(_Elem)'l': // '%lc' => wint_t type
-			if(arg >= WINT_MIN && arg <= WINT_MAX)
+			if(arg <= WINT_MAX &&
+				(std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= WINT_MIN))
 			{
 				_To_string(fmt, formatString, static_cast<wint_t>(arg));
 				buffer.append(fmt);
@@ -619,7 +535,7 @@ inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Allo
 	}
 
 	// '%c' => int type
-	if(arg >= INT_MIN && arg <= INT_MAX)
+	if(arg <= INT_MAX && (std::is_unsigned_v<_Elem> || static_cast<intmax_t>(arg) >= INT_MIN))
 	{
 		_To_string(fmt, formatString, static_cast<int>(arg));
 		buffer.append(fmt);
@@ -631,67 +547,200 @@ inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Allo
 	}
 }
 
-template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
-inline void _Append_character_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg, ::std::false_type)
+template<typename _ArgElem, typename _FormatElem>
+inline void get_string_format_arguments(std::basic_string_view<_ArgElem> arg,
+	std::basic_string_view<_FormatElem> formatting, size_t& totalCount, size_t& charCount)
 {
-	_MST_UNUSED(buffer);
-	_MST_UNUSED(formatString);
-	_MST_UNUSED(stringLength);
-	_MST_UNUSED(arg);
-	MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+	const auto pointIndex = formatting.find((_FormatElem)'.');
+	if(pointIndex == std::string_view::npos)
+	{ // Example %255s
+		size_t value = 0;
+		if constexpr(std::is_same_v<_FormatElem, char>)
+		{
+			const auto [ptr, _] =
+				std::from_chars(formatting.data(), formatting.data() + formatting.length(), value);
+			if(ptr != formatting.data() + formatting.length())
+			{
+				MST_FATAL_ERROR("Invalid characters encountered during string argument parsing");
+			}
+		}
+		else
+		{
+			size_t processed = 0;
+			try
+			{
+				value = std::stoull(
+					std::basic_string<_FormatElem>{ formatting.begin(), formatting.end() },
+					&processed);
+			}
+			catch(...)
+			{
+				processed = 0;
+			}
+			if(processed != formatting.length())
+			{
+				MST_FATAL_ERROR("Invalid characters encountered during string argument parsing");
+			}
+		}
+		totalCount = std::max(arg.length(), value);
+	}
+	else
+	{
+		charCount = 0;
+		totalCount = 0;
+		if(pointIndex < formatting.length() - 1)
+		{
+			if constexpr(std::is_same_v<_FormatElem, char>)
+			{
+				const auto [ptr, _] = std::from_chars(formatting.data() + pointIndex + 1,
+					formatting.data() + formatting.length(), charCount);
+
+				if(ptr != formatting.data() + formatting.length())
+				{
+					MST_FATAL_ERROR("Invalid characters encountered during string "
+									"argument parsing");
+				}
+			}
+			else
+			{
+				size_t processed = 0;
+				try
+				{
+					charCount = std::stoull(
+						std::basic_string<_FormatElem>{
+							formatting.begin() + pointIndex + 1, formatting.end() },
+						&processed);
+				}
+				catch(...)
+				{
+					processed = 0;
+				}
+				if(processed != (formatting.length() - pointIndex - 1))
+				{
+					MST_FATAL_ERROR(
+						"Invalid characters encountered during string argument parsing");
+				}
+			}
+			charCount = std::min(arg.length(), charCount);
+		}
+		if(pointIndex != 0)
+		{ // Example %25.s or %25.32s
+			if constexpr(std::is_same_v<_FormatElem, char>)
+			{
+				const auto [ptr, _] =
+					std::from_chars(formatting.data(), formatting.data() + pointIndex, totalCount);
+
+				if(ptr != formatting.data() + pointIndex)
+				{
+					MST_FATAL_ERROR("Invalid characters encountered during string "
+									"argument parsing");
+				}
+			}
+			else
+			{
+				size_t processed = 0;
+				try
+				{
+					totalCount = std::stoull(std::basic_string<_FormatElem>{ formatting.begin(),
+												 formatting.begin() + pointIndex },
+						&processed);
+				}
+				catch(...)
+				{
+					processed = 0;
+				}
+				if(processed != pointIndex)
+				{
+					MST_FATAL_ERROR(
+						"Invalid characters encountered during string argument parsing");
+				}
+			}
+			totalCount = std::max(charCount, totalCount);
+		}
+	}
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_string_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
 	const _Elem* formatString, size_t stringLength, Arg&& arg)
 {
-	if(stringLength < 2 || stringLength > 3)
-	{
-		MST_FATAL_ERROR("Argument could not be converted to this format specifier");
-	}
-	else if(stringLength == 3 && (formatString[1] != (_Elem)'l' && formatString[2] != (_Elem)'s'))
-	{
-		MST_FATAL_ERROR("'%ls' or '%s' argument expected");
-	}
-	else if(stringLength == 2 && formatString[1] != (_Elem)'s')
-	{
-		MST_FATAL_ERROR("'%ls' or '%s' argument expected");
-	}
+	size_t const startpos = buffer.length();
 
-	size_t _Startpos = buffer.length();
-	size_t _Len;
-
-	if(stringLength >= 2)
+	if(stringLength >= 3)
 	{
 		switch(formatString[stringLength - 2])
 		{
-		case L'l': // '%ls' => const w_char_t* type
+		case(_Elem)'l': // '%ls' => const w_char_t* type
+			if constexpr(std::is_constructible_v<std::wstring_view, decltype(arg)>)
+			{
+				const std::wstring_view argView{ arg };
 
-			_Len = _Strlen(_To_wchar_t_pointer(arg)) + 1;
+				size_t totalCount = argView.length();
+				size_t charCount = argView.length();
+				if(stringLength > 3)
+				{ // Example: %3213.42s
+					get_string_format_arguments(argView,
+						std::basic_string_view{ formatString + 1, stringLength - 3 }, totalCount,
+						charCount);
+				}
 
-			buffer.resize(_Startpos + _Len);
+				_Elem tmpFmt[32];
+				length_format_string<true>(tmpFmt, 32, charCount);
 
-			_String_to_string(&buffer[_Startpos], _Len, formatString,
-				static_cast<const wchar_t*>(_To_wchar_t_pointer(arg)));
+				buffer.resize(startpos + totalCount + 1);
+				const auto paddingCount = totalCount - charCount;
+				for(size_t spaceIdx = 0; spaceIdx < paddingCount; ++spaceIdx)
+				{
+					buffer[startpos + spaceIdx] = (_Elem)' ';
+				}
 
-			// remove trailing '\0'
-			buffer.pop_back();
+				_String_to_string(
+					&buffer[startpos + paddingCount], charCount + 1, tmpFmt, argView.data());
+				// remove trailing '\0'
+				buffer.pop_back();
+			}
+			else
+			{
+				MST_FATAL_ERROR("Argument could not be contained by this format specifier");
+			}
 			return;
 		default:
 			break;
 		}
 	}
 
-	_Len = _Strlen(_To_char_pointer(arg)) + 1;
-
-	buffer.resize(_Startpos + _Len);
-
 	// '%s' => const char* type
-	_String_to_string(
-		&buffer[_Startpos], _Len, formatString, static_cast<const char*>(_To_char_pointer(arg)));
-	// remove trailing '\0'
-	buffer.pop_back();
+	if constexpr(std::is_constructible_v<std::string_view, decltype(arg)>)
+	{
+		const std::string_view argView{ arg };
+
+		size_t totalCount = argView.length();
+		size_t charCount = argView.length();
+		if(stringLength > 2)
+		{ // Example: %3213s
+			get_string_format_arguments(argView,
+				std::basic_string_view{ formatString + 1, stringLength - 2 }, totalCount,
+				charCount);
+		}
+
+		_Elem tmpFmt[32];
+		length_format_string<false>(tmpFmt, 32, std::min(charCount, argView.length()));
+
+		buffer.resize(startpos + totalCount + 1);
+		const auto paddingCount = totalCount - charCount;
+		for(size_t spaceIdx = 0; spaceIdx < paddingCount; ++spaceIdx)
+		{
+			buffer[startpos + spaceIdx] = (_Elem)' ';
+		}
+
+		_String_to_string(&buffer[startpos + paddingCount], charCount + 1, tmpFmt, argView.data());
+		// remove trailing '\0'
+		buffer.pop_back();
+	}
+	else
+	{
+		MST_FATAL_ERROR("Argument could not be contained by this format specifier");
+	}
 }
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
@@ -702,19 +751,29 @@ inline void _Append_argument_impl(::std::basic_string<_Elem, _Traits, _Alloc>& b
 	{
 	case L'd':
 	case L'i':
-		_Append_signed_integer_argument(buffer, formatString, stringLength,
-			::std::forward<Arg>(arg),
-			typename ::std::is_integral<typename std::remove_cv<
-				typename ::std::remove_reference<Arg>::type>::type>::type());
+		if constexpr(std::is_integral_v<std::decay_t<Arg>>)
+		{
+			_Append_signed_integer_argument(
+				buffer, formatString, stringLength, ::std::forward<Arg>(arg));
+		}
+		else
+		{
+			MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+		}
 		return;
 	case L'u':
 	case L'o':
 	case L'x':
 	case L'X':
-		_Append_unsigned_integer_argument(buffer, formatString, stringLength,
-			::std::forward<Arg>(arg),
-			typename ::std::is_integral<typename std::remove_cv<
-				typename ::std::remove_reference<Arg>::type>::type>::type());
+		if constexpr(std::is_integral_v<std::decay_t<Arg>>)
+		{
+			_Append_unsigned_integer_argument(
+				buffer, formatString, stringLength, ::std::forward<Arg>(arg));
+		}
+		else
+		{
+			MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+		}
 		return;
 	case L'f':
 	case L'F':
@@ -724,26 +783,60 @@ inline void _Append_argument_impl(::std::basic_string<_Elem, _Traits, _Alloc>& b
 	case L'G':
 	case L'a':
 	case L'A':
-		_Append_floating_point_argument(buffer, formatString, stringLength,
-			::std::forward<Arg>(arg),
-			typename ::std::is_arithmetic<typename std::remove_cv<
-				typename ::std::remove_reference<Arg>::type>::type>::type());
+		if constexpr(std::is_arithmetic_v<std::decay_t<Arg>>)
+		{
+			_Append_floating_point_argument(
+				buffer, formatString, stringLength, ::std::forward<Arg>(arg));
+		}
+		else
+		{
+			MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+		}
 		return;
 	case L'c':
-		_Append_character_argument(buffer, formatString, stringLength, ::std::forward<Arg>(arg),
-			typename ::std::is_integral<typename std::remove_cv<
-				typename ::std::remove_reference<Arg>::type>::type>::type());
+		if constexpr(std::is_integral_v<std::decay_t<Arg>>)
+		{
+			_Append_character_argument(
+				buffer, formatString, stringLength, ::std::forward<Arg>(arg));
+		}
+		else
+		{
+			MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+		}
 		return;
 	case L's':
 		_Append_string_argument(buffer, formatString, stringLength, ::std::forward<Arg>(arg));
 		return;
 	case L'p':
-		_Append_pointer_argument(buffer, formatString, stringLength, ::std::forward<Arg>(arg),
-			typename ::std::is_pointer<typename std::remove_cv<
-				typename ::std::remove_reference<Arg>::type>::type>::type());
+		if constexpr(std::is_pointer_v<std::decay_t<Arg>>)
+		{
+			_Append_pointer_argument(buffer, formatString, stringLength, ::std::forward<Arg>(arg));
+		}
+		else
+		{
+			MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+		}
 		return;
 	case L'n':
-		MST_BREAKPOINT;
+		if constexpr(std::is_pointer_v<std::decay_t<Arg>> &&
+					 !std::is_const_v<std::remove_pointer_t<std::decay_t<Arg>>> &&
+					 std::is_integral_v<std::remove_pointer_t<std::decay_t<Arg>>>)
+		{
+			using PointerIntType = std::remove_pointer_t<std::decay_t<Arg>>;
+			if(buffer.length() <= std::numeric_limits<PointerIntType>::max())
+			{
+				*arg = static_cast<PointerIntType>(buffer.length());
+			}
+			else
+			{
+				MST_FATAL_ERROR("Buffer length does not fit in n parameter");
+			}
+		}
+		else
+		{
+			MST_FATAL_ERROR("Argument could not be converted to this format specifier");
+		}
+		return;
 	default:
 		MST_FATAL_ERROR("Invalid format specifier");
 	}

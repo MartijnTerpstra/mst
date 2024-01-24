@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -155,7 +155,7 @@ inline uint32_t processor_thread_count() noexcept
 	return ::mst::_Details::get_processor_thread_count_impl();
 }
 
-enum class processor_feature_flags : uint32_t
+enum class processor_feature_flags : uint64_t
 {
 	// Advanced Encryption Standard
 	aes,
@@ -204,6 +204,12 @@ enum class processor_feature_flags : uint32_t
 
 	// 512-bits Intel Advanced Vector Extensions, Byte and Word Instructions
 	avx512bw,
+
+	// ARM Advanced SIMD
+	asimd,
+
+	// ARM neon advances vector instructions
+	neon
 };
 
 inline mst::flag<processor_feature_flags> processor_features() noexcept

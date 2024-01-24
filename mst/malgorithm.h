@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -49,4 +49,4 @@ inline void for_each(_Iterator _Begin, _Iterator _End, _Function _Func)
 	::std::for_each(_Begin, _End, _Func);
 }
 
-}; // namespace mst
+} // namespace mst

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -34,6 +34,18 @@
 #include <mx_com_ptr.h>
 
 namespace mst {
+
+template<typename T>
+::mst::_Details::_Com_ptr_combiner<T> initialize(::mst::com_ptr<T>& comObject);
+
+#if _MST_HAS_CONCEPTS
+template<typename T>
+concept ComObjectType requires(T t)
+{
+	{ t.AddRef() } -> std::uint32_t;
+	{ t.Release() } -> std::uint32_t;
+};
+#endif
 
 template<typename T>
 class com_ptr
@@ -118,14 +130,14 @@ public:
 		return (_MyPtr != 0);
 	}
 
-	inline ULONG reset() noexcept
+	inline std::uint32_t reset() noexcept
 	{
 		T* _Released = release();
 		if(_Released)
 		{
 			return _Released->Release();
 		}
-		return (ULONG)-1;
+		return 0;
 	}
 
 	inline T* release() noexcept
@@ -145,7 +157,8 @@ public:
 	{
 		if(_MyPtr == nullptr)
 		{
-			ERROR_MESG("com_ptr<T>::as(): invalid call: pointer does not point to a valid object");
+			MST_FATAL_ERROR(
+				"com_ptr<T>::as(): invalid call: pointer does not point to a valid object");
 		}
 
 		static_assert(::std::is_base_of<IUnknown, T2>::value, "T2 must inherit from IUnknown");
@@ -153,11 +166,12 @@ public:
 	}
 
 	template<typename T2>
-	bool is() const
+	inline bool is() const
 	{
 		if(_MyPtr == nullptr)
 		{
-			ERROR_MESG("com_ptr<T>::is(): invalid call: pointer does not point to a valid object");
+			MST_FATAL_ERROR(
+				"com_ptr<T>::is(): invalid call: pointer does not point to a valid object");
 		}
 
 		com_ptr<T2> _Right;
@@ -207,15 +221,14 @@ public:
 
 private:
 	template<typename T2>
-	com_ptr<T2> _As(::std::true_type) const noexcept
+	inline com_ptr<T2> _As(::std::true_type) const noexcept
 	{
 		return *this;
 	}
 
 	template<typename T2>
-	com_ptr<T2> _As(::std::false_type) const
+	inline com_ptr<T2> _As(::std::false_type) const
 	{
-
 		com_ptr<T2> _Right;
 		if(FAILED(_MyPtr->QueryInterface<T2>(::mst::initialize(_Right))))
 		{
@@ -271,6 +284,6 @@ template<typename T>
 	__uuidof(::std::remove_reference<decltype(comPtr)>::type::element_type),                       \
 		::mst::_Details::_Initialize_ppv_args(comPtr)
 
-}; // namespace mst
+} // namespace mst
 
 #endif /* MCOM_PTR_H */

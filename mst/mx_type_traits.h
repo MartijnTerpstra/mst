@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -33,7 +33,7 @@ class shared_ptr;
 template<typename _Ty>
 class weak_ptr;
 
-}; // namespace std
+} // namespace std
 
 namespace mst {
 
@@ -88,7 +88,7 @@ _MST_ADD_CV_TO_POINTER_TO_CONST(T*, const T*)
 _MST_ADD_CV_TO_POINTER_TO_CONST(::std::shared_ptr<T>, ::std::shared_ptr<const T>)
 _MST_ADD_CV_TO_POINTER_TO_CONST(::std::weak_ptr<T>, ::std::weak_ptr<const T>)
 
-}; // namespace _Details
+} // namespace _Details
 
 
 template<typename _Ty>
@@ -102,4 +102,6 @@ using to_pointer_to_const_t = typename ::mst::to_pointer_to_const<_Ty>::type;
 
 #endif // _MST_HAS_TEMPLATE_ALIASES
 
-}; // namespace mst
+#endif
+
+} // namespace mst

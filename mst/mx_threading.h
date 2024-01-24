@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -91,6 +91,6 @@ public:
 	_Ty _Myfun;
 };
 
-}; // namespace _Details
-}; // namespace threading
-}; // namespace mst
+} // namespace _Details
+} // namespace threading
+} // namespace mst

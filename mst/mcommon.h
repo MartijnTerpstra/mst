@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -146,17 +146,15 @@ inline const char* typename_of()
 	return ::mst::_Details::_Typename_of<T>();
 }
 
-template<typename _Traits, typename _Alloc>
-struct is_string_type<::std::basic_string<char, _Traits, _Alloc>>
+template<typename Traits, typename Alloc>
+struct is_string_type<::std::basic_string<char, Traits, Alloc>>
 	: public ::std::integral_constant<bool, true>
-{
-};
+{ };
 
-template<typename _Traits, typename _Alloc>
-struct is_wstring_type<::std::basic_string<wchar_t, _Traits, _Alloc>>
+template<typename Traits, typename Alloc>
+struct is_wstring_type<::std::basic_string<wchar_t, Traits, Alloc>>
 	: public ::std::integral_constant<bool, true>
-{
-};
+{ };
 
 template<typename _Elem, typename... Args>
 inline int printf(const _Elem* format, Args&&... args)

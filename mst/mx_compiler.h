@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2021 Martinus Terpstra                                                 //
+//      Copyright (c)2024 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -78,15 +78,6 @@
 
 #endif
 
-#if _M_IX86
-#define _MST_HAS_X86 1
-#endif
-
-#if _M_X64
-#define _MST_HAS_X64   1
-#define _MST_HAS_64BIT 1
-#endif
-
 #define _MST_FUNCTION_SIGNATURE __FUNCSIG__
 
 #elif __clang__
@@ -108,15 +99,6 @@
 #define _MST_GCC_VER (__GNUC__ * 100 + __GNUC_MINOR__)
 
 #define _MST_FUNCTION_SIGNATURE __PRETTY_FUNCTION__
-
-#if _M_IX86
-#define _MST_HAS_X86 1
-#endif
-
-#if _M_X64
-#define _MST_HAS_X64   1
-#define _MST_HAS_64BIT 1
-#endif
 
 #else
 
@@ -172,6 +154,12 @@
 
 #if __cpp_lib_invoke >= 201411L
 #define _MST_HAS_INVOKE 1
+#endif
+
+#if __cpp_concepts >= 201907L
+#if __cpp_lib_concepts >= 202002L
+#define _MST_HAS_CONCEPTS 1
+#endif
 #endif
 
 // Attibutes
@@ -236,4 +224,14 @@
 #define _MST_PERMUTE_PS(v, c) _mm_permute_ps((v), c)
 #else
 #define _MST_PERMUTE_PS(v, c) _mm_shuffle_ps((v), (v), c)
+#endif
+
+#if defined(__x86_64__) || defined(_M_X64)
+#define _MST_HAS_X64   1
+#define _MST_HAS_64BIT 1
+#elif defined(__i386__) || defined(_M_IX86)
+#define _MST_HAS_X86 1
+#elif(defined(__arm__) || defined(_M_ARM)) || defined(__aarch64__)
+#define _MST_HAS_ARM 1
+#define _MST_HAS_64BIT 1
 #endif

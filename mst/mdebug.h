@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2024 Martinus Terpstra                                                 //
+//      Copyright (c)2025 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -26,25 +26,30 @@
 #pragma once
 #include <mcore.h>
 #include <utility>
-#include <iostream>
-#include <mx_debug.h>
+#include <sstream>
+#include <mdebug.h>
 
 #define MST_BREAKPOINT _MST_BREAK
 
-#ifndef MST_FATAL_ERROR
-#define MST_FATAL_ERROR(...)                                                                       \
-	[&] {                                                                                          \
-		MST_BREAKPOINT;                                                                            \
-		std::abort();                                                                              \
-	}()
-#endif // MST_FATAL_ERROR
+namespace mst {
+// Feel free to implement your handling of this fatal error
+void fatalError(std::string_view errMsg);
 
-#ifndef MST_ASSERT
-#include <cassert>
+namespace _Details {
+template<typename... Args>
+void fatalError(Args&&... args)
+{
+	std::ostringstream ss;
+	(ss << ... << args);
+	::mst::fatalError(ss.str().c_str());
+}
+}
+}
+
+#define MST_FATAL_ERROR(...) ::mst::_Details::fatalError("Fatal error: ", __VA_ARGS__)
+
 #define MST_ASSERT(x, ...)                                                                         \
 	(x || [&] {                                                                                    \
-		MST_FATAL_ERROR(__VA_ARGS__);                                                              \
+		::mst::_Details::fatalError("Assertion failed: " #x, __VA_ARGS__);                         \
 		return true;                                                                               \
 	}())
-
-#endif // MST_ASSERT

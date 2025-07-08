@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2024 Martinus Terpstra                                                 //
+//      Copyright (c)2025 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -25,10 +25,13 @@
 
 #pragma once
 
-#define MST_ASSERT(x, ...)                                                                         \
-	(x || [&] {                                                                                    \
-		FAIL("Assertion failed: " #x);                                                             \
-		return true;                                                                               \
-	}())
+#include <mdebug.h>
 
-#define MST_FATAL_ERROR(...) [&] { FAIL("Fatal error"); }()
+namespace mst {
+
+void fatalError(std::string_view errMsg)
+{
+	FAIL(errMsg);
+}
+
+}

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2024 Martinus Terpstra                                                 //
+//      Copyright (c)2025 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -26,6 +26,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+#include <set_assertions.h>
 #include <helpers.h>
 #include <mmath2.h>
 

@@ -138,6 +138,11 @@
           "type": "BOOL"
         },
         {
+          "name": "MST_UTILS",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "CMAKE_CXX_FLAGS",
           "value": "/DWIN32 /D_WINDOWS /W4 /GR /EHsc /wd4324 /wd4201",
           "type": "STRING"

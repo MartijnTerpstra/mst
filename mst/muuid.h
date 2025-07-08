@@ -30,6 +30,7 @@
 #include <mx_uuid.h>
 #include <cstring>
 #include <string>
+#include <optional>
 
 #if MST_UUID_NO_SIMD
 #define _MST_UUID_SIMD_ENABLED 0
@@ -119,15 +120,15 @@ public:
 #endif
 	}
 
-	inline static bool try_parse(_Details::string_view_type _Str, uuid& _Out_value) noexcept
+	inline static std::optional<uuid> try_parse(_Details::string_view_type _Str) noexcept
 	{
 		if(_Str.length() != 36) // _MST_UNLIKELY
-			return false;
+			return std::nullopt;
 
 		for(auto index : { 8, 13, 18, 23 })
 		{
 			if(_Str[index] != '-')
-				return false;
+				return std::nullopt;
 		}
 
 #if _MST_UUID_SIMD_ENABLED
@@ -177,9 +178,12 @@ public:
 			result = _mm_or_si128(result, lomask);
 		}
 
-		_Out_value._Mydata = result;
 		const auto combined_has_any = _mm_and_si128(has_any_result_lo, has_any_result_hi);
-		return _mm_movemask_epi8(combined_has_any) == 0xFFFF;
+		if (_mm_movemask_epi8(combined_has_any) != 0xFFFF)
+		{
+			return std::nullopt;
+		}
+		return uuid{ result };
 #else
 		constexpr int8_t indices[32]{ 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 17, 19, 20,
 			21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 };
@@ -187,7 +191,7 @@ public:
 		for(auto index : indices)
 		{
 			if(_Str[index] < '0' && _Str[index] > '9' && _Str[index] < 'A' && _Str[index] > 'Z')
-				return false;
+				return std::nullopt;
 		}
 
 		constexpr uint8_t hi['F' - '0' + 1]{ 0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80,
@@ -196,12 +200,13 @@ public:
 		constexpr uint8_t lo['F' - '0' + 1]{ 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 255,
 			255, 255, 255, 255, 255, 255, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
 
+		uuid _Out_data;
 		for(int8_t i = 0; i < 32; i += 2)
 		{
-			_Out_value._Mydata[i >> 1] =
+			_Out_data._Mydata[i >> 1] =
 				hi[(_Str[indices[i]] - '0')] | lo[_Str[indices[i + 1]] - '0'];
 		}
-		return true;
+		return _Out_data;
 #endif
 	}
 

@@ -53,17 +53,24 @@ TEST_CASE("uuid: string conversions", "[uuid]")
 	auto random = mst::uuid::create();
 	auto random2 = mst::create_zero_uuid();
 
-	REQUIRE(mst::uuid::try_parse(random.to_string(), random2));
-	REQUIRE(mst::uuid::parse(random.to_string()) == random2);
+	REQUIRE(mst::uuid::try_parse(random.to_string()) == random);
+	REQUIRE(mst::uuid::parse(random.to_string()) == random);
+	REQUIRE(mst::uuid::try_parse(random2.to_string()) == random2);
+	REQUIRE(mst::uuid::parse(random2.to_string()) == random2);
 
 	REQUIRE(random.to_string() != mst::create_zero_uuid().to_string());
-	REQUIRE(random == random2);
-	REQUIRE(random.to_string() == random2.to_string());
+	REQUIRE(random != random2);
+	REQUIRE(random.to_string() != random2.to_string());
 }
 
-TEST_CASE("uuid: try_parse returns false on invalid string", "[uuid]")
+TEST_CASE("uuid: try_parse returns nullopt on invalid string", "[uuid]")
 {
 	auto random2 = mst::create_zero_uuid();
 
-	REQUIRE(!mst::uuid::try_parse("12BCDEF;~{dwgrgaRE df;f- 1403- /*-+", random2));
+	REQUIRE(!mst::uuid::try_parse("12BCDEF;~{dwgrgaRE df;f- 1403- /*-+").has_value());
+}
+
+TEST_CASE("uuid: try_parse returns nullopt missing -", "[uuid]")
+{
+	REQUIRE(!mst::uuid::try_parse("679A889B 4689-4E66-B0FA-71DA5D5C7C04").has_value());
 }

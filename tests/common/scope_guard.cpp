@@ -23,53 +23,35 @@
 //                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
-#include <mcore.h>
-#include <mcommon.h>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-namespace mst {
+#include <set_assertions.h>
+#include <mscope_guard.h>
 
-namespace _Details {
-
-template<typename _Fun>
-class _scope_guard
+TEST_CASE("scope_guard: invokes on exit scope", "[common]")
 {
-public:
-	inline _scope_guard(_Fun _Func)
-		: _MyFunc(std::move(_Func))
-		, _Dismissed(false)
-	{ }
-
-	inline ~_scope_guard()
+	bool invoked = false;
 	{
-		if(!_Dismissed)
-		{
-			_MyFunc();
-		}
+		auto guard = mst::scope_guard([&] { invoked = true; });
+
+		REQUIRE(invoked == false);
+		REQUIRE(guard.is_dismissed() == false);
 	}
 
-	inline bool is_dismissed()
-	{
-		return _Dismissed;
-	}
-
-	inline void dismiss()
-	{
-		_Dismissed = true;
-	}
-
-private:
-	_Fun _MyFunc;
-	bool _Dismissed;
-
-}; // class _scope_guard
-
-} // namespace _Details
-
-template<typename _Fun>
-::mst::_Details::_scope_guard<_Fun> scope_guard(_Fun _Func)
-{
-	return ::mst::_Details::_scope_guard<_Fun>(std::move(_Func));
+	REQUIRE(invoked == true);
 }
 
-} // namespace mst
+TEST_CASE("scope_guard: doesn't invoke after dismissed", "[common]")
+{
+	bool invoked = false;
+	{
+		auto guard = mst::scope_guard([&] { invoked = true; });
+
+		guard.dismiss();
+
+		REQUIRE(guard.is_dismissed() == true);
+	}
+
+	REQUIRE(invoked == false);
+}

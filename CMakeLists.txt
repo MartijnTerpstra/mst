@@ -136,6 +136,7 @@ add_mst_test(common compiletime)
 add_mst_test(common flag)
 add_mst_test(common hash)
 add_mst_test(common printf)
+add_mst_test(common scope_guard)
 add_mst_test(common uuid)
 
 add_mst_test(containers array_view)

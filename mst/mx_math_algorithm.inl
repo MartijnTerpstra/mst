@@ -251,7 +251,7 @@ template<typename T>
 _MST_CONSTEXPR17 T mst::math::smoothstep(
 	const T& minim, const T& maxim, typename _MST_MDET _Cref_value<T>::type val) noexcept
 {
-	return _MST_MDET _Smoothstep(minim, maxim, val);
+	return _MST_MDET _Smoothstep(minim, maxim, val, typename _Details::_Math_traits<T>::math_type{});
 }
 
 template<typename _Ty>

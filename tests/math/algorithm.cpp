@@ -315,3 +315,11 @@ TEST_CASE("math::clamp: scalar", "[math][algorithm]")
 	REQUIRE(clamp(-40.f, -100.f, std::numeric_limits<float>::max()) == -40.f);
 	REQUIRE(clamp(100.f, 0, 10) == 10.f);
 }
+
+TEST_CASE("math::smoothstep: scalar", "[math][algorithm]")
+{
+	REQUIRE(smoothstep(0.0f, 1.0f, 0.f) == 0.f);
+	REQUIRE(smoothstep(0.0f, 1.0f, 1.f) == 1.f);
+	REQUIRE_THAT(
+		smoothstep(0.0f, 1.0f, .5f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
+}

@@ -299,12 +299,17 @@ int main(int argc, const char* const* argv)
 		std::string(directory) + mst::platform::directory_separator() + ".gitignore"
 	};
 
+	std::filesystem::directory_entry git_blame_ignore_revs{
+		std::string(directory) + mst::platform::directory_separator() + ".git-blame-ignore-revs"
+	};
+
 	std::filesystem::directory_entry rootCMakeLists{
 		std::string(directory) + mst::platform::directory_separator() + "CMakeLists.txt"
 	};
 
 	ProcessFile(clang_format, '#');
 	ProcessFile(git_ignore, '#');
+	ProcessFile(git_blame_ignore_revs, '#');
 	ProcessFile(rootCMakeLists, '#');
 
 	std::ifstream licence{ std::string(directory) + mst::platform::directory_separator() +

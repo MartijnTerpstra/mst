@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -30,7 +30,7 @@
 
 #include "helpers.h"
 
-//#define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
+// #define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
 #include <mmath2.h>
 #include <mcommon.h>
 

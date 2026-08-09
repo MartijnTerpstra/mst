@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -65,8 +65,6 @@ TEST_CASE("uuid: string conversions", "[uuid]")
 
 TEST_CASE("uuid: try_parse returns nullopt on invalid string", "[uuid]")
 {
-	auto random2 = mst::create_zero_uuid();
-
 	REQUIRE(!mst::uuid::try_parse("12BCDEF;~{dwgrgaRE df;f- 1403- /*-+").has_value());
 }
 

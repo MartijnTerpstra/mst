@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -63,9 +63,16 @@ _MST_NODISCARD _MST_CONSTEXPR17 T smoothstep(
 template<typename T>
 _MST_NODISCARD _MST_CONSTEXPR17 T frac(const T& val) noexcept;
 
-template<typename T>
+#if _MST_HAS_CONCEPTS
+template<_Details::NonScalar T>
 _MST_NODISCARD constexpr T clamp(const T& val, typename _MST_MDET _Cref_value<T>::type minim,
 	typename _MST_MDET _Cref_value<T>::type maxim) noexcept;
+#else
+template<typename T,
+	typename = ::std::enable_if_t<
+		::std::is_same<typename _MST_MDET _Math_traits<T>::math_type, _MST_MDET _Math_type>::value>>
+_MST_NODISCARD constexpr T clamp(const T& val, const T& minim, const T& maxim) noexcept;
+#endif
 
 template<typename T>
 _MST_NODISCARD constexpr T clamp(const T& val, const T& minim, const T& maxim) noexcept;

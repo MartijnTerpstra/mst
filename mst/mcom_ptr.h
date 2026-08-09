@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -32,6 +32,9 @@
 #include <mdebug.h>
 #include <Unknwn.h>
 #include <mx_com_ptr.h>
+#if _MST_HAS_CONCEPTS
+#include <concepts>
+#endif
 
 namespace mst {
 
@@ -40,10 +43,10 @@ template<typename T>
 
 #if _MST_HAS_CONCEPTS
 template<typename T>
-concept ComObjectType requires(T t)
+concept ComObjectType = requires(T t)
 {
-	{ t.AddRef() } -> std::uint32_t;
-	{ t.Release() } -> std::uint32_t;
+	{ t.AddRef() } -> std::same_as<std::uint32_t>;
+	{ t.Release() } -> std::same_as<std::uint32_t>;
 };
 #endif
 

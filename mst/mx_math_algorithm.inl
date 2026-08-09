@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -251,7 +251,8 @@ template<typename T>
 _MST_CONSTEXPR17 T mst::math::smoothstep(
 	const T& minim, const T& maxim, typename _MST_MDET _Cref_value<T>::type val) noexcept
 {
-	return _MST_MDET _Smoothstep(minim, maxim, val, typename _Details::_Math_traits<T>::math_type{});
+	return _MST_MDET _Smoothstep(
+		minim, maxim, val, typename _Details::_Math_traits<T>::math_type{});
 }
 
 template<typename _Ty>
@@ -260,12 +261,20 @@ _MST_CONSTEXPR17 _Ty mst::math::frac(const _Ty& val) noexcept
 	return _Details::_Frac(val, typename _Details::_Math_traits<_Ty>::math_type{});
 }
 
-template<typename T>
+#if _MST_HAS_CONCEPTS
+template<mst::math::_Details::NonScalar T>
 constexpr T mst::math::clamp(const T& val, typename _MST_MDET _Cref_value<T>::type minim,
 	typename _MST_MDET _Cref_value<T>::type maxim) noexcept
 {
 	return _MST_MDET _Clamp(val, minim, maxim, typename _MST_MDET _Math_traits<T>::math_type());
 }
+#else
+template<typename T, typename>
+constexpr T mst::math::clamp(const T& val, const T& minim, const T& maxim) noexcept
+{
+	return _MST_MDET _Clamp(val, minim, maxim, typename _MST_MDET _Math_traits<T>::math_type());
+}
+#endif
 
 template<typename T>
 constexpr T mst::math::clamp(const T& val, const T& minim, const T& maxim) noexcept

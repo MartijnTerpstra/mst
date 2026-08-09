@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -527,11 +527,6 @@ private:
 		const auto elemIndex = index & (ElementsPerPage - 1);
 
 		return m_pages[pageIndex][elemIndex].node;
-	}
-
-	inline void destroy_impl(T&, std::true_type) noexcept
-	{
-		// do nothing
 	}
 
 	inline void destroy_all()

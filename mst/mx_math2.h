@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -75,6 +75,11 @@ struct matrix_type<_Value_type, 1, 1>
 };
 
 namespace _Details {
+
+#if _MST_HAS_CONCEPTS
+template<typename T>
+concept NonScalar = !std::is_arithmetic_v<T>;
+#endif
 
 template<typename _Value_type>
 class _Math_base

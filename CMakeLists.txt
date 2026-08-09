@@ -1,7 +1,7 @@
 ##############################################################################################
 ##                                                                                          ##
 ##      MST Utility Library                                                                 ##
-##      Copyright (c)2025 Martinus Terpstra                                                 ##
+##      Copyright (c)2026 Martinus Terpstra                                                 ##
 ##                                                                                          ##
 ##      Permission is hereby granted, free of charge, to any person obtaining a copy        ##
 ##      of this software and associated documentation files (the "Software"), to deal       ##
@@ -56,7 +56,7 @@ enable_testing()
 include(CTest)
 
 
-Include(FetchContent)
+include(FetchContent)
 
 FetchContent_Declare(
         Catch2
@@ -95,7 +95,7 @@ function(SETUP_TARGET TARGET_NAME)
                 $<$<CONFIG:Release>:-O2>
         )
         
-        if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
+        if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64" AND NOT CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64")
         target_compile_options(
             ${TARGET_NAME}
             PRIVATE

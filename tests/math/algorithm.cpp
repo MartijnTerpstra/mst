@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
 //      MST Utility Library                                                                 //
-//      Copyright (c)2025 Martinus Terpstra                                                 //
+//      Copyright (c)2026 Martinus Terpstra                                                 //
 //                                                                                          //
 //      Permission is hereby granted, free of charge, to any person obtaining a copy        //
 //      of this software and associated documentation files (the "Software"), to deal       //
@@ -311,15 +311,14 @@ TEST_CASE("math::cubic_interp: scalar", "[math][algorithm]")
 
 TEST_CASE("math::clamp: scalar", "[math][algorithm]")
 {
-	REQUIRE(clamp(-1.f, 0, std::numeric_limits<float>::max()) == 0.f);
+	REQUIRE(clamp(-1.f, 0.f, std::numeric_limits<float>::max()) == 0.f);
 	REQUIRE(clamp(-40.f, -100.f, std::numeric_limits<float>::max()) == -40.f);
-	REQUIRE(clamp(100.f, 0, 10) == 10.f);
+	REQUIRE(clamp(100.f, 0.f, 10.f) == 10.f);
 }
 
 TEST_CASE("math::smoothstep: scalar", "[math][algorithm]")
 {
 	REQUIRE(smoothstep(0.0f, 1.0f, 0.f) == 0.f);
 	REQUIRE(smoothstep(0.0f, 1.0f, 1.f) == 1.f);
-	REQUIRE_THAT(
-		smoothstep(0.0f, 1.0f, .5f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
+	REQUIRE_THAT(smoothstep(0.0f, 1.0f, .5f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
 }

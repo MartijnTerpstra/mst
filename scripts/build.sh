@@ -1,6 +1,7 @@
 #!/bin/bash
 
-CURR_DIR=$(pwd);
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CURR_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 if [ "$#" -eq 1 ]; then
     BUILD_TYPE="$1";
@@ -16,10 +17,10 @@ elif [ $REBUILD ]; then
     mkdir "$CURR_DIR/build";
 fi
 
-cd build;
+cd "$CURR_DIR/build";
 
 echo 'Building cmake target'
-cmake $CURR_DIR -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
+cmake "$CURR_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True -DMST_UTILS=True
 echo 'Building mst'
 cmake --build . --config $BUILD_TYPE --parallel 10
 
@@ -28,5 +29,3 @@ if [ $TESTING ]; then
 fi
 
 cd -;
-
-

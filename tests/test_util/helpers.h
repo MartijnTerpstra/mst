@@ -26,13 +26,14 @@
 #pragma once
 
 #include <mmath2.h>
+#include <catch2/matchers/catch_matchers.hpp>
 
 namespace mst {
 namespace test_util {
 
 
 template<typename MathType>
-class math_approx : public Catch::MatcherBase<MathType>
+class math_approx : public Catch::Matchers::MatcherBase<MathType>
 {
 	typedef typename MathType::value_type value_type;
 

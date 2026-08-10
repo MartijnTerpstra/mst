@@ -30,8 +30,8 @@
 #include <variant>
 #include <sstream>
 #include <string_view>
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 
 #include <set_assertions.h>
 

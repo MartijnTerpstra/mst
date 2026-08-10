@@ -24,6 +24,21 @@
       "inheritEnvironments": [ "linux_x64" ],
       "variables": [
         {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
           "name": "MST_CREATE_LIBRARY",
           "value": "ON",
           "type": "STRING"
@@ -47,6 +62,21 @@
       "ctestCommandArgs": "",
       "variables": [
         {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
           "name": "MST_CREATE_LIBRARY",
           "value": "ON",
           "type": "STRING"
@@ -64,6 +94,21 @@
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "variables": [
+        {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
         {
           "name": "MST_CREATE_LIBRARY",
           "value": "ON",
@@ -94,6 +139,21 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "variables": [
+        {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
         {
           "name": "MST_RUN_TESTS",
           "value": "True",
@@ -128,6 +188,21 @@
       "ctestCommandArgs": "",
       "variables": [
         {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
           "name": "MST_RUN_TESTS",
           "value": "True",
           "type": "BOOL"
@@ -161,6 +236,21 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": [
         {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
           "name": "MST_RUN_TESTS",
           "value": "True",
           "type": "BOOL"
@@ -190,6 +280,21 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "variables": [
+        {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
         {
           "name": "MST_RUN_TESTS",
           "value": "True",
@@ -233,6 +338,21 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "variables": [
+        {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
         {
           "name": "MST_RUN_TESTS",
           "value": "True",
@@ -286,6 +406,21 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "variables": [
+        {
+          "name": "CMAKE_CXX_STANDARD",
+          "value": "17",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_STANDARD_REQUIRED",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_CXX_EXTENSIONS",
+          "value": "False",
+          "type": "BOOL"
+        },
         {
           "name": "MST_RUN_TESTS",
           "value": "True",

@@ -25,10 +25,18 @@
 
 #pragma once
 
+#include <mx_compiler.h>
+#include <Unknwn.h>
+
 namespace mst {
 
+#if _MST_HAS_CONCEPTS
+template<std::derived_from<IUnknown> T>
+class com_ptr;
+	#else
 template<typename T>
 class com_ptr;
+#endif
 
 namespace _Details {
 

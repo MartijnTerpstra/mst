@@ -34,10 +34,7 @@ add_library(mst STATIC
     "src/mthreading.cpp"
     "src/mthreading_rw_lock.cpp"
     "src/muuid.cpp"
-    "src/common.cpp")
-
-target_compile_features(mst
-    PUBLIC cxx_std_17)
+    "src/mcommon.cpp")
 
 if(APPLE OR UNIX)
 target_link_libraries(mst
@@ -47,6 +44,9 @@ endif()
 add_library(mst::mst ALIAS mst)
 
 target_include_directories(mst PUBLIC "${PROJECT_SOURCE_DIR}/mst")
+
+target_compile_features(mst PUBLIC cxx_std_17)
+set_target_properties(mst PROPERTIES CXX_EXTENSIONS OFF)
 
 if(MST_RUN_TESTS)
 
@@ -62,10 +62,12 @@ include(FetchContent)
 FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG v2.13.8
+        GIT_TAG v3.15.3
     )
 
 FetchContent_MakeAvailable(Catch2)
+
+target_compile_features(Catch2 PUBLIC cxx_std_17)
 
 list (APPEND CMAKE_MODULE_PATH "${Catch2_SOURCE_DIR}/contrib")
 
@@ -115,7 +117,7 @@ endif()
 function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
 
     add_executable(${TEST_NAME} ${TEST_SOURCES})
-    target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2)
+    target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2WithMain)
     SETUP_TARGET(${TEST_NAME} ${ARGN})
     catch_discover_tests(${TEST_NAME}
         TEST_SPEC ${MST_TEST_ARGS})

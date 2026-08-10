@@ -29,6 +29,8 @@
 #include <float.h>
 #include <cstring>
 #include <charconv>
+#include <string_view>
+#include <limits>
 #include <mx_is_string_type.h>
 
 namespace mst {
@@ -914,17 +916,8 @@ inline ::std::basic_string<_Elem, _Traits, _Alloc> _Printf(const _Elem* format, 
 	return buffer;
 }
 
-template<typename _Traits, typename _Alloc>
-inline void _Print_to_cout(const ::std::basic_string<char, _Traits, _Alloc>& buffer)
-{
-	std::cout << buffer.c_str() << std::flush;
-}
-
-template<typename _Traits, typename _Alloc>
-inline void _Print_to_cout(const ::std::basic_string<wchar_t, _Traits, _Alloc>& buffer)
-{
-	std::wcout << buffer.c_str() << std::flush;
-}
+void _Print_to_cout(const ::std::string_view& buffer);
+void _Print_to_cout(const ::std::wstring_view& buffer);
 
 } // namespace _Details
 } // namespace mst

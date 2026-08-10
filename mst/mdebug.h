@@ -27,7 +27,7 @@
 #include <mcore.h>
 #include <utility>
 #include <sstream>
-#include <mdebug.h>
+#include <mx_debug.h>
 
 #define MST_BREAKPOINT _MST_BREAK
 

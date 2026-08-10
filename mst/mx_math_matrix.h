@@ -381,7 +381,7 @@ public:
 	_MST_CONSTEXPR17 explicit matrix(_Value_type initVal) noexcept;
 
 	_MST_CONSTEXPR17 explicit matrix(
-		const matrix<_Value_type, 4, 3>& _Row012, vector<_Value_type, 4>& _Row3) noexcept;
+		const matrix<_Value_type, 4, 3>& _Row012, const vector<_Value_type, 4>& _Row3) noexcept;
 
 	_MST_CONSTEXPR17 matrix(const vector<_Value_type, 4>& _Row0,
 		const vector<_Value_type, 4>& _Row1, const vector<_Value_type, 4>& _Row2,

@@ -747,8 +747,8 @@ const matrix<_Value_type, 1, 1> _Details::_Math_matrix_square<_Value_type, 1>::i
 	_Details::_Make_identity_matrix<_Value_type, 1>();
 
 template<typename _Value_type>
-const matrix<_Value_type, 4, 3>
-	matrix<_Value_type, 4, 3>::identity = _Details::_Make_identity4x3_matrix<_Value_type>();
+const matrix<_Value_type, 4, 3> matrix<_Value_type, 4, 3>::identity =
+	_Details::_Make_identity4x3_matrix<_Value_type>();
 
 template<typename _Value_type, size_t _Columns, size_t _Rows>
 _MST_CONSTEXPR17
@@ -943,7 +943,7 @@ _Details::_Math_matrix_orientational<_Value_type, _Columns, _Rows>::get_backward
 template<typename _Value_type>
 _MST_CONSTEXPR17 void matrix<_Value_type, 4, 4>::scale(_Value_type _Scale) noexcept
 {
-	scale(vector3_type(_Scale, _Scale, _Scale));
+	scale(vector<_Value_type, 3>(_Scale, _Scale, _Scale));
 }
 
 template<typename _Value_type>

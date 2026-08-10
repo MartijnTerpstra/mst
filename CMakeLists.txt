@@ -30,10 +30,11 @@ project (mst CXX)
 option(MST_RUN_TESTS "Build tests for mst utility library" OFF)
 
 add_library(mst STATIC
-    src/mplatform.cpp
-    src/mthreading.cpp
-    src/mthreading_rw_lock.cpp
-    src/muuid.cpp)
+    "src/mplatform.cpp"
+    "src/mthreading.cpp"
+    "src/mthreading_rw_lock.cpp"
+    "src/muuid.cpp"
+    "src/common.cpp")
 
 target_compile_features(mst
     PUBLIC cxx_std_17)

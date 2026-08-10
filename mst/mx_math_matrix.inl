@@ -240,7 +240,7 @@ _MST_CONSTEXPR17 matrix<_Value_type, 4, 4>::matrix(_Value_type initVal) noexcept
 
 template<typename _Value_type>
 _MST_CONSTEXPR17 matrix<_Value_type, 4, 4>::matrix(
-	const matrix<_Value_type, 4, 3>& _Row012, vector<_Value_type, 4>& _Row3) noexcept
+	const matrix<_Value_type, 4, 3>& _Row012, const vector<_Value_type, 4>& _Row3) noexcept
 {
 	this->_Data[0] = _Row012._Data[0];
 	this->_Data[1] = _Row012._Data[1];

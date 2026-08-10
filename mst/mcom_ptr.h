@@ -38,19 +38,19 @@
 
 namespace mst {
 
+
+#if _MST_HAS_CONCEPTS
+template<std::derived_from<IUnknown> T>
+#else
 template<typename T>
+#endif
 ::mst::_Details::_Com_ptr_combiner<T> initialize(::mst::com_ptr<T>& comObject);
 
 #if _MST_HAS_CONCEPTS
+template<std::derived_from<IUnknown> T>
+#else
 template<typename T>
-concept ComObjectType = requires(T t)
-{
-	{ t.AddRef() } -> std::same_as<std::uint32_t>;
-	{ t.Release() } -> std::same_as<std::uint32_t>;
-};
 #endif
-
-template<typename T>
 class com_ptr
 {
 
@@ -59,7 +59,7 @@ public:
 
 public:
 	explicit com_ptr() noexcept
-		: _MyPtr((T*)0)
+		: _MyPtr(nullptr)
 	{ }
 
 	explicit com_ptr(T* _Ptr) noexcept
@@ -68,16 +68,37 @@ public:
 		// do not add reference
 	}
 
+	com_ptr(::std::nullptr_t) noexcept
+		: _MyPtr(nullptr)
+	{ }
+
 	com_ptr(const com_ptr& _Other) noexcept
 	{
 		this->_MyPtr = _Other._MyPtr;
 		_Add_ref();
 	}
 
-	com_ptr(::std::nullptr_t) noexcept
-		: _MyPtr((T*)0)
-	{ }
+	com_ptr(com_ptr&& _Other) noexcept
+	{
+		this->_MyPtr = _Other._MyPtr;
+		_Other._MyPtr = nullptr;
+	}
 
+#if _MST_HAS_CONCEPTS
+	template<std::derived_from<T> T2>
+	com_ptr(const com_ptr<T2>& _Other) noexcept
+	{
+		this->_MyPtr = _Other._MyPtr;
+		_Add_ref();
+	}
+
+	template<std::derived_from<T> T2>
+	com_ptr(com_ptr<T2>&& _Other) noexcept
+	{
+		this->_MyPtr = _Other._MyPtr;
+		_Other._MyPtr = nullptr;
+	}
+#else
 	template<typename T2>
 	com_ptr(const com_ptr<T2>& _Other, T* _Dummy = typename ::mst::pointer<T2>::type()) noexcept
 	{
@@ -85,6 +106,14 @@ public:
 		this->_MyPtr = _Other._MyPtr;
 		_Add_ref();
 	}
+	template<typename T2>
+	com_ptr(com_ptr<T2>&& _Other, T* _Dummy = typename ::mst::pointer<T2>::type()) noexcept
+	{
+		_MST_UNUSED(_Dummy);
+		this->_MyPtr = _Other._MyPtr;
+		_Other._MyPtr = nullptr;
+	}
+#endif
 
 	// no reinterpret cast, not supported for com ptrs
 
@@ -94,17 +123,48 @@ public:
 		return (*this);
 	}
 
-	template<class T2>
+	inline com_ptr& operator=(com_ptr&& _Right) noexcept
+	{
+		com_ptr(std::move(_Right)).swap(*this);
+		return (*this);
+	}
+
+#if _MST_HAS_CONCEPTS
+	template<std::derived_from<T> T2>
 	inline com_ptr& operator=(const com_ptr<T2>& _Right) noexcept
 	{
 		com_ptr(_Right).swap(*this);
 		return (*this);
 	}
 
+	template<std::derived_from<T> T2>
+	inline com_ptr& operator=(com_ptr<T2>&& _Right) noexcept
+	{
+		com_ptr(std::move(_Right)).swap(*this);
+		return (*this);
+	}
+#else
+	template<typename T2,
+		typename ::std::enable_if<::std::is_convertible<T2*, T*>::value, int>::type = 0>
+	inline com_ptr& operator=(const com_ptr<T2>& _Right) noexcept
+	{
+		com_ptr(_Right).swap(*this);
+		return (*this);
+	}
+
+	template<typename T2,
+		typename ::std::enable_if<::std::is_convertible<T2*, T*>::value, int>::type = 0>
+	inline com_ptr& operator=(com_ptr<T2>&& _Right) noexcept
+	{
+		com_ptr(std::move(_Right)).swap(*this);
+		return (*this);
+	}
+#endif
+
 	inline com_ptr& operator=(::std::nullptr_t) noexcept
 	{
 		_Release();
-		_MyPtr = (T*)0;
+		_MyPtr = nullptr;
 		return (*this);
 	}
 
@@ -120,20 +180,20 @@ public:
 
 	inline bool operator==(::std::nullptr_t) const noexcept
 	{
-		return this->get() == (void*)0;
+		return this->get() == nullptr;
 	}
 
 	inline bool operator!=(::std::nullptr_t) const noexcept
 	{
-		return this->get() != (void*)0;
+		return this->get() != nullptr;
 	}
 
 	inline explicit operator bool() const noexcept
 	{
-		return (_MyPtr != 0);
+		return (_MyPtr != nullptr);
 	}
 
-	inline std::uint32_t reset() noexcept
+	inline ULONG reset() noexcept
 	{
 		T* _Released = release();
 		if(_Released)
@@ -146,7 +206,7 @@ public:
 	inline T* release() noexcept
 	{
 		T* retval = this->_MyPtr;
-		this->_MyPtr = (T*)0;
+		this->_MyPtr = nullptr;
 		return retval;
 	}
 
@@ -155,6 +215,31 @@ public:
 		::std::swap(this->_MyPtr, _Right._MyPtr);
 	}
 
+#if _MST_HAS_CONCEPTS
+	template<std::derived_from<IUnknown> T2>
+	com_ptr<T2> as() const
+	{
+		if(_MyPtr == nullptr)
+		{
+			MST_FATAL_ERROR(
+				"com_ptr<T>::as(): invalid call: pointer does not point to a valid object");
+		}
+
+		if constexpr(std::derived_from<T, T2>)
+		{
+			return *this;
+		}
+		else
+		{
+			com_ptr<T2> _Right;
+			if(FAILED(_MyPtr->QueryInterface<T2>(::mst::initialize(_Right))))
+			{
+				return nullptr;
+			}
+			return _Right;
+		}
+	}
+#else
 	template<typename T2>
 	com_ptr<T2> as() const
 	{
@@ -167,6 +252,7 @@ public:
 		static_assert(::std::is_base_of<IUnknown, T2>::value, "T2 must inherit from IUnknown");
 		return _As<T2>(::std::is_convertible<T, T2>::type());
 	}
+#endif
 
 	template<typename T2>
 	inline bool is() const
@@ -204,22 +290,8 @@ public:
 
 	inline T* operator->() const noexcept
 	{
-		CHECK_IF(this->get() == nullptr, "cannot dereference a nullptr-pointer");
+		MST_ASSERT(this->get() != nullptr, "cannot dereference a nullptr-pointer");
 		return this->get();
-	}
-
-	com_ptr(com_ptr&& _Other) noexcept
-	{
-		this->_MyPtr = _Other._MyPtr;
-		_Other._MyPtr = (T*)0;
-	}
-
-	template<typename T2>
-	com_ptr(com_ptr<T2>&& _Other, T* _Dummy = typename ::mst::pointer<T2>::type()) noexcept
-	{
-		_MST_UNUSED(_Dummy);
-		this->_MyPtr = _Other._MyPtr;
-		_Other._MyPtr = (T2*)0;
 	}
 
 private:
@@ -259,8 +331,13 @@ private:
 
 	T* _MyPtr;
 
+#if _MST_HAS_CONCEPTS
+	template<std::derived_from<IUnknown> T2>
+	friend class com_ptr;
+#else
 	template<typename T2>
 	friend class com_ptr;
+#endif
 
 }; // class com_ptr
 
@@ -277,7 +354,11 @@ template<typename T>
 	return ::mst::_Details::_Com_ptr_combiner<T>(comObject);
 }
 
+#if _MST_HAS_CONCEPTS
+template<std::derived_from<IUnknown> T>
+#else
 template<typename T>
+#endif
 ::mst::_Details::_Com_ptr_combiner<T> initialize(::mst::com_ptr<T>& comObject)
 {
 	return ::mst::_Details::_Com_ptr_combiner<T>(comObject);

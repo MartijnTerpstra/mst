@@ -190,16 +190,17 @@ public:
 	template<typename Traits>
 	constexpr basic_static_string& operator=(const ::std::basic_string_view<CharT, Traits>& strView)
 	{
-		MST_ASSERT(strView.length() <= max_size(), "strin: length is out of range");
+		MST_ASSERT(strView.length() <= max_size(), "strView: length is out of range");
 
-		memset(m_ptr, 0, sizeof(m_ptr));
-		m_length = 0;
+		const size_t maxLength = std::max(m_length, strView.length());
+		m_length = strView.length();
 
-		while(strView[m_length])
+		for(size_t i = 0; i < m_length; ++i)
 		{
-			m_ptr[m_length] = strView[m_length];
-			++m_length;
+			m_ptr[i] = strView[i];
 		}
+
+		memset(m_ptr + m_length, 0, maxLength - m_length);
 
 		return *this;
 	}

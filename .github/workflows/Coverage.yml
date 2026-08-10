@@ -37,7 +37,8 @@ jobs:
       working-directory: build
       run: |
         sudo apt install lcov
-        lcov -c -d . -o coverage.info --ignore-errors mismatch
+        lcov -c -d . -o coverage.info --ignore-errors mismatch,source
+        lcov -r coverage.info '*/_deps/*' '/usr/*' -o coverage.info --ignore-errors unused
         lcov -l coverage.info
 
     - name: Upload coverage to Codecov

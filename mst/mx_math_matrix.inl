@@ -33,7 +33,7 @@ template<typename _xValue_type>
 _MST_CONSTEXPR17 matrix<_Value_type, _Columns, 1>::matrix(
 	const matrix<_xValue_type, _Columns, 1>& _Other) noexcept
 {
-	this->_Data[0] = vector<_Value_type, _Columns>(_Other._Data[0]);
+	this->_Data[0] = vector<_Value_type, _Columns>(_Other[0]);
 }
 
 template<typename _Value_type, size_t _Columns>
@@ -54,8 +54,8 @@ template<typename _xValue_type>
 _MST_CONSTEXPR17 matrix<_Value_type, _Columns, 2>::matrix(
 	const matrix<_xValue_type, _Columns, 2>& _Other) noexcept
 {
-	this->_Data[0] = vector<_Value_type, _Columns>(_Other._Data[0]);
-	this->_Data[1] = vector<_Value_type, _Columns>(_Other._Data[1]);
+	this->_Data[0] = vector<_Value_type, _Columns>(_Other[0]);
+	this->_Data[1] = vector<_Value_type, _Columns>(_Other[1]);
 }
 
 template<typename _Value_type, size_t _Columns>
@@ -78,9 +78,9 @@ template<typename _xValue_type>
 _MST_CONSTEXPR17 matrix<_Value_type, _Columns, 3>::matrix(
 	const matrix<_xValue_type, _Columns, 3>& _Other) noexcept
 {
-	this->_Data[0] = vector<_Value_type, _Columns>(_Other._Data[0]);
-	this->_Data[1] = vector<_Value_type, _Columns>(_Other._Data[1]);
-	this->_Data[2] = vector<_Value_type, _Columns>(_Other._Data[2]);
+	this->_Data[0] = vector<_Value_type, _Columns>(_Other[0]);
+	this->_Data[1] = vector<_Value_type, _Columns>(_Other[1]);
+	this->_Data[2] = vector<_Value_type, _Columns>(_Other[2]);
 }
 
 template<typename _Value_type, size_t _Columns>
@@ -106,9 +106,9 @@ template<typename _xValue_type>
 _MST_CONSTEXPR17 matrix<_Value_type, 3, 3>::matrix(
 	const matrix<_xValue_type, 3, 3>& _Other) noexcept
 {
-	this->_Data[0] = vector<_Value_type, 3>(_Other._Data[0]);
-	this->_Data[1] = vector<_Value_type, 3>(_Other._Data[1]);
-	this->_Data[2] = vector<_Value_type, 3>(_Other._Data[2]);
+	this->_Data[0] = vector<_Value_type, 3>(_Other[0]);
+	this->_Data[1] = vector<_Value_type, 3>(_Other[1]);
+	this->_Data[2] = vector<_Value_type, 3>(_Other[2]);
 }
 
 template<typename _Value_type>
@@ -142,10 +142,10 @@ template<typename _xValue_type>
 _MST_CONSTEXPR17 matrix<_Value_type, 3, 4>::matrix(
 	const matrix<_xValue_type, 3, 4>& _Other) noexcept
 {
-	this->_Data[0] = vector<_Value_type, 3>(_Other._Data[0]);
-	this->_Data[1] = vector<_Value_type, 3>(_Other._Data[1]);
-	this->_Data[2] = vector<_Value_type, 3>(_Other._Data[2]);
-	this->_Data[3] = vector<_Value_type, 3>(_Other._Data[3]);
+	this->_Data[0] = vector<_Value_type, 3>(_Other[0]);
+	this->_Data[1] = vector<_Value_type, 3>(_Other[1]);
+	this->_Data[2] = vector<_Value_type, 3>(_Other[2]);
+	this->_Data[3] = vector<_Value_type, 3>(_Other[3]);
 }
 
 template<typename _Value_type>
@@ -196,10 +196,10 @@ template<typename _xValue_type>
 _MST_CONSTEXPR17 matrix<_Value_type, _Columns, 4>::matrix(
 	const matrix<_xValue_type, _Columns, 4>& _Other) noexcept
 {
-	this->_Data[0] = vector<_Value_type, _Columns>(_Other._Data[0]);
-	this->_Data[1] = vector<_Value_type, _Columns>(_Other._Data[1]);
-	this->_Data[2] = vector<_Value_type, _Columns>(_Other._Data[2]);
-	this->_Data[3] = vector<_Value_type, _Columns>(_Other._Data[3]);
+	this->_Data[0] = vector<_Value_type, _Columns>(_Other[0]);
+	this->_Data[1] = vector<_Value_type, _Columns>(_Other[1]);
+	this->_Data[2] = vector<_Value_type, _Columns>(_Other[2]);
+	this->_Data[3] = vector<_Value_type, _Columns>(_Other[3]);
 }
 
 template<typename _Value_type, size_t _Columns>
@@ -229,10 +229,10 @@ template<typename _xValue_type>
 _MST_CONSTEXPR17 matrix<_Value_type, 4, 4>::matrix(
 	const matrix<_xValue_type, 4, 4>& _Other) noexcept
 {
-	this->_Data[0] = vector<_Value_type, 4>(_Other._Data[0]);
-	this->_Data[1] = vector<_Value_type, 4>(_Other._Data[1]);
-	this->_Data[2] = vector<_Value_type, 4>(_Other._Data[2]);
-	this->_Data[3] = vector<_Value_type, 4>(_Other._Data[3]);
+	this->_Data[0] = vector<_Value_type, 4>(_Other[0]);
+	this->_Data[1] = vector<_Value_type, 4>(_Other[1]);
+	this->_Data[2] = vector<_Value_type, 4>(_Other[2]);
+	this->_Data[3] = vector<_Value_type, 4>(_Other[3]);
 }
 
 template<typename _Value_type>
@@ -248,10 +248,10 @@ template<typename _Value_type>
 _MST_CONSTEXPR17 matrix<_Value_type, 4, 4>::matrix(const matrix<_Value_type, 3, 4>& _Columns012,
 	const vector<_Value_type, 4>& _Column3) noexcept
 {
-	this->_Data[0] = vector<_Value_type, 4>(_Columns012._Data[0], _Column3[0]);
-	this->_Data[1] = vector<_Value_type, 4>(_Columns012._Data[1], _Column3[1]);
-	this->_Data[2] = vector<_Value_type, 4>(_Columns012._Data[2], _Column3[2]);
-	this->_Data[3] = vector<_Value_type, 4>(_Columns012._Data[3], _Column3[3]);
+	this->_Data[0] = vector<_Value_type, 4>(_Columns012[0], _Column3[0]);
+	this->_Data[1] = vector<_Value_type, 4>(_Columns012[1], _Column3[1]);
+	this->_Data[2] = vector<_Value_type, 4>(_Columns012[2], _Column3[2]);
+	this->_Data[3] = vector<_Value_type, 4>(_Columns012[3], _Column3[3]);
 }
 
 template<typename _Value_type>

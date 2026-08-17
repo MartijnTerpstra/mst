@@ -85,8 +85,8 @@ constexpr vector<_Value_type, 3>::vector(_Value_type initVal) noexcept
 template<typename _Value_type>
 template<typename _xValue_type>
 constexpr vector<_Value_type, 4>::vector(const vector<_xValue_type, 4>& _Other) noexcept
-	: _Mybase(static_cast<_Value_type>(_Other._Data[0]), static_cast<_Value_type>(_Other._Data[1]),
-		  static_cast<_Value_type>(_Other._Data[2]), static_cast<_Value_type>(_Other._Data[3]))
+	: _Mybase(static_cast<_Value_type>(_Other[0]), static_cast<_Value_type>(_Other[1]),
+		  static_cast<_Value_type>(_Other[2]), static_cast<_Value_type>(_Other[3]))
 { }
 
 template<typename _Value_type>
@@ -260,7 +260,7 @@ _MST_CONSTEXPR17 _Value_type
 _Details::_Math_vector_base<_Value_type, _Elems, true, _IsUnsigned>::distance(
 	const _Vector_t& _Vec) const noexcept
 {
-	return sqrt(squared_distance(_Vec));
+	return sqrt(this->squared_distance(_Vec));
 }
 
 /* normalized and returns itself */

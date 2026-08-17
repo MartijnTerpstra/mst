@@ -50,91 +50,57 @@ inline __m128 _VectorDot(__m128 V1, __m128 V2)
 
 } // namespace _Details
 
+#if _MST_ALL_VECTORS_SIMD
+
 //////////////////////////////////
-// matrix<float, 4, 3>          //
+// matrix<float, 3, 4>          //
+// (needs vector<float,3> itself to be SIMD-backed, i.e. MST_MATH_ALL_VECTORS_MATRICES_SIMD) //
 //////////////////////////////////
 
-inline matrix<float, 4, 3> operator*(
-	const matrix<float, 4, 3>& _Left, const matrix<float, 4, 3>& _Right) noexcept
+/* fast path for composing two compact affine transforms -- see the scalar version in
+	mx_math_matrix.inl for the derivation. Rows 0-2 (orientation) are a plain weighted sum of
+	_Right's rows; row 3 (position) is the same plus _Right's own position added unweighted
+	(_Left[3][i] is the implicit "1" that would multiply _Right's row 3 in a promoted 4x4). The
+	4th float lane of each vector<float,3>'s _Simd is unused padding (uninitialized) -- this is
+	safe because every lane-3 value here only ever gets multiplied/added into other lane-3 slots
+	that are equally never read back through the vector<float,3> interface. */
+inline matrix<float, 3, 4> operator*(
+	const matrix<float, 3, 4>& _Left, const matrix<float, 3, 4>& _Right) noexcept
 {
-	matrix<float, 4, 3> retval;
+	matrix<float, 3, 4> retval;
 
+	for(int x = 0; x < 4; ++x)
+	{
 #if _MST_HAS_AVX
-	__m128 vX = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[0]._Simd) + 0);
-	__m128 vY = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[0]._Simd) + 1);
-	__m128 vZ = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[0]._Simd) + 2);
-	__m128 vW = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[0]._Simd) + 3);
+		__m128 vX = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[x]._Simd) + 0);
+		__m128 vY = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[x]._Simd) + 1);
+		__m128 vZ = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[x]._Simd) + 2);
 #else
-	__m128 vW = _Left[0]._Simd;
-	__m128 vX = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(0, 0, 0, 0));
-	__m128 vY = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(1, 1, 1, 1));
-	__m128 vZ = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(2, 2, 2, 2));
-	vW = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(3, 3, 3, 3));
+		__m128 vTemp = _Left[x]._Simd;
+		__m128 vX = _MST_PERMUTE_PS(vTemp, _MM_SHUFFLE(0, 0, 0, 0));
+		__m128 vY = _MST_PERMUTE_PS(vTemp, _MM_SHUFFLE(1, 1, 1, 1));
+		__m128 vZ = _MST_PERMUTE_PS(vTemp, _MM_SHUFFLE(2, 2, 2, 2));
 #endif // _MST_HAS_AVX
 
-	__m128 lastRow = _mm_set_ps(1, 0, 0, 0);
+		vX = _mm_mul_ps(vX, _Right[0]._Simd);
+		vY = _mm_mul_ps(vY, _Right[1]._Simd);
+		vZ = _mm_mul_ps(vZ, _Right[2]._Simd);
 
-	vX = _mm_mul_ps(vX, _Right[0]._Simd);
-	vY = _mm_mul_ps(vY, _Right[1]._Simd);
-	vZ = _mm_mul_ps(vZ, _Right[2]._Simd);
-	vW = _mm_mul_ps(vW, lastRow);
+		vX = _mm_add_ps(vX, vY);
+		vX = _mm_add_ps(vX, vZ);
 
-	vX = _mm_add_ps(vX, vZ);
-	vY = _mm_add_ps(vY, vW);
-	vX = _mm_add_ps(vX, vY);
+		if(x == 3)
+		{
+			vX = _mm_add_ps(vX, _Right[3]._Simd);
+		}
 
-	retval[0]._Simd = vX;
-
-#if _MST_HAS_AVX
-	vX = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[1]._Simd) + 0);
-	vY = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[1]._Simd) + 1);
-	vZ = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[1]._Simd) + 2);
-	vW = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[1]._Simd) + 3);
-#else
-	vW = _Left[1]._Simd;
-	vX = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(0, 0, 0, 0));
-	vY = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(1, 1, 1, 1));
-	vZ = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(2, 2, 2, 2));
-	vW = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(3, 3, 3, 3));
-#endif // _MST_HAS_AVX
-
-	vX = _mm_mul_ps(vX, _Right[0]._Simd);
-	vY = _mm_mul_ps(vY, _Right[1]._Simd);
-	vZ = _mm_mul_ps(vZ, _Right[2]._Simd);
-	vW = _mm_mul_ps(vW, lastRow);
-
-	vX = _mm_add_ps(vX, vZ);
-	vY = _mm_add_ps(vY, vW);
-	vX = _mm_add_ps(vX, vY);
-
-	retval[1]._Simd = vX;
-
-#if _MST_HAS_AVX
-	vX = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[2]._Simd) + 0);
-	vY = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[2]._Simd) + 1);
-	vZ = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[2]._Simd) + 2);
-	vW = _mm_broadcast_ss(reinterpret_cast<const float*>(&_Left[2]._Simd) + 3);
-#else
-	vW = _Left[2]._Simd;
-	vX = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(0, 0, 0, 0));
-	vY = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(1, 1, 1, 1));
-	vZ = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(2, 2, 2, 2));
-	vW = _MST_PERMUTE_PS(vW, _MM_SHUFFLE(3, 3, 3, 3));
-#endif // _MST_HAS_AVX
-
-	vX = _mm_mul_ps(vX, _Right[0]._Simd);
-	vY = _mm_mul_ps(vY, _Right[1]._Simd);
-	vZ = _mm_mul_ps(vZ, _Right[2]._Simd);
-	vW = _mm_mul_ps(vW, lastRow);
-
-	vX = _mm_add_ps(vX, vZ);
-	vY = _mm_add_ps(vY, vW);
-	vX = _mm_add_ps(vX, vY);
-
-	retval[2]._Simd = vX;
+		retval[x]._Simd = vX;
+	}
 
 	return retval;
 }
+
+#endif // _MST_ALL_VECTORS_SIMD
 
 //////////////////////////////////
 // matrix<float, 4, 4>          //

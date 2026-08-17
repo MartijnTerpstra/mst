@@ -29,7 +29,7 @@
 
 #include "helpers.h"
 
-// #define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
+#define MST_MATH_ALL_VECTORS_MATRICES_SIMD 1
 #include <mmath2.h>
 #include <mcommon.h>
 
@@ -143,6 +143,77 @@ TEST_CASE("matrix<V,C,R>: SIMDmultiplication", "[matrix][simd]")
 	TestMultiplication<float, 4>();
 	TestMultiplication<uint32_t, 4>();
 	TestMultiplication<int32_t, 4>();
+}
+
+/* independent (not copied from mx_math_matrix_simd.inl) reference for the compact affine
+	multiply: equivalent to promoting both operands to a matrix<V,4,4> (appending (0,0,0,1)),
+	multiplying, and dropping the resulting (always (0,0,0,1)) 4th column. */
+template<typename V>
+matrix<V, 3, 4> ReferenceCompactAffineMultiply(
+	const matrix<V, 3, 4>& _Left, const matrix<V, 3, 4>& _Right) noexcept
+{
+	matrix<V, 3, 4> retval = matrix<V, 3, 4>::zero;
+
+	for(size_t x = 0; x < 3; ++x)
+		for(size_t y = 0; y < 3; ++y)
+			for(size_t i = 0; i < 3; ++i)
+			{
+				retval[x][y] += _Left[x][i] * _Right[i][y];
+			}
+
+	for(size_t y = 0; y < 3; ++y)
+	{
+		for(size_t i = 0; i < 3; ++i)
+		{
+			retval[3][y] += _Left[3][i] * _Right[i][y];
+		}
+		retval[3][y] += _Right[3][y];
+	}
+
+	return retval;
+}
+
+TEST_CASE("matrix<V,C,R>: compact affine (matrix<V,3,4>) SIMD multiplication: pure translation",
+	"[matrix][simd]")
+{
+	/* MST_MATH_ALL_VECTORS_MATRICES_SIMD (defined above) is what makes vector<float,3> itself
+		SIMD-backed, which is what the matrix<float,3,4> SIMD operator* needs to exist at all. */
+	typedef vector<float, 3> float3;
+
+	matrix<float, 3, 4> left = matrix<float, 3, 4>::identity;
+	left.set_position(float3(1, 2, 3));
+
+	matrix<float, 3, 4> right = matrix<float, 3, 4>::identity;
+	right.set_position(float3(4, 5, 6));
+
+	auto combined = left * right;
+
+	/* with identity orientation on both sides, translations simply add and the orientation
+		stays identity */
+	REQUIRE(combined.get_position() == float3(5, 7, 9));
+	REQUIRE(combined.get_right_direction() == float3(1, 0, 0));
+	REQUIRE(combined.get_up_direction() == float3(0, 1, 0));
+	REQUIRE(combined.get_forward_direction() == float3(0, 0, 1));
+}
+
+TEST_CASE(
+	"matrix<V,C,R>: compact affine (matrix<V,3,4>) SIMD multiplication matches scalar reference",
+	"[matrix][simd]")
+{
+	typedef vector<float, 3> float3;
+	typedef mst::math::degrees<float> degrees;
+	typedef mst::math::quaternion<float> quaternion;
+
+	matrix<float, 3, 4> left(float3(2, 4, 6), quaternion(degrees(30), float3(0, 1, 0)));
+	matrix<float, 3, 4> right(float3(-1, 5, 2), quaternion(degrees(60), float3(1, 0, 0)));
+
+	auto simdresult = left * right;
+	auto ref = ReferenceCompactAffineMultiply(left, right);
+
+	/* not memcmp: the 4th float lane behind each vector<float,3> is unused padding and isn't
+		guaranteed to hold the same bit pattern between two independently-built matrices, so
+		element-wise (padding-blind) comparison is the correct check here */
+	REQUIRE_THAT(simdresult, mst::test_util::approx_equal(ref, 0.0001f));
 }
 
 template<typename _Value_type, size_t _ColumnsAndRows>

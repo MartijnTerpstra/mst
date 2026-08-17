@@ -260,7 +260,7 @@ _MST_CONSTEXPR17 _Value_type
 _Details::_Math_vector_base<_Value_type, _Elems, true, _IsUnsigned>::distance(
 	const _Vector_t& _Vec) const noexcept
 {
-	return sqrt(squared_distance(_Vec));
+	return sqrt(this->squared_distance(_Vec));
 }
 
 /* normalized and returns itself */

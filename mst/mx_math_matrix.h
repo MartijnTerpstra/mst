@@ -99,10 +99,14 @@ public:
 	/* sets the values of the matrix */
 	_MST_CONSTEXPR17 void set(const _Value_type (&_Values)[_Columns][_Rows]) noexcept;
 
-	/* sets only a part of the matrix from _Matrix */
+	/* sets only a part of the matrix from _Matrix, copying at most _Column_count columns and
+		_Row_count rows starting at (0,0) in _Matrix into this matrix starting at
+		(_Column_offset, _Row_offset). _Column_offset/_Row_offset are not defaulted here to
+		avoid an ambiguity against the (_Matrix, _Column_offset, _Row_offset) overload below. */
 	template<size_t _xColumns, size_t _xRows>
-	_MST_CONSTEXPR17 void set_part(const _Matrix_t& _Matrix, size_t _Column_count,
-		size_t _Row_count, size_t _Column_offset = 0, size_t _Row_offset = 0) noexcept;
+	_MST_CONSTEXPR17 void set_part(const matrix<_Value_type, _xColumns, _xRows>& _Matrix,
+		size_t _Column_count, size_t _Row_count, size_t _Column_offset,
+		size_t _Row_offset) noexcept;
 
 	/* sets only a part of the matrix from _Matrix */
 	template<size_t _xColumns, size_t _xRows>
@@ -217,7 +221,7 @@ struct _GetMatrixBase
 		if(_Columns == 1 && _Rows == 1)
 			return _Math_matrix_square<_Value_type, 1,1>;
 
-		if (std::is_floating_point_v<_Value_type> && _Rows >= 3 && _Columns >= 4)
+		if (std::is_floating_point_v<_Value_type> && _Rows >= 4 && _Columns >= 3)
 			return _Math_matrix_positional<_Value_type, _Columns, _Rows>;
 
 		if (std::is_floating_point_v<_Value_type> && _Rows == 3 && _Columns == 3)
@@ -230,10 +234,14 @@ struct _GetMatrixBase
 
 	*/
 
+	/* positional needs a dedicated 4th row to hold the row-vector translation (see
+		set_position()/get_position()), so it requires _Rows >= 4; a 3-column orientation block
+		(_Columns >= 3) is still enough for the basis vectors. This is what backs
+		matrix<V,3,4> (compact affine: 3 basis rows + 1 translation row) and matrix<V,4,4>. */
 	typedef typename ::std::conditional<!std::is_signed<_Value_type>::value ||
 											!std::is_floating_point<_Value_type>::value,
 		_Math_matrix_base<_Value_type, _Columns, _Rows>,
-		typename ::std::conditional<_Rows >= 3 && _Columns >= 4,
+		typename ::std::conditional<_Rows >= 4 && _Columns >= 3,
 			_Math_matrix_positional<_Value_type, _Columns, _Rows>,
 			typename ::std::conditional<_Rows == 3 && _Columns == 3,
 				_Math_matrix_orientational<_Value_type, _Columns, _Rows>,
@@ -325,34 +333,6 @@ public:
 								std::is_floating_point<_Ty>::value>::type* = 0) noexcept;
 };
 
-template<typename _Value_type>
-class matrix<_Value_type, 4, 3> : public _Details::_GetMatrixBase<_Value_type, 4, 3>::type
-{
-public:
-	constexpr matrix() = default;
-
-	template<typename _xValue_type>
-	_MST_CONSTEXPR17 explicit matrix(const matrix<_xValue_type, 4, 3>& _Other) noexcept;
-	_MST_CONSTEXPR17 explicit matrix(_Value_type initVal) noexcept;
-
-	_MST_CONSTEXPR17 matrix(const ::mst::math::vector<_Value_type, 4>& _Row0,
-		const ::mst::math::vector<_Value_type, 4>& _Row1,
-		const ::mst::math::vector<_Value_type, 4>& _Row2) noexcept;
-
-	template<typename _Ty = _Value_type>
-	_MST_CONSTEXPR17 matrix(const vector<_Value_type, 3>& _Position,
-		typename std::enable_if<std::is_signed<_Ty>::value &&
-								std::is_floating_point<_Ty>::value>::type* = 0) noexcept;
-
-	template<typename _Ty = _Value_type>
-	_MST_CONSTEXPR17 matrix(const vector<_Value_type, 3>& _Position,
-		const quaternion<_Value_type>& _Orientation,
-		typename std::enable_if<std::is_signed<_Ty>::value &&
-								std::is_floating_point<_Ty>::value>::type* = 0) noexcept;
-
-	static const matrix<_Value_type, 4, 3> identity;
-};
-
 template<typename _Value_type, size_t _Columns>
 class matrix<_Value_type, _Columns, 4>
 	: public _Details::_GetMatrixBase<_Value_type, _Columns, 4>::type
@@ -370,6 +350,38 @@ public:
 		const ::mst::math::vector<_Value_type, _Columns>& _Row3) noexcept;
 };
 
+/* compact affine transform: 3 basis rows plus a 4th row holding the row-vector translation
+	(see set_position()/get_position()) -- the same role matrix<V,4,3> used to play, reshaped so
+	the translation has a row of its own instead of being tacked onto the end of each basis row */
+template<typename _Value_type>
+class matrix<_Value_type, 3, 4> : public _Details::_GetMatrixBase<_Value_type, 3, 4>::type
+{
+public:
+	constexpr matrix() = default;
+
+	template<typename _xValue_type>
+	_MST_CONSTEXPR17 explicit matrix(const matrix<_xValue_type, 3, 4>& _Other) noexcept;
+	_MST_CONSTEXPR17 explicit matrix(_Value_type initVal) noexcept;
+
+	_MST_CONSTEXPR17 matrix(const ::mst::math::vector<_Value_type, 3>& _Row0,
+		const ::mst::math::vector<_Value_type, 3>& _Row1,
+		const ::mst::math::vector<_Value_type, 3>& _Row2,
+		const ::mst::math::vector<_Value_type, 3>& _Row3) noexcept;
+
+	template<typename _Ty = _Value_type>
+	_MST_CONSTEXPR17 matrix(const vector<_Value_type, 3>& _Position,
+		typename std::enable_if<std::is_signed<_Ty>::value &&
+								std::is_floating_point<_Ty>::value>::type* = 0) noexcept;
+
+	template<typename _Ty = _Value_type>
+	_MST_CONSTEXPR17 matrix(const vector<_Value_type, 3>& _Position,
+		const quaternion<_Value_type>& _Orientation,
+		typename std::enable_if<std::is_signed<_Ty>::value &&
+								std::is_floating_point<_Ty>::value>::type* = 0) noexcept;
+
+	static const matrix<_Value_type, 3, 4> identity;
+};
+
 template<typename _Value_type>
 class matrix<_Value_type, 4, 4> : public _Details::_GetMatrixBase<_Value_type, 4, 4>::type
 {
@@ -380,8 +392,9 @@ public:
 	_MST_CONSTEXPR17 explicit matrix(const matrix<_xValue_type, 4, 4>& _Other) noexcept;
 	_MST_CONSTEXPR17 explicit matrix(_Value_type initVal) noexcept;
 
+	/* appends _Column3 as the 4th column of each row of _Columns012 (typically (0,0,0,1)) */
 	_MST_CONSTEXPR17 explicit matrix(
-		const matrix<_Value_type, 4, 3>& _Row012, const vector<_Value_type, 4>& _Row3) noexcept;
+		const matrix<_Value_type, 3, 4>& _Columns012, const vector<_Value_type, 4>& _Column3) noexcept;
 
 	_MST_CONSTEXPR17 matrix(const vector<_Value_type, 4>& _Row0,
 		const vector<_Value_type, 4>& _Row1, const vector<_Value_type, 4>& _Row2,

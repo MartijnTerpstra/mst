@@ -431,7 +431,7 @@ inline void recursive_mutex::signal() const noexcept
 
 inline bool recursive_mutex::_Try_wait() const noexcept
 {
-	const uint32_t tid = ::mst::_Details::get_current_thread_id();
+	const uint64_t tid = ::mst::_Details::get_current_thread_id();
 
 	if(m_tid == tid)
 	{

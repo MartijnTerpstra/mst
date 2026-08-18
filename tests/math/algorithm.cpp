@@ -323,3 +323,78 @@ TEST_CASE("math::smoothstep: scalar", "[math][algorithm]")
 	REQUIRE(smoothstep(0.0f, 1.0f, 1.f) == 1.f);
 	REQUIRE_THAT(smoothstep(0.0f, 1.0f, .5f), Catch::Matchers::WithinAbs(.5f, _MST_EPSILON));
 }
+
+TEST_CASE("math::reflect: axis aligned normal", "[math][algorithm]")
+{
+	typedef vector<float, 2> vec2;
+
+	REQUIRE(reflect(vec2(1.f, -1.f), vec2(0.f, 1.f)) == vec2(1.f, 1.f));
+	REQUIRE(reflect(vec2(-1.f, -1.f), vec2(0.f, 1.f)) == vec2(-1.f, 1.f));
+	REQUIRE(reflect(vec2(1.f, -1.f), vec2(1.f, 0.f)) == vec2(-1.f, -1.f));
+	REQUIRE(reflect(vec2(3.f, 4.f), vec2(0.f, -1.f)) == vec2(3.f, -4.f));
+}
+
+TEST_CASE("math::reflect: 3D vector", "[math][algorithm]")
+{
+	typedef vector<float, 3> vec3;
+	typedef vector<double, 3> dvec3;
+
+	REQUIRE(reflect(vec3(1.f, -1.f, 2.f), vec3(0.f, 1.f, 0.f)) == vec3(1.f, 1.f, 2.f));
+	REQUIRE(reflect(vec3(1.f, 2.f, -3.f), vec3(0.f, 0.f, 1.f)) == vec3(1.f, 2.f, 3.f));
+
+	REQUIRE(reflect(dvec3(1.0, -1.0, 2.0), dvec3(0.0, 1.0, 0.0)) == dvec3(1.0, 1.0, 2.0));
+}
+
+TEST_CASE("math::reflect: 4D vector", "[math][algorithm]")
+{
+	typedef vector<float, 4> vec4;
+
+	REQUIRE(reflect(vec4(1.f, -1.f, 2.f, -3.f), vec4(0.f, 1.f, 0.f, 0.f)) ==
+		vec4(1.f, 1.f, 2.f, -3.f));
+	REQUIRE(reflect(vec4(1.f, 2.f, -3.f, 4.f), vec4(0.f, 0.f, 0.f, 1.f)) ==
+		vec4(1.f, 2.f, -3.f, -4.f));
+}
+
+TEST_CASE("math::reflect: vector parallel to the surface is unaffected", "[math][algorithm]")
+{
+	typedef vector<float, 3> vec3;
+
+	const vec3 normal(0.f, 1.f, 0.f);
+	const vec3 alongSurface(3.f, 0.f, -5.f);
+
+	REQUIRE(reflect(alongSurface, normal) == alongSurface);
+}
+
+TEST_CASE("math::reflect: reflecting the normal off itself negates it", "[math][algorithm]")
+{
+	typedef vector<float, 3> vec3;
+
+	const vec3 normal = vec3(1.f, 2.f, 3.f).normalized();
+
+	REQUIRE_THAT(reflect(normal, normal), mst::test_util::approx_equal(-normal, 0.0001f));
+}
+
+TEST_CASE("math::reflect: is its own inverse", "[math][algorithm]")
+{
+	typedef vector<float, 3> vec3;
+
+	const vec3 normal = vec3(-2.f, 1.f, 0.5f).normalized();
+	const vec3 incident(4.f, -7.f, 2.f);
+
+	const auto reflected = reflect(incident, normal);
+
+	REQUIRE_THAT(reflect(reflected, normal), mst::test_util::approx_equal(incident, 0.0001f));
+}
+
+TEST_CASE("math::reflect: preserves length", "[math][algorithm]")
+{
+	typedef vector<float, 3> vec3;
+
+	const vec3 normal = vec3(1.f, -3.f, 2.f).normalized();
+	const vec3 incident(5.f, 1.f, -4.f);
+
+	const auto reflected = reflect(incident, normal);
+
+	REQUIRE_THAT(
+		reflected.squared_length(), Catch::Matchers::WithinAbs(incident.squared_length(), 0.0001f));
+}

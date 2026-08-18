@@ -120,12 +120,10 @@ TEST_CASE(
 	matrix<float, 3, 3> m(q);
 	quatf roundTripped(m);
 
-	/* a quaternion and its negation represent the same rotation (double cover) -- normalize the
-		sign before comparing */
-	if(roundTripped.dot(q) < 0)
-	{
-		roundTripped = -roundTripped;
-	}
+	/* a quaternion and its negation represent the same rotation (double cover); the trace>0
+		extraction branch always produces a positive w, and q.w = cos(36.5deg) is positive too, so
+		no sign flip is needed here (unlike the test below) */
+	REQUIRE(roundTripped.dot(q) > 0.0f);
 
 	REQUIRE_THAT(roundTripped, mst::test_util::approx_equal(q, 0.0001f));
 }
@@ -164,10 +162,9 @@ TEST_CASE(
 		matrix<float, 3, 3> m(q);
 		quatf roundTripped(m);
 
-		if(roundTripped.dot(q) < 0)
-		{
-			roundTripped = -roundTripped;
-		}
+		/* each of these 180 degree rotations has w = cos(90deg) = 0, which the trace<=0 branches
+			extract with the same sign, so no flip is needed */
+		REQUIRE(roundTripped.dot(q) > 0.0f);
 
 		REQUIRE_THAT(roundTripped, mst::test_util::approx_equal(q, 0.0001f));
 	}
@@ -370,10 +367,8 @@ TEST_CASE("quaternion<V>: look_at reconstructs an orientation from its own basis
 		quatf reconstructed;
 		reconstructed.look_at(q.get_forward_direction(), q.get_up_direction());
 
-		if(reconstructed.dot(q) < 0)
-		{
-			reconstructed = -reconstructed;
-		}
+		/* as above, these 180 degree rotations don't trigger the double-cover sign ambiguity */
+		REQUIRE(reconstructed.dot(q) > 0.0f);
 
 		REQUIRE_THAT(reconstructed, mst::test_util::approx_equal(q, 0.0001f));
 	}

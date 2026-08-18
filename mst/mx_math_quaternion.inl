@@ -162,7 +162,7 @@ template<typename _Value_type>
 /* returns the left vector */
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_left_direction() const noexcept
 {
-	return vector3_type(
+	return vector<_Value_type, 3>(
 		-1.0f + 2.0f * (y * y + z * z), -2.0f * (x * y + w * z), -2.0f * (x * z - w * y));
 }
 
@@ -170,7 +170,7 @@ template<typename _Value_type>
 /* returns the right vector */
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_right_direction() const noexcept
 {
-	return vector3_type(
+	return vector<_Value_type, 3>(
 		1.0f - 2.0f * (y * y + z * z), 2.0f * (x * y + w * z), 2.0f * (x * z - w * y));
 }
 
@@ -178,7 +178,7 @@ template<typename _Value_type>
 /* returns the up vector */
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_up_direction() const noexcept
 {
-	return vector3_type(
+	return vector<_Value_type, 3>(
 		2.0f * (x * y - w * z), 1.0f - 2.0f * (x * x + z * z), 2.0f * (y * z + w * x));
 }
 
@@ -186,7 +186,7 @@ template<typename _Value_type>
 /* returns the down vector */
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_down_direction() const noexcept
 {
-	return vector3_type(
+	return vector<_Value_type, 3>(
 		-2.0f * (x * y - w * z), -1.0f + 2.0f * (x * x + z * z), -2.0f * (y * z + w * x));
 }
 
@@ -194,7 +194,7 @@ template<typename _Value_type>
 /* returns the forward vector */
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_forward_direction() const noexcept
 {
-	return vector3_type(
+	return vector<_Value_type, 3>(
 		2.0f * (x * z + w * y), 2.0f * (y * z - w * x), 1.0f - 2.0f * (x * x + y * y));
 }
 
@@ -202,7 +202,7 @@ template<typename _Value_type>
 /* returns the backward vector */
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_backward_direction() const noexcept
 {
-	return vector3_type(
+	return vector<_Value_type, 3>(
 		-2.0f * (x * z + w * y), -2.0f * (y * z - w * x), -1.0f + 2.0f * (x * x + y * y));
 }
 
@@ -288,7 +288,7 @@ _MST_CONSTEXPR17 vector<_Value_type, 3> quaternion<_Value_type>::rotate_point(
 						   dz = { 2 * x * z - 2 * y * w, 2 * y * z + 2 * x * w,
 							   1 - 2 * qx2 - 2 * qy2 };
 
-	return vector3_type(dx[0] * _Vec[0] + dx[1] * _Vec[1] + dx[2] * _Vec[2],
+	return vector<_Value_type, 3>(dx[0] * _Vec[0] + dx[1] * _Vec[1] + dx[2] * _Vec[2],
 		dy[0] * _Vec[0] + dy[1] * _Vec[1] + dy[2] * _Vec[2],
 		dz[0] * _Vec[0] + dz[1] * _Vec[1] + dz[2] * _Vec[2]);
 }

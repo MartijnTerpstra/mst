@@ -101,7 +101,7 @@ TEST_CASE("threading::slim::recursive_mutex: the owning thread can reenter, and 
 
 TEST_CASE("threading::slim::recursive_mutex: wait() blocks a second thread until the owner "
 		  "fully unlocks",
-	"[thread][slim][recursive_mutex][not_deterministic]")
+	"[thread][slim][recursive_mutex]")
 {
 	recursive_mutex m{ false };
 

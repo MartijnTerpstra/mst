@@ -82,7 +82,7 @@ TEST_CASE("threading::slim::semaphore: signal(count) grants that many additional
 }
 
 TEST_CASE("threading::slim::semaphore: permits acquired concurrently never exceed what was granted",
-	"[thread][slim][semaphore][not_deterministic]")
+	"[thread][slim][semaphore]")
 {
 	constexpr int permitCount = 10;
 	constexpr int threadCount = 40;

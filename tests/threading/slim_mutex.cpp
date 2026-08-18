@@ -97,8 +97,8 @@ TEST_CASE("threading::slim::mutex: a second thread cannot acquire it while locke
 	m.unlock();
 }
 
-TEST_CASE("threading::slim::mutex: wait() blocks a second thread until unlock()",
-	"[thread][slim][mutex][not_deterministic]")
+TEST_CASE(
+	"threading::slim::mutex: wait() blocks a second thread until unlock()", "[thread][slim][mutex]")
 {
 	mutex m{ false };
 

@@ -244,9 +244,34 @@ TEST_CASE("threading::slim::wait_object: the pointer+count overloads match the a
 	REQUIRE(wait_object::wait_any_for(objects, (size_t)2, std::chrono::milliseconds(10)) < 2);
 }
 
+TEST_CASE("threading::slim::wait_object: the initializer_list overloads accept wait objects by "
+		  "reference, without needing to build a pointer array",
+	"[thread][slim][wait_object]")
+{
+	event a{ true, true };
+	event b{ true, true };
+
+	/* wait_all/wait_any */
+	wait_object::wait_all({ a, b });
+	REQUIRE(wait_object::wait_any({ a, b }) < 2);
+
+	/* wait_all_for/wait_any_for */
+	REQUIRE(wait_object::wait_all_for({ a, b }, std::chrono::milliseconds(10)));
+	REQUIRE(wait_object::wait_any_for({ a, b }, std::chrono::milliseconds(10)) < 2);
+
+	event c{ false, true };
+	REQUIRE(!wait_object::wait_all_for({ a, c }, std::chrono::milliseconds(10)));
+	REQUIRE(wait_object::wait_any_for({ a, c }, std::chrono::milliseconds(10)) == 0);
+
+	/* wait_all_until/wait_any_until */
+	const auto deadline = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(10);
+	REQUIRE(wait_object::wait_all_until({ a, b }, deadline));
+	REQUIRE(wait_object::wait_any_until({ a, b }, deadline) < 2);
+}
+
 TEST_CASE("threading::slim::wait_object: wait_all blocks until every object is signaled by other "
 		  "threads",
-	"[thread][slim][wait_object][not_deterministic]")
+	"[thread][slim][wait_object]")
 {
 	event a{ false, true };
 	event b{ false, true };
@@ -274,7 +299,7 @@ TEST_CASE("threading::slim::wait_object: wait_all blocks until every object is s
 }
 
 TEST_CASE("threading::slim::wait_object: wait_any returns as soon as any single object is signaled",
-	"[thread][slim][wait_object][not_deterministic]")
+	"[thread][slim][wait_object]")
 {
 	event a{ false, true };
 	event b{ false, true };

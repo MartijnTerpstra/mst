@@ -30,6 +30,8 @@
 #include <mx_platform.h>
 #include <chrono>
 #include <atomic>
+#include <functional>
+#include <initializer_list>
 
 namespace mst {
 namespace threading {
@@ -70,6 +72,9 @@ public:
 	inline static void wait_all(
 		const wait_object* const* waitObjects, size_t waitObjectCount) noexcept;
 
+	inline static void wait_all(
+		::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects) noexcept;
+
 	template<size_t WaitObjectCount>
 	inline static size_t wait_any(const wait_object* (&waitObjects)[WaitObjectCount]) noexcept;
 
@@ -78,6 +83,9 @@ public:
 
 	inline static size_t wait_any(
 		const wait_object* const* waitObjects, size_t waitObjectCount) noexcept;
+
+	inline static size_t wait_any(
+		::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects) noexcept;
 
 	template<typename RepType, typename PeriodType, size_t WaitObjectCount>
 	inline static bool wait_all_for(const wait_object* (&waitObjects)[WaitObjectCount],
@@ -89,6 +97,11 @@ public:
 
 	template<typename RepType, typename PeriodType>
 	inline static bool wait_all_for(const wait_object* const* waitObjects, size_t waitObjectCount,
+		const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept;
+
+	template<typename RepType, typename PeriodType>
+	inline static bool wait_all_for(
+		::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
 		const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept;
 
 	template<typename ClockType, typename DurationType, size_t WaitObjectCount>
@@ -103,6 +116,11 @@ public:
 	inline static bool wait_all_until(const wait_object* const* waitObjects, size_t waitObjectCount,
 		const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept;
 
+	template<typename ClockType, typename DurationType>
+	inline static bool wait_all_until(
+		::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
+		const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept;
+
 	template<typename RepType, typename PeriodType, size_t WaitObjectCount>
 	inline static size_t wait_any_for(const wait_object* (&waitObjects)[WaitObjectCount],
 		const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept;
@@ -113,6 +131,11 @@ public:
 
 	template<typename RepType, typename PeriodType>
 	inline static size_t wait_any_for(const wait_object* const* waitObjects, size_t waitObjectCount,
+		const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept;
+
+	template<typename RepType, typename PeriodType>
+	inline static size_t wait_any_for(
+		::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
 		const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept;
 
 	template<typename ClockType, typename DurationType, size_t WaitObjectCount>
@@ -126,6 +149,11 @@ public:
 	template<typename ClockType, typename DurationType>
 	inline static size_t wait_any_until(const wait_object* const* waitObjects,
 		size_t waitObjectCount,
+		const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept;
+
+	template<typename ClockType, typename DurationType>
+	inline static size_t wait_any_until(
+		::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
 		const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept;
 
 protected:

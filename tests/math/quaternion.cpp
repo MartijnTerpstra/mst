@@ -32,6 +32,8 @@
 #include <mmath2.h>
 #include <mcommon.h>
 
+#include <sstream>
+
 using mst::math::vector;
 using mst::math::matrix;
 using mst::math::quaternion;
@@ -126,6 +128,49 @@ TEST_CASE(
 	}
 
 	REQUIRE_THAT(roundTripped, mst::test_util::approx_equal(q, 0.0001f));
+}
+
+TEST_CASE("quaternion<V>: matrix constructor round-trips even when the extracted sign flips",
+	"[quaternion]")
+{
+	/* a rotation angle above 240 degrees keeps the matrix trace positive (so this still takes the
+		trace>0 branch above), but the trace>0 branch always extracts a positive w, whereas this
+		q's w = cos(angle/2) is negative -- so the round trip is guaranteed to need the sign flip
+		that the previous test only exercises conditionally */
+	quatf q(degrees<float>(250), float3(1, 2, 3).normalized());
+	REQUIRE(q.w < 0.0f);
+
+	matrix<float, 3, 3> m(q);
+	quatf roundTripped(m);
+
+	REQUIRE(roundTripped.dot(q) < 0.0f);
+	roundTripped = -roundTripped;
+
+	REQUIRE_THAT(roundTripped, mst::test_util::approx_equal(q, 0.0001f));
+}
+
+TEST_CASE(
+	"quaternion<V>: matrix constructor round-trips through every trace<=0 branch", "[quaternion]")
+{
+	/* a 180 degree rotation gives a matrix trace of -1, forcing the trace<=0 branch; rotating
+		around a different axis each time changes which diagonal element dominates, exercising
+		all three sub-branches */
+	quatf aroundX(degrees<float>(180), float3(1, 0, 0));
+	quatf aroundY(degrees<float>(180), float3(0, 1, 0));
+	quatf aroundZ(degrees<float>(180), float3(0, 0, 1));
+
+	for(const quatf& q : { aroundX, aroundY, aroundZ })
+	{
+		matrix<float, 3, 3> m(q);
+		quatf roundTripped(m);
+
+		if(roundTripped.dot(q) < 0)
+		{
+			roundTripped = -roundTripped;
+		}
+
+		REQUIRE_THAT(roundTripped, mst::test_util::approx_equal(q, 0.0001f));
+	}
 }
 
 TEST_CASE("quaternion<V>: identity static member", "[quaternion]")
@@ -311,6 +356,29 @@ TEST_CASE("quaternion<V>: look_at orients forward toward the target", "[quaterni
 	REQUIRE_THAT(q2.get_right_direction(), mst::test_util::approx_equal(float3(0, 0, -1), 0.0001f));
 }
 
+TEST_CASE("quaternion<V>: look_at reconstructs an orientation from its own basis", "[quaternion]")
+{
+	/* feeding a quaternion's own forward/up directions back into look_at() must reconstruct that
+		same orientation (right = up x forward always holds for an orthonormal right-handed
+		frame), regardless of which axis the rotation is around */
+	quatf aroundX(degrees<float>(180), float3(1, 0, 0));
+	quatf aroundY(degrees<float>(180), float3(0, 1, 0));
+	quatf aroundZ(degrees<float>(180), float3(0, 0, 1));
+
+	for(const quatf& q : { aroundX, aroundY, aroundZ })
+	{
+		quatf reconstructed;
+		reconstructed.look_at(q.get_forward_direction(), q.get_up_direction());
+
+		if(reconstructed.dot(q) < 0)
+		{
+			reconstructed = -reconstructed;
+		}
+
+		REQUIRE_THAT(reconstructed, mst::test_util::approx_equal(q, 0.0001f));
+	}
+}
+
 TEST_CASE("quaternion<V>: dot product", "[quaternion]")
 {
 	quatf left(1, 2, 3, 4);
@@ -341,6 +409,31 @@ TEST_CASE("quaternion<V>: slerp interpolates between two orientations", "[quater
 	REQUIRE(std::fabs(halfway.length() - 1.0f) < 0.0001f);
 	REQUIRE_THAT(
 		halfway, mst::test_util::approx_equal(quatf(degrees<float>(45), float3(0, 1, 0)), 0.0001f));
+}
+
+TEST_CASE("quaternion<V>: slerp takes the short way when inputs are more than 90 degrees apart",
+	"[quaternion]")
+{
+	quatf from = quatf::identity;
+	quatf to(degrees<float>(190), float3(0, 1, 0));
+
+	/* sanity check that this pair actually exercises slerp's dot<0 short-path correction */
+	REQUIRE(from.dot(to) < 0.0f);
+
+	REQUIRE_THAT(from.slerp(to, 0.0f), mst::test_util::approx_equal(from, 0.0001f));
+
+	/* slerp inverts one side to take the short path, so it may return -to instead of to -- both
+		represent the same orientation */
+	quatf atEnd = from.slerp(to, 1.0f);
+	if(atEnd.dot(to) < 0)
+	{
+		atEnd = -atEnd;
+	}
+	REQUIRE_THAT(atEnd, mst::test_util::approx_equal(to, 0.0001f));
+
+	/* the interpolated result stays a unit quaternion throughout */
+	quatf halfway = from.slerp(to, 0.5f);
+	REQUIRE(std::fabs(halfway.length() - 1.0f) < 0.0001f);
 }
 
 TEST_CASE("quaternion<V>: operator* combines rotations, operator*= matches", "[quaternion]")
@@ -385,4 +478,14 @@ TEST_CASE("quaternion<V>: operator/= scales down every component", "[quaternion]
 	q /= 2.0f;
 
 	REQUIRE_THAT(q, mst::test_util::approx_equal(quatf(1, 2, 3, 4), 0.0001f));
+}
+
+TEST_CASE("quaternion<V>: operator<< streams the components in w,x,y,z order", "[quaternion]")
+{
+	quatf q(1, 2, 3, 4);
+
+	std::ostringstream stream;
+	stream << q;
+
+	REQUIRE(stream.str() == "<1, 2, 3, 4>");
 }

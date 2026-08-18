@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <utility>
+
 namespace mst {
 namespace math {
 
@@ -864,7 +866,7 @@ _MST_CONSTEXPR17
 		radians<_Value_type> _X_angle, radians<_Value_type> _Y_angle, radians<_Value_type> _Z_angle,
 		euler_rotation_order order) const noexcept
 {
-	byte orderingByte = (byte)order;
+	auto orderingByte = static_cast<std::underlying_type_t<euler_rotation_order>>(order);
 
 	_Matrix_t m = static_cast<const _Matrix_t&>(*this);
 

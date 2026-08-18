@@ -26,6 +26,7 @@
 #pragma once
 
 #include <mcore.h>
+#include <cstddef>
 
 namespace mst {
 
@@ -77,24 +78,24 @@ public:
 		return _Mydata;
 	}
 
-	[[nodiscard]] inline const byte* begin() const
+	[[nodiscard]] inline const std::byte* begin() const
 	{
-		return reinterpret_cast<const byte*>(_Mydata);
+		return reinterpret_cast<const std::byte*>(_Mydata);
 	}
 
-	[[nodiscard]] inline const byte* end() const
+	[[nodiscard]] inline const std::byte* end() const
 	{
-		return reinterpret_cast<const byte*>(_Mydata) + _Mysize;
+		return reinterpret_cast<const std::byte*>(_Mydata) + _Mysize;
 	}
 
-	[[nodiscard]] inline const byte* cbegin() const
+	[[nodiscard]] inline const std::byte* cbegin() const
 	{
-		return reinterpret_cast<const byte*>(_Mydata);
+		return reinterpret_cast<const std::byte*>(_Mydata);
 	}
 
-	[[nodiscard]] inline const byte* cend() const
+	[[nodiscard]] inline const std::byte* cend() const
 	{
-		return reinterpret_cast<const byte*>(_Mydata) + _Mysize;
+		return reinterpret_cast<const std::byte*>(_Mydata) + _Mysize;
 	}
 
 private:

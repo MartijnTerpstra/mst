@@ -103,7 +103,7 @@ inline __m128& operator|=(__m128& _A, const __m128 _B)
 	return _A;
 }
 
-inline __m128& operator&(__m128& _A, const __m128 _B)
+inline __m128& operator&=(__m128& _A, const __m128 _B)
 {
 	_A = _mm_and_ps(_A, _B);
 	return _A;
@@ -167,7 +167,6 @@ inline __m128(max)(const __m128 _A, const __m128 _B)
 	return _mm_max_ps(_A, _B);
 }
 
-template<typename _Ty>
 inline __m128(min)(const __m128 _A, const __m128 _B)
 {
 	return _mm_min_ps(_A, _B);
@@ -279,20 +278,20 @@ struct MST_ALIGN(16) SSEfloat3
 
 	inline __m128& operator[](size_t index)
 	{
-		CHECK_ARR_RANGE(index, 3, "index out of range");
+		MST_ASSERT(index < 3, "index out of range");
 		return (&x)[index];
 	}
 
 	inline const __m128& operator[](size_t index) const
 	{
-		CHECK_ARR_RANGE(index, 3, "index out of range");
+		MST_ASSERT(index < 3, "index out of range");
 		return (&x)[index];
 	}
 
 #ifdef MMATH_H
 	inline float3 to_float3(size_t index) const
 	{
-		CHECK_ARR_RANGE(index, 4, "index out of range");
+		MST_ASSERT(index < 4, "index out of range");
 		return cfloat3(x.m128_f32[index], y.m128_f32[index], z.m128_f32[index]);
 	}
 #endif
@@ -300,7 +299,7 @@ struct MST_ALIGN(16) SSEfloat3
 #ifdef MMATH2_H
 	inline ::mst::math::vector<float, 3> to_float3(size_t index) const
 	{
-		CHECK_ARR_RANGE(index, 4, "index out of range");
+		MST_ASSERT(index < 4, "index out of range");
 		return ::mst::math::vector<float, 3>(
 			x.m128_f32[index], y.m128_f32[index], z.m128_f32[index]);
 	}
@@ -394,13 +393,13 @@ struct MST_ALIGN(16) SSEfloat2
 
 	inline __m128& operator[](size_t index)
 	{
-		CHECK_ARR_RANGE(index, 2, "index out of range");
+		MST_ASSERT(index < 2, "index out of range");
 		return (&x)[index];
 	}
 
 	inline const __m128& operator[](size_t index) const
 	{
-		CHECK_ARR_RANGE(index, 2, "index out of range");
+		MST_ASSERT(index < 2, "index out of range");
 		return (&x)[index];
 	}
 
@@ -489,20 +488,20 @@ struct MST_ALIGN(16) SSEcolor
 
 	inline __m128& operator[](size_t index)
 	{
-		CHECK_ARR_RANGE(index, 3, "index out of range");
+		MST_ASSERT(index < 3, "index out of range");
 		return (&r)[index];
 	}
 
 	inline const __m128& operator[](size_t index) const
 	{
-		CHECK_ARR_RANGE(index, 3, "index out of range");
+		MST_ASSERT(index < 3, "index out of range");
 		return (&r)[index];
 	}
 
 #ifdef MCOLOR_H
 	inline ::mst::math::color3 to_color3(size_t index) const
 	{
-		CHECK_ARR_RANGE(index, 4, "index out of range");
+		MST_ASSERT(index < 4, "index out of range");
 		return ::mst::math::ccolor3(r.m128_f32[index], g.m128_f32[index], b.m128_f32[index]);
 	}
 #endif

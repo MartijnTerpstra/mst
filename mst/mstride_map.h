@@ -34,10 +34,10 @@
 
 namespace mst {
 
-class stridemap;
+class stride_map;
 
 template<typename T>
-class stridemap_iterator
+class stride_map_iterator
 {
 public:
 	typedef ::std::random_access_iterator_tag iterator_category;
@@ -48,12 +48,12 @@ public:
 	typedef const T* const_pointer;
 	typedef ptrdiff_t difference_type;
 
-	typedef stridemap_iterator& _ThisRef;
-	typedef stridemap_iterator _ThisCpy;
+	typedef stride_map_iterator& _ThisRef;
+	typedef stride_map_iterator _ThisCpy;
 
-	friend class ::mst::stridemap;
+	friend class ::mst::stride_map;
 
-	stridemap_iterator(char* _Ptr, size_t _Stride)
+	stride_map_iterator(char* _Ptr, size_t _Stride)
 		: _MyPtr(_Ptr)
 		, _MyStride(_Stride)
 	{
@@ -118,37 +118,37 @@ public:
 		return _ThisCpy(*this) -= _Count;
 	}
 
-	inline difference_type operator-(const stridemap_iterator& _Other) const
+	inline difference_type operator-(const stride_map_iterator& _Other) const
 	{
 		return (_MyPtr - _Other._MyPtr) / (difference_type)_MyStride;
 	}
 
-	inline bool operator==(const stridemap_iterator& _Other) const
+	inline bool operator==(const stride_map_iterator& _Other) const
 	{
 		return _MyPtr == _Other._MyPtr;
 	}
 
-	inline bool operator!=(const stridemap_iterator& _Other) const
+	inline bool operator!=(const stride_map_iterator& _Other) const
 	{
 		return _MyPtr != _Other._MyPtr;
 	}
 
-	inline bool operator<(const stridemap_iterator& _Other) const
+	inline bool operator<(const stride_map_iterator& _Other) const
 	{
 		return _MyPtr < _Other._MyPtr;
 	}
 
-	inline bool operator<=(const stridemap_iterator& _Other) const
+	inline bool operator<=(const stride_map_iterator& _Other) const
 	{
 		return _MyPtr <= _Other._MyPtr;
 	}
 
-	inline bool operator>(const stridemap_iterator& _Other) const
+	inline bool operator>(const stride_map_iterator& _Other) const
 	{
 		return _MyPtr > _Other._MyPtr;
 	}
 
-	inline bool operator>=(const stridemap_iterator& _Other) const
+	inline bool operator>=(const stride_map_iterator& _Other) const
 	{
 		return _MyPtr >= _Other._MyPtr;
 	}
@@ -158,35 +158,35 @@ private:
 	const size_t _MyStride;
 };
 
-class stridemap
+class stride_map
 {
 public:
-	explicit stridemap(size_t _Stride)
+	explicit stride_map(size_t _Stride)
 		: _MyBegin((char*)malloc(_Stride))
 		, _MyEnd(_MyBegin)
 		, _MyLast(_MyBegin + _Stride)
 		, _MyStride(_Stride)
 	{ }
-	explicit stridemap(size_t _Stride, size_t _InitSize)
+	explicit stride_map(size_t _Stride, size_t _InitSize)
 		: _MyBegin((char*)malloc(_InitSize * _Stride))
 		, _MyEnd(_MyBegin + (_InitSize * _Stride))
 		, _MyLast(_MyEnd)
 		, _MyStride(_Stride)
 	{ }
-	stridemap(const stridemap& _OtherMap)
+	stride_map(const stride_map& _OtherMap)
 		: _MyBegin((char*)malloc(_OtherMap.size() * _OtherMap._MyStride))
 		, _MyEnd(_MyBegin + (_OtherMap.size() * _OtherMap._MyStride))
 		, _MyLast(_MyBegin + (_OtherMap.size() * _OtherMap._MyStride))
 		, _MyStride(_OtherMap._MyStride)
 	{
-#if MST_STRIDEMAP_COPY_WARNING
-		WARNING_MESG("copying std::stridemap. this is slow, try moving it");
+#if MST_STRIDE_MAP_COPY_WARNING
+		WARNING_MESG("copying std::stride_map. this is slow, try moving it");
 #endif
 		_copydata(_OtherMap);
 	}
 
 	template<typename T>
-	stridemap(::std::initializer_list<T> initList)
+	stride_map(::std::initializer_list<T> initList)
 		: _MyBegin((char*)malloc(initList.size() * sizeof(T)))
 		, _MyEnd(_MyBegin + (initList.size() * sizeof(T)))
 		, _MyLast(_MyBegin + (initList.size() * sizeof(T)))
@@ -196,7 +196,7 @@ public:
 	}
 
 	// rvalue reference constructor
-	stridemap(stridemap&& _OtherMap)
+	stride_map(stride_map&& _OtherMap)
 		: _MyBegin(_OtherMap._MyBegin)
 		, _MyEnd(_OtherMap._MyEnd)
 		, _MyLast(_OtherMap._MyLast)
@@ -205,15 +205,15 @@ public:
 		_OtherMap._MyBegin = _OtherMap._MyEnd = _OtherMap._MyLast = nullptr;
 	}
 
-	~stridemap()
+	~stride_map()
 	{
 		_orphan();
 	}
 
 	template<typename T>
-	inline void erase(stridemap_iterator<T> _It)
+	inline void erase(stride_map_iterator<T> _It)
 	{
-		MST_ASSERT(_It._MyStride == _MyStride, "incompatable strides between iterator and stridemap");
+		MST_ASSERT(_It._MyStride == _MyStride, "incompatable strides between iterator and stride_map");
 		MST_ASSERT(_It._MyPtr >= _MyBegin && _It._MyPtr < _MyEnd, "erase iterator out of range");
 
 		memmove(_It._MyPtr, _It._MyPtr + _MyStride, (_MyEnd - _It._MyPtr) - _MyStride);
@@ -222,10 +222,10 @@ public:
 	}
 
 	template<typename T>
-	inline void erase(stridemap_iterator<T> _ItFirst, stridemap_iterator<T> _ItEnd)
+	inline void erase(stride_map_iterator<T> _ItFirst, stride_map_iterator<T> _ItEnd)
 	{
 		MST_ASSERT(_ItFirst._MyStride == _MyStride && _ItEnd._MyStride == _MyStride,
-			"incompatable strides between iterators and stridemap");
+			"incompatable strides between iterators and stride_map");
 		MST_ASSERT(
 			_ItFirst._MyPtr >= _MyBegin && _ItFirst._MyPtr <= _MyEnd, "erase iterator out of range");
 		MST_ASSERT(_ItEnd._MyPtr >= _MyBegin && _ItEnd._MyPtr <= _MyEnd, "erase iterator out of range");
@@ -286,14 +286,14 @@ public:
 
 	inline void pop_back()
 	{
-		MST_ASSERT(!empty(), "cannot pop back when stridemap is empty");
+		MST_ASSERT(!empty(), "cannot pop back when stride_map is empty");
 		_MyEnd -= _MyStride;
 		_checkcollapse();
 	}
 
 	inline void pop_front()
 	{
-		MST_ASSERT(!empty(), "cannot pop front when stridemap is empty");
+		MST_ASSERT(!empty(), "cannot pop front when stride_map is empty");
 
 		memmove(_MyBegin, _MyBegin + _MyStride, (_MyEnd - _MyBegin) - _MyStride);
 		_MyEnd -= _MyStride;
@@ -303,28 +303,28 @@ public:
 	template<typename T>
 	inline const T& back() const
 	{
-		MST_ASSERT(!empty(), "the stridemap is empty");
+		MST_ASSERT(!empty(), "the stride_map is empty");
 		return *(const T*)(_MyEnd - _MyStride);
 	}
 
 	template<typename T>
 	inline const T& front() const
 	{
-		MST_ASSERT(!empty(), "the stridemap is empty");
+		MST_ASSERT(!empty(), "the stride_map is empty");
 		return *(const T*)_MyBegin;
 	}
 
 	template<typename T>
 	inline T& back()
 	{
-		MST_ASSERT(!empty(), "the stridemap is empty");
+		MST_ASSERT(!empty(), "the stride_map is empty");
 		return *(T*)(_MyEnd - _MyStride);
 	}
 
 	template<typename T>
 	inline T& front()
 	{
-		MST_ASSERT(!empty(), "the stridemap is empty");
+		MST_ASSERT(!empty(), "the stride_map is empty");
 		return *(T*)_MyBegin;
 	}
 
@@ -374,39 +374,39 @@ public:
 	}
 
 	template<typename T>
-	inline stridemap_iterator<T> begin()
+	inline stride_map_iterator<T> begin()
 	{
-		return stridemap_iterator<T>(_MyBegin, _MyStride);
+		return stride_map_iterator<T>(_MyBegin, _MyStride);
 	}
 
 	template<typename T>
-	inline stridemap_iterator<T> end()
+	inline stride_map_iterator<T> end()
 	{
-		return stridemap_iterator<T>(_MyEnd, _MyStride);
+		return stride_map_iterator<T>(_MyEnd, _MyStride);
 	}
 
 	template<typename T>
-	inline stridemap_iterator<const T> begin() const
+	inline stride_map_iterator<const T> begin() const
 	{
-		return stridemap_iterator<const T>(_MyBegin, _MyStride);
+		return stride_map_iterator<const T>(_MyBegin, _MyStride);
 	}
 
 	template<typename T>
-	inline stridemap_iterator<const T> end() const
+	inline stride_map_iterator<const T> end() const
 	{
-		return stridemap_iterator<const T>(_MyEnd, _MyStride);
+		return stride_map_iterator<const T>(_MyEnd, _MyStride);
 	}
 
 	template<typename T>
-	inline stridemap_iterator<const T> cbegin() const
+	inline stride_map_iterator<const T> cbegin() const
 	{
-		return stridemap_iterator<const T>(_MyBegin, _MyStride);
+		return stride_map_iterator<const T>(_MyBegin, _MyStride);
 	}
 
 	template<typename T>
-	inline stridemap_iterator<const T> cend() const
+	inline stride_map_iterator<const T> cend() const
 	{
-		return stridemap_iterator<const T>(_MyEnd, _MyStride);
+		return stride_map_iterator<const T>(_MyEnd, _MyStride);
 	}
 
 	inline void pre_allocate(size_t _NumObjects)
@@ -459,7 +459,7 @@ public:
 	}
 
 
-	inline stridemap& operator+=(const stridemap& _OtherMap)
+	inline stride_map& operator+=(const stride_map& _OtherMap)
 	{
 		MST_ASSERT(_MyStride == _OtherMap._MyStride, "incompatible strides");
 
@@ -470,10 +470,10 @@ public:
 		return *this;
 	}
 
-	inline stridemap& operator=(const stridemap& _OtherMap)
+	inline stride_map& operator=(const stride_map& _OtherMap)
 	{
-#if MST_STRIDEMAP_COPY_WARNING
-		WARNING_MESG("copying std::stridemap. this is slow, try moving it");
+#if MST_STRIDE_MAP_COPY_WARNING
+		WARNING_MESG("copying std::stride_map. this is slow, try moving it");
 #endif
 		MST_ASSERT(_OtherMap._MyStride == _MyStride,
 			"incompatible strides, use set_stride() to make them match");
@@ -487,7 +487,7 @@ public:
 		return *this;
 	}
 
-	inline stridemap& operator=(stridemap&& _OtherMap)
+	inline stride_map& operator=(stride_map&& _OtherMap)
 	{
 		MST_ASSERT(_OtherMap._MyStride == _MyStride, "incompatible strides");
 
@@ -568,7 +568,7 @@ private:
 	}
 
 	// is plain old data, copy memory
-	inline void _copydata(const stridemap& _OtherMap)
+	inline void _copydata(const stride_map& _OtherMap)
 	{
 		memcpy(_MyBegin, _OtherMap._MyBegin, _OtherMap.size() * _MyStride);
 	}
@@ -586,30 +586,30 @@ private:
 	char* _MyLast;
 	size_t _MyStride;
 
-}; // struct stridemap
+}; // struct stride_map
 
 template<typename T>
-iterator_range<stridemap_iterator<T>> range(stridemap& strideMap)
+iterator_range<stride_map_iterator<T>> range(stride_map& strideMap)
 {
-	return iterator_range<stridemap_iterator<T>>(strideMap.begin<T>(), strideMap.end<T>());
+	return iterator_range<stride_map_iterator<T>>(strideMap.begin<T>(), strideMap.end<T>());
 }
 
 template<typename T>
-iterator_range<stridemap_iterator<const T>> range(const stridemap& strideMap)
+iterator_range<stride_map_iterator<const T>> range(const stride_map& strideMap)
 {
-	return iterator_range<stridemap_iterator<const T>>(strideMap.begin<T>(), strideMap.end<T>());
+	return iterator_range<stride_map_iterator<const T>>(strideMap.begin<T>(), strideMap.end<T>());
 }
 
 template<typename T>
-iterator_range<stridemap_iterator<const T>> crange(stridemap& strideMap)
+iterator_range<stride_map_iterator<const T>> crange(stride_map& strideMap)
 {
-	return iterator_range<stridemap_iterator<const T>>(strideMap.cbegin<T>(), strideMap.cend<T>());
+	return iterator_range<stride_map_iterator<const T>>(strideMap.cbegin<T>(), strideMap.cend<T>());
 }
 
 template<typename T>
-iterator_range<stridemap_iterator<const T>> crange(const stridemap& strideMap)
+iterator_range<stride_map_iterator<const T>> crange(const stride_map& strideMap)
 {
-	return iterator_range<stridemap_iterator<const T>>(strideMap.cbegin<T>(), strideMap.cend<T>());
+	return iterator_range<stride_map_iterator<const T>>(strideMap.cbegin<T>(), strideMap.cend<T>());
 }
 
 } // namespace mst

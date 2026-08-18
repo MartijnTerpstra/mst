@@ -130,7 +130,6 @@ SETUP_BASIC_TEST("test_${CATEGORY}_${TEST_NAME}" "tests/${CATEGORY}/${TEST_NAME}
 
 endmacro(add_mst_test)
 
-add_mst_test(algorithm container)
 add_mst_test(algorithm for_each)
 add_mst_test(algorithm for_each_remove_if)
 
@@ -142,15 +141,17 @@ add_mst_test(common printf)
 add_mst_test(common scope_guard)
 add_mst_test(common uuid)
 
+add_mst_test(containers array_map)
 add_mst_test(containers array_view)
-add_mst_test(containers arraymap)
 add_mst_test(containers colony)
 add_mst_test(containers ranges)
 add_mst_test(containers sparse_set)
-add_mst_test(containers stridemap)
+add_mst_test(containers static_map)
+add_mst_test(containers stride_map)
 
 add_mst_test(lock_free queue)
 
+add_mst_test(math aabb)
 add_mst_test(math algorithm)
 add_mst_test(math vector_simd)
 add_mst_test(math vector_functionality)
@@ -169,6 +170,7 @@ add_mst_test(math matrix_transform)
 add_mst_test(math matrix_projection)
 add_mst_test(math matrix_set)
 add_mst_test(math quaternion)
+add_mst_test(math ray)
 
 add_mst_test(memory aligned_allocator)
 add_mst_test(memory aligned_malloc)
@@ -178,6 +180,20 @@ add_mst_test(platform directory_and_paths)
 add_mst_test(platform memory)
 add_mst_test(platform names_and_versions)
 add_mst_test(platform processor)
+
+# msimd.h/msimdmath.h are x86-only (raw SSE2/AVX2 intrinsic headers, no ARM fallback)
+if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64" AND NOT CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64")
+add_mst_test(simd sse2)
+
+# msimdmath.h hard-requires AVX2 (#error otherwise); the shared -mavx test flags don't
+# enable it, so this one target opts in on its own.
+add_mst_test(simd simdmath)
+if(MSVC)
+target_compile_options(test_simd_simdmath PRIVATE /arch:AVX2)
+else()
+target_compile_options(test_simd_simdmath PRIVATE -mavx2)
+endif()
+endif()
 
 add_mst_test(test_util helpers)
 add_mst_test(test_util random_data_generator)

@@ -8,27 +8,24 @@ if ($PSBoundParameters.ContainsKey("BuildType")) {
 
 $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
 $BuildDir = Join-Path $RootDir "build"
+$Preset = "dev-$($BuildType.ToLower())"
 
-if (-not (Test-Path $BuildDir)) {
-    New-Item -ItemType Directory -Path $BuildDir | Out-Null
-}
-elseif ($env:REBUILD) {
+if ($env:REBUILD -and (Test-Path $BuildDir)) {
     Remove-Item -Recurse -Force $BuildDir
-    New-Item -ItemType Directory -Path $BuildDir | Out-Null
 }
 
-Push-Location $BuildDir
+Push-Location $RootDir
 try {
-    Write-Host "Building cmake target"
-    cmake $RootDir -DCMAKE_BUILD_TYPE=$BuildType -DMST_RUN_TESTS=True -DMST_UTILS=True
+    Write-Host "Configuring cmake preset $Preset"
+    cmake --preset $Preset
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     Write-Host "Building mst"
-    cmake --build . --config $BuildType --parallel 10
+    cmake --build --preset $Preset --parallel 10
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     if ($env:TESTING) {
-        ctest -C $BuildType --output-on-failure
+        ctest --preset $Preset
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
 }

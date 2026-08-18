@@ -70,6 +70,7 @@ build/
 _build/
 out/
 Testing/
+CMakeUserPresets.json
 
 # clion
 cmake-build-*/

@@ -33,32 +33,62 @@
 #include <chrono>
 #include <thread>
 
-using mst::threading::slim::recursive_mutex;
+using mst::threading::slim::mutex;
 
-TEST_CASE("threading::slim::recursive_mutex: creation", "[thread][slim][recursive_mutex]")
+TEST_CASE("threading::slim::mutex: creation unowned starts unlocked", "[thread][slim][mutex]")
 {
-	recursive_mutex m{ false };
+	mutex m{ false };
 
-	/* an unowned mutex isn't locked by anyone yet */
 	REQUIRE(m.try_wait());
 
 	m.unlock();
 }
 
-TEST_CASE("threading::slim::recursive_mutex: creation with owned=true locks it for the "
-		  "constructing thread",
-	"[thread][slim][recursive_mutex]")
+TEST_CASE("threading::slim::mutex: creation owned starts locked", "[thread][slim][mutex]")
 {
-	recursive_mutex m{ true };
+	mutex m{ true };
 
-	/* the constructing thread already holds it, so it can reenter without blocking */
-	REQUIRE(m.try_wait());
+	REQUIRE(!m.try_wait());
+
 	m.unlock();
+}
 
-	/* a different thread must not be able to acquire it while the constructing thread still
-		holds its original (owned=true) lock plus the reentrant lock above */
+TEST_CASE("threading::slim::mutex: unlike recursive_mutex, the owning thread cannot reenter it",
+	"[thread][slim][mutex]")
+{
+	mutex m{ false };
+
+	m.lock();
+
+	/* a second try_wait() from the very same thread that already holds it must fail -- unlike
+		recursive_mutex, mutex tracks no owning thread and allows no reentrancy */
+	REQUIRE(!m.try_wait());
+
+	m.unlock();
+}
+
+TEST_CASE("threading::slim::mutex: unlock() releases it for other threads to acquire",
+	"[thread][slim][mutex]")
+{
+	mutex m{ false };
+
+	m.lock();
+	REQUIRE(!m.try_wait());
+
+	m.unlock();
+	REQUIRE(m.try_wait());
+
+	m.unlock();
+}
+
+TEST_CASE("threading::slim::mutex: a second thread cannot acquire it while locked",
+	"[thread][slim][mutex]")
+{
+	mutex m{ false };
+
+	m.lock();
+
 	std::atomic_bool acquiredByOtherThread{ false };
-
 	std::thread other([&] { acquiredByOtherThread = m.try_wait(); });
 	other.join();
 
@@ -67,46 +97,12 @@ TEST_CASE("threading::slim::recursive_mutex: creation with owned=true locks it f
 	m.unlock();
 }
 
-TEST_CASE("threading::slim::recursive_mutex: the owning thread can reenter, and it only "
-		  "releases once every lock has a matching unlock",
-	"[thread][slim][recursive_mutex]")
+TEST_CASE("threading::slim::mutex: wait() blocks a second thread until unlock()",
+	"[thread][slim][mutex][not_deterministic]")
 {
-	recursive_mutex m{ false };
-
-	/* try_wait/lock lets the same thread reenter as many times as it wants */
-	REQUIRE(m.try_wait());
-	REQUIRE(m.try_wait());
-	REQUIRE(m.try_wait());
-
-	/* a different thread cannot acquire it while any of those three locks is still held */
-	auto tryAcquireFromOtherThread = [&] {
-		std::atomic_bool acquired{ false };
-		std::thread other([&] { acquired = m.try_wait(); });
-		other.join();
-		return acquired.load();
-	};
-
-	REQUIRE(!tryAcquireFromOtherThread());
-	m.unlock();
-
-	REQUIRE(!tryAcquireFromOtherThread());
-	m.unlock();
-
-	/* the last matching unlock finally releases it */
-	REQUIRE(!tryAcquireFromOtherThread());
-	m.unlock();
-
-	REQUIRE(tryAcquireFromOtherThread());
-}
-
-TEST_CASE("threading::slim::recursive_mutex: wait() blocks a second thread until the owner "
-		  "fully unlocks",
-	"[thread][slim][recursive_mutex][not_deterministic]")
-{
-	recursive_mutex m{ false };
+	mutex m{ false };
 
 	m.lock();
-	m.lock(); // lock it recursively, so a single unlock() must not be enough to release it
 
 	std::atomic_bool acquiredByOtherThread{ false };
 
@@ -119,12 +115,7 @@ TEST_CASE("threading::slim::recursive_mutex: wait() blocks a second thread until
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquiredByOtherThread);
 
-	m.unlock(); // still locked once more
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	REQUIRE(!acquiredByOtherThread);
-
-	m.unlock(); // fully released now
+	m.unlock();
 
 	other.join();
 

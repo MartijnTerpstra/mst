@@ -71,8 +71,7 @@ inline bool wait_object::wait_for(
 				return true;
 			}
 			if(::std::chrono::duration_cast<DurationType>(
-				   ::std::chrono::high_resolution_clock::now() - start)
-					.count() > duration)
+				   ::std::chrono::high_resolution_clock::now() - start) >= duration)
 			{
 				return false;
 			}
@@ -181,12 +180,12 @@ inline bool wait_object::wait_all_for(const wait_object* const* waitObjects, siz
 	{
 		for(size_t i = 0; i < waitObjectCount; ++i)
 		{
-			if(waitObjects[i]->_Try_wait())
+			if(!waitObjects[i]->_Try_wait())
 			{
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	else
 	{
@@ -239,12 +238,12 @@ inline bool wait_object::wait_all_until(const wait_object* const* waitObjects,
 	{
 		for(size_t i = 0; i < waitObjectCount; ++i)
 		{
-			if(waitObjects[i]->_Try_wait())
+			if(!waitObjects[i]->_Try_wait())
 			{
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	else
 	{

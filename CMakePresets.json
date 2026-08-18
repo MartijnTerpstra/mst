@@ -1,0 +1,405 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "dev-base",
+            "displayName": "Local dev base",
+            "description": "Shared settings for local Debug/Release dev builds (mirrors scripts/build.sh)",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "MST_RUN_TESTS": true,
+                "MST_UTILS": true
+            }
+        },
+        {
+            "name": "dev-debug",
+            "displayName": "Debug",
+            "inherits": "dev-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "dev-release",
+            "displayName": "Release",
+            "inherits": "dev-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "windows-strict-base",
+            "displayName": "Windows strict-warnings base",
+            "description": "From CMakeSettings.json's Windows-x64-Dev/Test: /W4 plus SIMD-union/alignment suppressions. NOTE: CMakeLists.txt's own SETUP_TARGET sets /W1 on top of this per-target, which likely wins on the MSVC command line — verify with /showIncludes or a build log if you rely on /W4 actually applying.",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "inherits": "dev-base",
+            "binaryDir": "${sourceDir}/build-windows-strict",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /W4 /GR /EHsc /wd4324 /wd4201"
+            }
+        },
+        {
+            "name": "windows-strict-debug",
+            "displayName": "Windows Debug (strict warnings)",
+            "inherits": "windows-strict-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "windows-strict-release",
+            "displayName": "Windows Release (strict warnings)",
+            "inherits": "windows-strict-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "linux-gcc-base",
+            "displayName": "Linux GCC base",
+            "description": "From CMakeSettings.json's Linux-x64-GCC-Dev/Test (local, not remote)",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "inherits": "dev-base",
+            "binaryDir": "${sourceDir}/build-linux-gcc",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc"
+            }
+        },
+        {
+            "name": "linux-gcc-debug",
+            "displayName": "Linux GCC Debug",
+            "inherits": "linux-gcc-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-gcc-release",
+            "displayName": "Linux GCC Release",
+            "inherits": "linux-gcc-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG"
+            }
+        },
+        {
+            "name": "linux-clang-base",
+            "displayName": "Linux Clang base",
+            "description": "From CMakeSettings.json's Linux-x64-Clang-Dev/Test (local, not remote)",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "inherits": "dev-base",
+            "binaryDir": "${sourceDir}/build-linux-clang",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
+            }
+        },
+        {
+            "name": "linux-clang-debug",
+            "displayName": "Linux Clang Debug",
+            "inherits": "linux-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-clang-release",
+            "displayName": "Linux Clang Release",
+            "inherits": "linux-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -finline-functions"
+            }
+        },
+        {
+            "name": "remote-linux-base",
+            "displayName": "Remote Linux base (Visual Studio)",
+            "description": "From CMakeSettings.json's remote (SSH) Linux configurations. Best-effort port of Visual Studio's remote-preset vendor JSON — I could not verify the exact vendor schema outside the IDE, so open this in Visual Studio and confirm it picks up a remote connection (Tools > Options > Cross Platform > Connection Manager) before relying on it.",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "inherits": "dev-base",
+            "binaryDir": "~/projects/mst/${presetName}/build",
+            "installDir": "~/projects/mst/${presetName}/install",
+            "vendor": {
+                "microsoft.com/VisualStudioRemoteSettings/CMake1": {
+                    "sourceDir": "~/projects/mst/${presetName}",
+                    "copySources": true,
+                    "copySourcesOptions": {
+                        "exclusionList": [ ".vs", ".git", ".svn", "build", "out" ],
+                        "method": "rsync",
+                        "concurrentCopies": 10,
+                        "outputVerbosity": "Normal"
+                    },
+                    "rsyncCommandArgs": "-t --delete --delete-excluded"
+                }
+            }
+        },
+        {
+            "name": "remote-linux-gcc-debug",
+            "displayName": "Remote Linux GCC Debug",
+            "inherits": "remote-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc"
+            }
+        },
+        {
+            "name": "remote-linux-gcc-release",
+            "displayName": "Remote Linux GCC Release",
+            "inherits": "remote-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG"
+            }
+        },
+        {
+            "name": "remote-linux-clang-debug",
+            "displayName": "Remote Linux Clang Debug",
+            "inherits": "remote-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
+            }
+        },
+        {
+            "name": "remote-linux-clang-release",
+            "displayName": "Remote Linux Clang Release",
+            "inherits": "remote-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -finline-functions"
+            }
+        },
+        {
+            "name": "ci-tests",
+            "displayName": "CI unit tests",
+            "description": "Matches .github/workflows/UnitTestOnPullRequest.yml (compiler picked up from CC/CXX env)",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "MST_RUN_TESTS": true
+            }
+        },
+        {
+            "name": "ci-coverage",
+            "displayName": "CI coverage",
+            "description": "Matches .github/workflows/Coverage.yml",
+            "binaryDir": "${sourceDir}/build",
+            "environment": {
+                "CXX": "g++",
+                "CXXFLAGS": "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+            },
+            "cacheVariables": {
+                "MST_RUN_TESTS": true,
+                "MST_TEST_ARGS": "~[not_deterministic]"
+            }
+        },
+        {
+            "name": "ci-licenses",
+            "displayName": "CI license check",
+            "description": "Matches .github/workflows/CheckLicenses.yml",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "MST_UTILS": true
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "dev-debug",
+            "configurePreset": "dev-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "dev-release",
+            "configurePreset": "dev-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "windows-strict-debug",
+            "configurePreset": "windows-strict-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "windows-strict-release",
+            "configurePreset": "windows-strict-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "linux-gcc-debug",
+            "configurePreset": "linux-gcc-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "linux-gcc-release",
+            "configurePreset": "linux-gcc-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "linux-clang-debug",
+            "configurePreset": "linux-clang-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "linux-clang-release",
+            "configurePreset": "linux-clang-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "remote-linux-gcc-debug",
+            "configurePreset": "remote-linux-gcc-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "remote-linux-gcc-release",
+            "configurePreset": "remote-linux-gcc-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "remote-linux-clang-debug",
+            "configurePreset": "remote-linux-clang-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "remote-linux-clang-release",
+            "configurePreset": "remote-linux-clang-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "ci-tests",
+            "configurePreset": "ci-tests",
+            "configuration": "Release"
+        },
+        {
+            "name": "ci-coverage",
+            "configurePreset": "ci-coverage",
+            "jobs": 10
+        },
+        {
+            "name": "ci-licenses",
+            "configurePreset": "ci-licenses",
+            "targets": "util_update_licenses"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "dev-debug",
+            "configurePreset": "dev-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "dev-release",
+            "configurePreset": "dev-release",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "windows-strict-debug",
+            "configurePreset": "windows-strict-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "windows-strict-release",
+            "configurePreset": "windows-strict-release",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "linux-gcc-debug",
+            "configurePreset": "linux-gcc-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "linux-gcc-release",
+            "configurePreset": "linux-gcc-release",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "linux-clang-debug",
+            "configurePreset": "linux-clang-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "linux-clang-release",
+            "configurePreset": "linux-clang-release",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ci-tests",
+            "configurePreset": "ci-tests",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "jobs": 10
+            }
+        },
+        {
+            "name": "ci-coverage",
+            "configurePreset": "ci-coverage",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "jobs": 4,
+                "timeout": 120
+            }
+        }
+    ]
+}

@@ -10,22 +10,21 @@ else
     BUILD_TYPE="Debug";
 fi
 
-if [ ! -d "$CURR_DIR/build" ]; then
-    mkdir "$CURR_DIR/build";
-elif [ $REBUILD ]; then
+PRESET="dev-$(echo "$BUILD_TYPE" | tr '[:upper:]' '[:lower:]')"
+
+if [ $REBUILD ]; then
     rm -rf "$CURR_DIR/build";
-    mkdir "$CURR_DIR/build";
 fi
 
-cd "$CURR_DIR/build";
+cd "$CURR_DIR";
 
-echo 'Building cmake target'
-cmake "$CURR_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True -DMST_UTILS=True
+echo "Configuring cmake preset $PRESET"
+cmake --preset "$PRESET"
 echo 'Building mst'
-cmake --build . --config $BUILD_TYPE --parallel 10
+cmake --build --preset "$PRESET" --parallel 10
 
 if [ $TESTING ]; then
-    ctest -C $BUILD_TYPE --output-on-failure
+    ctest --preset "$PRESET"
 fi
 
 cd -;

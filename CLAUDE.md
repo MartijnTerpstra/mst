@@ -13,9 +13,20 @@ Martijn/Martinus Terpstra. See `README.md` for the feature list.
 Requires CMake >= 3.13 and a C++17 compiler (MSVC, Clang, or GCC). On non-ARM targets the test build adds `-mavx`
 (GCC/Clang) — a native/AVX-capable CPU is assumed for running tests.
 
+Builds are driven by `CMakePresets.json` at the repo root. Local dev presets are `dev-debug`/`dev-release` (both
+turn on `MST_RUN_TESTS` and `MST_UTILS`, output in `./build`); CI uses its own presets (`ci-tests`, `ci-coverage`,
+`ci-licenses`) invoked directly from the workflow YAML in `.github/workflows/`. Using presets requires
+CMake >= 3.21 (only for the presets themselves — the project still builds with plain `-D` flags on older CMake).
+
+The presets file also carries over what used to be Visual Studio's `CMakeSettings.json` (now deleted — VS reads
+`CMakePresets.json` natively): `windows-strict-*` (stricter `/W4` warnings, Windows-only), `linux-gcc-*` /
+`linux-clang-*` (explicit-compiler local Linux builds, each in their own `build-linux-*` dir so they don't clobber
+each other), and `remote-linux-*` (Visual Studio's SSH remote-build presets, Windows-only — these need a remote
+connection picked in VS's Connection Manager and haven't been exercised outside the IDE).
+
 ```bash
-./scripts/build.sh          # configure+build Debug (adds -DMST_RUN_TESTS=True -DMST_UTILS=True), output in ./build
-./scripts/build.sh Release   # build a specific config
+./scripts/build.sh          # configure+build via the `dev-debug` preset, output in ./build
+./scripts/build.sh Release   # build a specific config (maps to the `dev-release` preset)
 REBUILD=1 ./scripts/build.sh # wipe ./build first (equivalent: ./scripts/rebuild.sh)
 TESTING=1 ./scripts/build.sh # also run `ctest` after building        (equivalent: ./scripts/test.sh)
 ```
@@ -23,12 +34,12 @@ TESTING=1 ./scripts/build.sh # also run `ctest` after building        (equivalen
 PowerShell equivalents (`scripts/build.ps1`, `scripts/rebuild.ps1`, `scripts/test.ps1`) work the same way, e.g.
 `./scripts/build.ps1 Release`, `$env:REBUILD=1; ./scripts/build.ps1`.
 
-These are just thin wrappers around plain CMake, e.g.:
+These are just thin wrappers around plain CMake preset invocations, e.g.:
 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMST_RUN_TESTS=True -DMST_UTILS=True
-cmake --build build --config Debug --parallel 10
-ctest --test-dir build -C Debug --output-on-failure
+cmake --preset dev-debug
+cmake --build --preset dev-debug
+ctest --preset dev-debug
 ```
 
 - `MST_RUN_TESTS` — fetches Catch2 (v2.13.8, via `FetchContent`) and registers one test executable per test file
@@ -45,8 +56,8 @@ ctest --test-dir build -C Debug -R test_common_scope_guard --output-on-failure
 ./build/test_common_scope_guard "[common]"
 ```
 
-Tests tagged `[not_deterministic]` are excluded from CI coverage runs (`MST_TEST_ARGS`, e.g.
-`-DMST_TEST_ARGS="~[not_deterministic]"`) — flaky/timing-sensitive tests should carry that tag.
+Tests tagged `[not_deterministic]` are excluded from CI coverage runs (`MST_TEST_ARGS`, set to
+`~[not_deterministic]` by the `ci-coverage` preset) — flaky/timing-sensitive tests should carry that tag.
 
 CI (`.github/workflows/`) builds MSVC on Windows and Clang/GCC on Linux/macOS/arm, runs `ctest`, checks license
 headers, and reports coverage — mirror that matrix mentally when touching platform-conditional code.

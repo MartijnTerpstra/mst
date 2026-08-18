@@ -4,99 +4,76 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 jobs:
   msvc-unit-tests:
     name: MSVC Unit Tests
-    
+
     # Run on Windows
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build-msvc
-
     - name: Configure CMake
       shell: bash
-      working-directory: ${{runner.workspace}}/build-msvc
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
+      run: cmake --preset ci-tests
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build-msvc
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build --preset ci-tests
 
     - name: Test
-      working-directory: ${{runner.workspace}}/build-msvc
       shell: bash
-      run: ctest -C $BUILD_TYPE --output-on-failure
-      
+      run: ctest --preset ci-tests
+
   clang-unit-tests:
     name: Clang Unit Tests
     strategy:
       matrix:
         platforms: [ubuntu-latest, macos-latest, arm-cpu]
-    
+
     runs-on: ${{ matrix.platforms }}
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build-clang
-
     - name: Configure CMake
       shell: bash
-      working-directory: ${{runner.workspace}}/build-clang
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
+      run: cmake --preset ci-tests
       env:
         CXX: clang++
         CC: clang
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build-clang
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build --preset ci-tests
 
     - name: Test
-      working-directory: ${{runner.workspace}}/build-clang
       shell: bash
-      run: ctest -C $BUILD_TYPE -j 10 --output-on-failure
-      
+      run: ctest --preset ci-tests
+
   gcc-unit-tests:
     name: GCC Unit Tests
     strategy:
       matrix:
         platforms: [ubuntu-latest, arm-cpu]
-    
+
     runs-on: ${{ matrix.platforms }}
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build-gcc
-
     - name: Configure CMake
       shell: bash
-      working-directory: ${{runner.workspace}}/build-gcc
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DMST_RUN_TESTS=True
+      run: cmake --preset ci-tests
       env:
         CXX: g++
         CC: gcc
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build-gcc
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build --preset ci-tests
 
     - name: Test
-      working-directory: ${{runner.workspace}}/build-gcc
       shell: bash
-      run: ctest -C $BUILD_TYPE -j 10 --output-on-failure
-
+      run: ctest --preset ci-tests

@@ -245,8 +245,8 @@ _MST_CONSTEXPR17 matrix<_Value_type, 4, 4>::matrix(_Value_type initVal) noexcept
 }
 
 template<typename _Value_type>
-_MST_CONSTEXPR17 matrix<_Value_type, 4, 4>::matrix(const matrix<_Value_type, 3, 4>& _Columns012,
-	const vector<_Value_type, 4>& _Column3) noexcept
+_MST_CONSTEXPR17 matrix<_Value_type, 4, 4>::matrix(
+	const matrix<_Value_type, 3, 4>& _Columns012, const vector<_Value_type, 4>& _Column3) noexcept
 {
 	this->_Data[0] = vector<_Value_type, 4>(_Columns012[0], _Column3[0]);
 	this->_Data[1] = vector<_Value_type, 4>(_Columns012[1], _Column3[1]);
@@ -306,10 +306,10 @@ _Details::_Math_matrix_orientational<_Value_type, _Columns, _Rows>::set_orientat
 }
 
 template<typename _Value_type, size_t _Columns, size_t _Rows>
-_MST_CONSTEXPR17 void _Details::_Math_matrix_positional<_Value_type, _Columns, _Rows>::lookat(
-	const vector<_Value_type, 3>& _Position, const vector<_Value_type, 3>& _Upvector) noexcept
+_MST_CONSTEXPR17 void _Details::_Math_matrix_positional<_Value_type, _Columns, _Rows>::look_at(
+	const vector<_Value_type, 3>& _Direction, const vector<_Value_type, 3>& _Upvector) noexcept
 {
-	vector<_Value_type, 3> normalized_z = (_Position - get_position()).normalize();
+	vector<_Value_type, 3> normalized_z = (_Direction - get_position()).normalize();
 
 	vector<_Value_type, 3> normalized_x = _Upvector.cross(normalized_z).normalize();
 

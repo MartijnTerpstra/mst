@@ -63,6 +63,20 @@ TEST_CASE("mst::static_map: initializer_list construction", "[static_map]")
 		REQUIRE(sm[(size_t)i] == i + 1);
 }
 
+TEST_CASE("mst::static_map: initializer_list construction copies each element at runtime", "[static_map]")
+{
+	// values are read through volatile so the initializer_list constructor's element-copy
+	// loop can't be folded away at compile time; this exercises it as genuine runtime code
+	volatile int a = 10, b = 20, c = 30;
+
+	mst::static_map<int, 4> sm = { (int)a, (int)b, (int)c };
+
+	REQUIRE(sm.size() == 3);
+	REQUIRE(sm[0] == 10);
+	REQUIRE(sm[1] == 20);
+	REQUIRE(sm[2] == 30);
+}
+
 TEST_CASE("mst::static_map: initializer_list construction exceeding capacity", "[!shouldfail][static_map]")
 {
 	mst::static_map<int, 2> sm = { 1, 2, 3 };
@@ -130,6 +144,15 @@ TEST_CASE("mst::static_map: operator[] const out of range", "[!shouldfail][stati
 {
 	const mst::static_map<int, 4> sm = { 1, 2 };
 	(void)sm[2];
+}
+
+TEST_CASE("mst::static_map: operator[] const reads elements in range", "[static_map]")
+{
+	const mst::static_map<int, 4> sm = { 1, 2, 3 };
+
+	REQUIRE(sm[0] == 1);
+	REQUIRE(sm[1] == 2);
+	REQUIRE(sm[2] == 3);
 }
 
 TEST_CASE("mst::static_map: front and back, const and non-const", "[static_map]")

@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 namespace mst {
 namespace _Details {
 
@@ -32,7 +34,7 @@ template<typename _Ty>
 void _Impl_release(_Ty* _ptr)
 {
 	_ptr->~_Ty();
-	free(reinterpret_cast<byte*>(_ptr) - std::alignment_of<std::max_align_t>::value);
+	free(reinterpret_cast<std::byte*>(_ptr) - std::alignment_of<std::max_align_t>::value);
 }
 
 } // namespace _Details

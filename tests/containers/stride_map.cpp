@@ -27,11 +27,11 @@
 
 #include <set_assertions.h>
 
-#include <mstridemap.h>
+#include <mstride_map.h>
 
 namespace {
 
-struct stridemap_test_point
+struct stride_map_test_point
 {
 	int x;
 	int y;
@@ -39,18 +39,18 @@ struct stridemap_test_point
 
 } // namespace
 
-TEST_CASE("mst::stridemap: default single-stride construction", "[stridemap]")
+TEST_CASE("mst::stride_map: default single-stride construction", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	REQUIRE(sm.size() == 0);
 	REQUIRE(sm.empty());
 	REQUIRE(sm.stride() == sizeof(int));
 	REQUIRE(sm.data_size() == 0);
 }
 
-TEST_CASE("mst::stridemap: construction with initial size", "[stridemap]")
+TEST_CASE("mst::stride_map: construction with initial size", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int), 4);
+	mst::stride_map sm(sizeof(int), 4);
 	REQUIRE(sm.size() == 4);
 	REQUIRE(!sm.empty());
 	REQUIRE(sm.data_size() == 4 * sizeof(int));
@@ -61,26 +61,26 @@ TEST_CASE("mst::stridemap: construction with initial size", "[stridemap]")
 	for(size_t i = 0; i < 4; ++i)
 		REQUIRE(sm.index<int>(i) == (int)i);
 
-	const mst::stridemap& csm = sm;
+	const mst::stride_map& csm = sm;
 	for(size_t i = 0; i < 4; ++i)
 		REQUIRE(csm.index<int>(i) == (int)i);
 }
 
-TEST_CASE("mst::stridemap: construction with an initial size of zero", "[stridemap]")
+TEST_CASE("mst::stride_map: construction with an initial size of zero", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int), 0);
+	mst::stride_map sm(sizeof(int), 0);
 	REQUIRE(sm.size() == 0);
 	REQUIRE(sm.empty());
 
-	// growing an empty, zero-capacity stridemap must not get stuck doubling zero
+	// growing an empty, zero-capacity stride_map must not get stuck doubling zero
 	sm.push_back<int>(42);
 	REQUIRE(sm.size() == 1);
 	REQUIRE(sm.index<int>(0) == 42);
 }
 
-TEST_CASE("mst::stridemap: initializer_list construction", "[stridemap]")
+TEST_CASE("mst::stride_map: initializer_list construction", "[stride_map]")
 {
-	mst::stridemap sm = { 1, 2, 3, 4 };
+	mst::stride_map sm = { 1, 2, 3, 4 };
 	REQUIRE(sm.size() == 4);
 	REQUIRE(sm.stride() == sizeof(int));
 
@@ -88,9 +88,9 @@ TEST_CASE("mst::stridemap: initializer_list construction", "[stridemap]")
 		REQUIRE(sm.index<int>((size_t)i) == i + 1);
 }
 
-TEST_CASE("mst::stridemap: push_back(value) grows across several reallocations", "[stridemap]")
+TEST_CASE("mst::stride_map: push_back(value) grows across several reallocations", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 
 	for(int i = 0; i < 16; ++i)
 		sm.push_back<int>(i);
@@ -100,9 +100,9 @@ TEST_CASE("mst::stridemap: push_back(value) grows across several reallocations",
 		REQUIRE(sm.index<int>((size_t)i) == i);
 }
 
-TEST_CASE("mst::stridemap: push_back() zero-initializes the new element", "[stridemap]")
+TEST_CASE("mst::stride_map: push_back() zero-initializes the new element", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 
 	sm.push_back();
 	REQUIRE(sm.size() == 1);
@@ -114,9 +114,9 @@ TEST_CASE("mst::stridemap: push_back() zero-initializes the new element", "[stri
 	REQUIRE(sm.index<int>(2) == 0);
 }
 
-TEST_CASE("mst::stridemap: push_back_from_index duplicates an existing element", "[stridemap]")
+TEST_CASE("mst::stride_map: push_back_from_index duplicates an existing element", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 
 	sm.push_back<int>(10);
 	sm.push_back<int>(20);
@@ -129,9 +129,9 @@ TEST_CASE("mst::stridemap: push_back_from_index duplicates an existing element",
 	REQUIRE(sm.index<int>(2) == 10);
 }
 
-TEST_CASE("mst::stridemap: find locates an element or reports failure", "[stridemap]")
+TEST_CASE("mst::stride_map: find locates an element or reports failure", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	sm.push_back<int>(10);
 	sm.push_back<int>(20);
 	sm.push_back<int>(30);
@@ -141,9 +141,9 @@ TEST_CASE("mst::stridemap: find locates an element or reports failure", "[stride
 	REQUIRE(sm.find<int>(99) == (size_t)-1);
 }
 
-TEST_CASE("mst::stridemap: find_if locates an element or reports failure", "[stridemap]")
+TEST_CASE("mst::stride_map: find_if locates an element or reports failure", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	sm.push_back<int>(10);
 	sm.push_back<int>(20);
 	sm.push_back<int>(30);
@@ -152,9 +152,9 @@ TEST_CASE("mst::stridemap: find_if locates an element or reports failure", "[str
 	REQUIRE(sm.find_if<int>([](int v) { return v > 100; }) == (size_t)-1);
 }
 
-TEST_CASE("mst::stridemap: pop_back shrinks down to empty and back", "[stridemap]")
+TEST_CASE("mst::stride_map: pop_back shrinks down to empty and back", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 
 	for(int i = 0; i < 16; ++i)
 		sm.push_back<int>(i);
@@ -171,9 +171,9 @@ TEST_CASE("mst::stridemap: pop_back shrinks down to empty and back", "[stridemap
 	REQUIRE(sm.index<int>(0) == 7);
 }
 
-TEST_CASE("mst::stridemap: pop_front shifts the remaining elements down", "[stridemap]")
+TEST_CASE("mst::stride_map: pop_front shifts the remaining elements down", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	for(int i = 0; i < 5; ++i)
 		sm.push_back<int>(i);
 
@@ -187,9 +187,9 @@ TEST_CASE("mst::stridemap: pop_front shifts the remaining elements down", "[stri
 	REQUIRE(sm.index<int>(0) == 2);
 }
 
-TEST_CASE("mst::stridemap: erase a single element", "[stridemap]")
+TEST_CASE("mst::stride_map: erase a single element", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	for(int i = 0; i < 5; ++i)
 		sm.push_back<int>(i); // 0,1,2,3,4
 
@@ -215,9 +215,9 @@ TEST_CASE("mst::stridemap: erase a single element", "[stridemap]")
 	REQUIRE(sm.index<int>(1) == 3);
 }
 
-TEST_CASE("mst::stridemap: erase a range of elements", "[stridemap]")
+TEST_CASE("mst::stride_map: erase a range of elements", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	for(int i = 0; i < 6; ++i)
 		sm.push_back<int>(i); // 0..5
 
@@ -246,9 +246,9 @@ TEST_CASE("mst::stridemap: erase a range of elements", "[stridemap]")
 	REQUIRE(sm.index<int>(0) == 42);
 }
 
-TEST_CASE("mst::stridemap: front and back, const and non-const", "[stridemap]")
+TEST_CASE("mst::stride_map: front and back, const and non-const", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	sm.push_back<int>(1);
 	sm.push_back<int>(2);
 	sm.push_back<int>(3);
@@ -256,7 +256,7 @@ TEST_CASE("mst::stridemap: front and back, const and non-const", "[stridemap]")
 	REQUIRE(sm.front<int>() == 1);
 	REQUIRE(sm.back<int>() == 3);
 
-	const mst::stridemap& csm = sm;
+	const mst::stride_map& csm = sm;
 	REQUIRE(csm.front<int>() == 1);
 	REQUIRE(csm.back<int>() == 3);
 
@@ -266,9 +266,9 @@ TEST_CASE("mst::stridemap: front and back, const and non-const", "[stridemap]")
 	REQUIRE(sm.index<int>(2) == 300);
 }
 
-TEST_CASE("mst::stridemap: data() and data_size()", "[stridemap]")
+TEST_CASE("mst::stride_map: data() and data_size()", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int), 3);
+	mst::stride_map sm(sizeof(int), 3);
 	sm.index<int>(0) = 1;
 	sm.index<int>(1) = 2;
 	sm.index<int>(2) = 3;
@@ -276,16 +276,16 @@ TEST_CASE("mst::stridemap: data() and data_size()", "[stridemap]")
 	REQUIRE(sm.data() != nullptr);
 	REQUIRE(sm.data_size() == 3 * sizeof(int));
 
-	const mst::stridemap& csm = sm;
+	const mst::stride_map& csm = sm;
 	REQUIRE(csm.data() != nullptr);
 	REQUIRE(csm.data() == sm.data());
 
 	REQUIRE(*(const int*)csm.data() == 1);
 }
 
-TEST_CASE("mst::stridemap: set_stride while empty", "[stridemap]")
+TEST_CASE("mst::stride_map: set_stride while empty", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	REQUIRE(sm.stride() == sizeof(int));
 
 	sm.set_stride(sizeof(double));
@@ -297,9 +297,9 @@ TEST_CASE("mst::stridemap: set_stride while empty", "[stridemap]")
 	REQUIRE(sm.index<double>(0) == 3.5);
 }
 
-TEST_CASE("mst::stridemap: pre_allocate", "[stridemap]")
+TEST_CASE("mst::stride_map: pre_allocate", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int), 5);
+	mst::stride_map sm(sizeof(int), 5);
 	for(size_t i = 0; i < 5; ++i)
 		sm.index<int>(i) = (int)i;
 
@@ -318,9 +318,9 @@ TEST_CASE("mst::stridemap: pre_allocate", "[stridemap]")
 	REQUIRE(sm.size() == 15);
 }
 
-TEST_CASE("mst::stridemap: clear empties the container and it stays usable", "[stridemap]")
+TEST_CASE("mst::stride_map: clear empties the container and it stays usable", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	for(int i = 0; i < 4; ++i)
 		sm.push_back<int>(i);
 
@@ -334,9 +334,9 @@ TEST_CASE("mst::stridemap: clear empties the container and it stays usable", "[s
 	REQUIRE(sm.index<int>(0) == 99);
 }
 
-TEST_CASE("mst::stridemap: shrink_to_fit", "[stridemap]")
+TEST_CASE("mst::stride_map: shrink_to_fit", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	sm.push_back<int>(1);
 	sm.push_back<int>(2);
 	sm.push_back<int>(3);
@@ -348,16 +348,16 @@ TEST_CASE("mst::stridemap: shrink_to_fit", "[stridemap]")
 	REQUIRE(sm.index<int>(2) == 3);
 
 	sm.clear();
-	sm.shrink_to_fit(); // shrinking an already-empty stridemap
+	sm.shrink_to_fit(); // shrinking an already-empty stride_map
 	REQUIRE(sm.empty());
 
 	sm.push_back<int>(9);
 	REQUIRE(sm.index<int>(0) == 9);
 }
 
-TEST_CASE("mst::stridemap: resize grows, shrinks and clears", "[stridemap]")
+TEST_CASE("mst::stride_map: resize grows, shrinks and clears", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int), 3);
+	mst::stride_map sm(sizeof(int), 3);
 	sm.index<int>(0) = 1;
 	sm.index<int>(1) = 2;
 	sm.index<int>(2) = 3;
@@ -381,13 +381,13 @@ TEST_CASE("mst::stridemap: resize grows, shrinks and clears", "[stridemap]")
 	REQUIRE(sm.index<int>(0) == 42);
 }
 
-TEST_CASE("mst::stridemap: operator+= appends another stridemap", "[stridemap]")
+TEST_CASE("mst::stride_map: operator+= appends another stride_map", "[stride_map]")
 {
-	mst::stridemap a(sizeof(int), 2);
+	mst::stride_map a(sizeof(int), 2);
 	a.index<int>(0) = 1;
 	a.index<int>(1) = 2;
 
-	mst::stridemap b(sizeof(int), 3);
+	mst::stride_map b(sizeof(int), 3);
 	b.index<int>(0) = 3;
 	b.index<int>(1) = 4;
 	b.index<int>(2) = 5;
@@ -402,14 +402,14 @@ TEST_CASE("mst::stridemap: operator+= appends another stridemap", "[stridemap]")
 	REQUIRE(b.size() == 3);
 }
 
-TEST_CASE("mst::stridemap: copy construction and copy assignment", "[stridemap]")
+TEST_CASE("mst::stride_map: copy construction and copy assignment", "[stride_map]")
 {
-	mst::stridemap src(sizeof(int), 3);
+	mst::stride_map src(sizeof(int), 3);
 	src.index<int>(0) = 1;
 	src.index<int>(1) = 2;
 	src.index<int>(2) = 3;
 
-	mst::stridemap copyCtor(src);
+	mst::stride_map copyCtor(src);
 	REQUIRE(copyCtor.size() == 3);
 	for(size_t i = 0; i < 3; ++i)
 		REQUIRE(copyCtor.index<int>(i) == src.index<int>(i));
@@ -418,7 +418,7 @@ TEST_CASE("mst::stridemap: copy construction and copy assignment", "[stridemap]"
 	copyCtor.index<int>(0) = 100;
 	REQUIRE(src.index<int>(0) == 1);
 
-	mst::stridemap assignee(sizeof(int));
+	mst::stride_map assignee(sizeof(int));
 	assignee = src;
 	REQUIRE(assignee.size() == 3);
 	for(size_t i = 0; i < 3; ++i)
@@ -428,29 +428,29 @@ TEST_CASE("mst::stridemap: copy construction and copy assignment", "[stridemap]"
 	REQUIRE(src.index<int>(0) == 1);
 }
 
-TEST_CASE("mst::stridemap: move construction and move assignment", "[stridemap]")
+TEST_CASE("mst::stride_map: move construction and move assignment", "[stride_map]")
 {
-	mst::stridemap src(sizeof(int), 3);
+	mst::stride_map src(sizeof(int), 3);
 	src.index<int>(0) = 1;
 	src.index<int>(1) = 2;
 	src.index<int>(2) = 3;
 
-	mst::stridemap moved(std::move(src));
+	mst::stride_map moved(std::move(src));
 	REQUIRE(moved.size() == 3);
 	REQUIRE(moved.index<int>(0) == 1);
 	REQUIRE(moved.index<int>(2) == 3);
 	REQUIRE(src.empty()); // NOLINT: intentionally inspecting the moved-from state
 
-	mst::stridemap moveAssignee(sizeof(int));
+	mst::stride_map moveAssignee(sizeof(int));
 	moveAssignee = std::move(moved);
 	REQUIRE(moveAssignee.size() == 3);
 	REQUIRE(moveAssignee.index<int>(0) == 1);
 	REQUIRE(moved.empty()); // NOLINT: intentionally inspecting the moved-from state
 }
 
-TEST_CASE("mst::stridemap: begin/end/cbegin/cend, const and non-const", "[stridemap]")
+TEST_CASE("mst::stride_map: begin/end/cbegin/cend, const and non-const", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	sm.push_back<int>(1);
 	sm.push_back<int>(2);
 	sm.push_back<int>(3);
@@ -460,7 +460,7 @@ TEST_CASE("mst::stridemap: begin/end/cbegin/cend, const and non-const", "[stride
 		sum += *it;
 	REQUIRE(sum == 6);
 
-	const mst::stridemap& csm = sm;
+	const mst::stride_map& csm = sm;
 
 	sum = 0;
 	for(auto it = csm.begin<int>(); it != csm.end<int>(); ++it)
@@ -473,9 +473,9 @@ TEST_CASE("mst::stridemap: begin/end/cbegin/cend, const and non-const", "[stride
 	REQUIRE(sum == 6);
 }
 
-TEST_CASE("mst::stridemap: range() and crange() free functions", "[stridemap]")
+TEST_CASE("mst::stride_map: range() and crange() free functions", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int), 3);
+	mst::stride_map sm(sizeof(int), 3);
 	sm.index<int>(0) = 1;
 	sm.index<int>(1) = 2;
 	sm.index<int>(2) = 3;
@@ -485,7 +485,7 @@ TEST_CASE("mst::stridemap: range() and crange() free functions", "[stridemap]")
 		sum += v;
 	REQUIRE(sum == 6);
 
-	const mst::stridemap& csm = sm;
+	const mst::stride_map& csm = sm;
 
 	sum = 0;
 	for(int v : mst::range<int>(csm))
@@ -503,9 +503,9 @@ TEST_CASE("mst::stridemap: range() and crange() free functions", "[stridemap]")
 	REQUIRE(sum == 6);
 }
 
-TEST_CASE("mst::stridemap_iterator<T>: increment, decrement and dereference", "[stridemap]")
+TEST_CASE("mst::stride_map_iterator<T>: increment, decrement and dereference", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	for(int i = 0; i < 5; ++i)
 		sm.push_back<int>(i); // 0,1,2,3,4
 
@@ -527,9 +527,9 @@ TEST_CASE("mst::stridemap_iterator<T>: increment, decrement and dereference", "[
 	REQUIRE(*it == 0);
 }
 
-TEST_CASE("mst::stridemap_iterator<T>: random access arithmetic and distance", "[stridemap]")
+TEST_CASE("mst::stride_map_iterator<T>: random access arithmetic and distance", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	for(int i = 0; i < 5; ++i)
 		sm.push_back<int>(i); // 0,1,2,3,4
 
@@ -550,9 +550,9 @@ TEST_CASE("mst::stridemap_iterator<T>: random access arithmetic and distance", "
 	REQUIRE((it2 - it) == 2);
 }
 
-TEST_CASE("mst::stridemap_iterator<T>: comparison operators", "[stridemap]")
+TEST_CASE("mst::stride_map_iterator<T>: comparison operators", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(int));
+	mst::stride_map sm(sizeof(int));
 	for(int i = 0; i < 3; ++i)
 		sm.push_back<int>(i);
 
@@ -570,13 +570,13 @@ TEST_CASE("mst::stridemap_iterator<T>: comparison operators", "[stridemap]")
 	REQUIRE(first >= firstCopy);
 }
 
-TEST_CASE("mst::stridemap_iterator<T>: operator-> gives member access", "[stridemap]")
+TEST_CASE("mst::stride_map_iterator<T>: operator-> gives member access", "[stride_map]")
 {
-	mst::stridemap sm(sizeof(stridemap_test_point));
-	sm.push_back<stridemap_test_point>({ 1, 2 });
-	sm.push_back<stridemap_test_point>({ 3, 4 });
+	mst::stride_map sm(sizeof(stride_map_test_point));
+	sm.push_back<stride_map_test_point>({ 1, 2 });
+	sm.push_back<stride_map_test_point>({ 3, 4 });
 
-	auto it = sm.begin<stridemap_test_point>();
+	auto it = sm.begin<stride_map_test_point>();
 	REQUIRE(it->x == 1);
 	REQUIRE(it->y == 2);
 

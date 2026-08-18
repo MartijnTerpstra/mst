@@ -32,19 +32,6 @@
 
 #include <mversion.h>
 
-// typedefs of unsigned types
-#ifndef _UNSIGNED_INTEGERS_DEFINED
-typedef unsigned int uint;
-typedef unsigned short ushort;
-typedef unsigned char ubyte;
-typedef unsigned char byte;
-#define _UNSIGNED_INTEGERS_DEFINED 1
-#endif
-
-#ifndef _VARIADIC_MAX
-#define _VARIADIC_MAX 10
-#endif
-
 #ifndef _MST_EPSILON
 #define _MST_EPSILON (1e-5L)
 #endif

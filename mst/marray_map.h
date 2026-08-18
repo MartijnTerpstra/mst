@@ -36,7 +36,7 @@ namespace mst {
 
 template<typename KeyType, typename ValueType, typename ComparisonType = ::std::less<KeyType>,
 	typename ContainerType = ::std::vector<::std::pair<KeyType, ValueType>>>
-class arraymap
+class array_map
 {
 public:
 	typedef ::std::pair<const KeyType, ValueType> value_type;
@@ -53,31 +53,31 @@ public:
 	typedef typename container_type::iterator _Cont_iter;
 	typedef typename container_type::const_iterator _Cont_const_iter;
 
-	inline arraymap()
+	inline array_map()
 		: _Mypair()
 	{ }
 
-	inline arraymap(const arraymap& other)
+	inline array_map(const array_map& other)
 		: _Mypair(ComparisonType(), other._Mypair._Get_second())
 	{ }
 
-	inline arraymap(const arraymap&& other)
+	inline array_map(const array_map&& other)
 		: _Mypair(ComparisonType(), std::move(other._Mypair._Get_second()))
 	{ }
 
-	inline arraymap& operator=(const arraymap& other)
+	inline array_map& operator=(const array_map& other)
 	{
 		_Mypair._Get_second() = other._Mypair._Get_second();
 		return *this;
 	}
 
-	inline arraymap& operator=(arraymap&& other)
+	inline array_map& operator=(array_map&& other)
 	{
 		_Mypair._Get_second() = std::move(other._Mypair._Get_second());
 		return *this;
 	}
 
-	inline arraymap(std::initializer_list<value_type> initList)
+	inline array_map(std::initializer_list<value_type> initList)
 		: _Mypair()
 	{
 		reserve(initList.size());
@@ -90,7 +90,7 @@ public:
 		// insert(initList.begin(), initList.end());
 	}
 
-	inline ~arraymap()
+	inline ~array_map()
 	{ }
 
 	_MST_NODISCARD inline size_t capacity() const
@@ -284,7 +284,7 @@ public:
 
 		_Cont_iter it = _Lower_bound(key);
 
-		CHECK_IFNOT(!_Get_comp()(key, it->first), "key is not found");
+		MST_ASSERT(it != _Get_end() && !_Get_comp()(key, it->first), "key is not found");
 
 		erase(_To_extern(it));
 	}
@@ -589,7 +589,7 @@ private:
 private:
 	::mst::_Details::_Packed_pair<ComparisonType, container_type> _Mypair;
 
-}; // class arraymap<KeyType, ValueType, ComparisonType, AllocatorType>
+}; // class array_map<KeyType, ValueType, ComparisonType, AllocatorType>
 
 
 } // namespace mst

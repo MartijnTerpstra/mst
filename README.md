@@ -7,7 +7,7 @@ Main   |    [![codecov](https://codecov.io/gh/MartijnTerpstra/mst/branch/main/gr
 ## Goal
 
 This library is just a hobby project with some crazy classes and solutions, including:
-- Containers: colony, stride_map, sparse_set, arraymap, static_map
+- Containers: colony, stride_map, sparse_set, array_map, static_map
 - Multithreading: lock-free queue, low-overhead threading primitives
 - Math types: vector, matrix, quaternion, SIMD support
 - Math algos: clamp/saturate, curves/interpolation, reflect

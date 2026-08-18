@@ -47,12 +47,13 @@ public:
 template<typename _Value_type, size_t _Dimensions>
 class ray : public ::mst::math::_Details::_Ray<_Value_type, _Dimensions>
 {
+public:
 	constexpr ray() = default;
 
 	inline ray(const vector<_Value_type, _Dimensions>& _position,
-		const vector<_Value_type, _Dimensions>& _direction) noexcept
+		const vector<_Value_type, _Dimensions>& _direction)
 	{
-		CHECK_IF(fabs(_direction.length() - (_Value_type)1) > _MST_EPSILON,
+		MST_ASSERT(fabs(_direction.length() - (_Value_type)1) <= _MST_EPSILON,
 			"direction required a length of 1");
 
 		this->position = _position;

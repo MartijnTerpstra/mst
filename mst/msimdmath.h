@@ -37,9 +37,12 @@ class float4 : private _Details::vectorf
 public:
 #if _MST_HAS_INLINE_VARIABLES
 
-	inline static const float4 zero = float4(_Details::vector_constants<__m128>::zero);
+	// float4 is still an incomplete type here (static data member initializers are not a
+	// complete-class context), so these can only be declared in-class; see below for the
+	// out-of-line definitions, once the class is complete.
+	static const float4 zero;
 
-	inline static const float4 one = float4(_Details::vector_constants<__m128>::one);
+	static const float4 one;
 
 #endif
 
@@ -58,7 +61,7 @@ public:
 		return float4{ base::add(other) };
 	}
 
-	[[nodiscard]] inline float4& operator+=(const float4 other) noexcept
+	inline float4& operator+=(const float4 other) noexcept
 	{
 		base::set(base::add(other));
 		return *this;
@@ -69,7 +72,7 @@ public:
 		return float4{ base::sub(other) };
 	}
 
-	[[nodiscard]] inline float4& operator-=(const float4 other) noexcept
+	inline float4& operator-=(const float4 other) noexcept
 	{
 		base::set(base::sub(other));
 		return *this;
@@ -80,7 +83,7 @@ public:
 		return float4{ base::mul(other) };
 	}
 
-	[[nodiscard]] inline float4& operator*=(const float4 other) noexcept
+	inline float4& operator*=(const float4 other) noexcept
 	{
 		base::set(base::mul(other));
 		return *this;
@@ -91,7 +94,7 @@ public:
 		return float4{ base::mul(value) };
 	}
 
-	[[nodiscard]] inline float4& operator*=(float value) noexcept
+	inline float4& operator*=(float value) noexcept
 	{
 		base::set(base::mul(value));
 		return *this;
@@ -102,7 +105,7 @@ public:
 		return float4{ base::div(other) };
 	}
 
-	[[nodiscard]] inline float4& operator/=(const float4 other) noexcept
+	inline float4& operator/=(const float4 other) noexcept
 	{
 		base::set(base::div(other));
 		return *this;
@@ -130,6 +133,11 @@ private:
 		: base(data)
 	{ }
 };
+
+#if _MST_HAS_INLINE_VARIABLES
+inline const float4 float4::zero = float4(_Details::vector_constants<__m128>::zero);
+inline const float4 float4::one = float4(_Details::vector_constants<__m128>::one);
+#endif
 
 class float3 : private _Details::vectorf
 {

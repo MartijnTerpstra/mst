@@ -64,7 +64,7 @@ struct vector_constants
 	static T make_one() noexcept
 	{
 		T retval;
-		make_zero_impl(retval);
+		make_one_impl(retval);
 		return retval;
 	}
 };

@@ -34,17 +34,39 @@
 
 using mst::math::vector;
 
-template<typename V>
+template<typename V, size_t N>
+vector<V, N> MakeVector(const V (&values)[N])
+{
+	vector<V, N> result{};
+	for(size_t i = 0; i < N; ++i)
+	{
+		result[i] = values[i];
+	}
+	return result;
+}
+
+template<typename V, size_t N>
 void TestDot()
 {
 	CAPTURE(mst::typename_of<V>());
+	CAPTURE(N);
 
-	typedef vector<V, 3> vector_type;
+	typedef vector<V, N> vector_type;
 
-	vector_type left(2, -3, 5);
-	vector_type right(1, 4, -2);
+	V leftValues[N];
+	V rightValues[N];
+	V expected = 0;
+	for(size_t i = 0; i < N; ++i)
+	{
+		leftValues[i] = static_cast<V>(i + 1);
+		rightValues[i] = static_cast<V>(N - i);
+		expected += leftValues[i] * rightValues[i];
+	}
 
-	REQUIRE(left.dot(right) == (V)(2 * 1 + -3 * 4 + 5 * -2));
+	const vector_type left = MakeVector(leftValues);
+	const vector_type right = MakeVector(rightValues);
+
+	REQUIRE(left.dot(right) == expected);
 
 	/* dot product with itself equals the squared length */
 	REQUIRE(left.dot(left) == left.squared_length());
@@ -56,12 +78,21 @@ void TestDot()
 	REQUIRE(left.dot(vector_type::zero) == (V)0);
 }
 
-TEST_CASE("vector<V,3>: dot", "[vector]")
+template<typename V>
+void TestDotAllSizes()
 {
-	TestDot<float>();
-	TestDot<double>();
-	TestDot<int32_t>();
-	TestDot<int64_t>();
+	TestDot<V, 1>();
+	TestDot<V, 2>();
+	TestDot<V, 3>();
+	TestDot<V, 4>();
+}
+
+TEST_CASE("vector<V,N>: dot", "[vector]")
+{
+	TestDotAllSizes<float>();
+	TestDotAllSizes<double>();
+	TestDotAllSizes<int32_t>();
+	TestDotAllSizes<int64_t>();
 }
 
 template<typename V>

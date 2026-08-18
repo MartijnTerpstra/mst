@@ -246,6 +246,20 @@ _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::squared_di
 	return retval;
 }
 
+/* returns the dot product with _Vec */
+template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
+_MST_CONSTEXPR17 _Value_type
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::dot(
+	const _Vector_t& _Vec) const noexcept
+{
+	_Value_type retval = 0;
+	for(size_t i = 0; i < _Elems; ++i)
+	{
+		retval += (&this->x)[i] * _Vec[i];
+	}
+	return retval;
+}
+
 /* returns the length */
 template<typename _Value_type, size_t _Elems, bool _IsUnsigned>
 _MST_CONSTEXPR17 _Value_type
@@ -294,14 +308,6 @@ _Details::_Math_vector_base<_Value_type, _Elems, false, false>::operator-() cons
 	}
 
 	return retval;
-}
-
-/* returns the dot product of the  */
-template<typename _Value_type>
-constexpr _Value_type vector<_Value_type, 3>::dot(
-	const vector<_Value_type, 3>& _Other) const noexcept
-{
-	return (&this->x)[0] * _Other[0] + (&this->x)[1] * _Other[1] + (&this->x)[2] * _Other[2];
 }
 
 template<typename _Value_type>

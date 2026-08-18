@@ -355,6 +355,9 @@ public:
 	/* returns the squared distance towards _Vec */
 	_MST_NODISCARD _MST_CONSTEXPR17 _Value_type squared_distance(
 		const _Vector_t& _Vec) const noexcept;
+
+	/* returns the dot product with _Vec */
+	_MST_NODISCARD _MST_CONSTEXPR17 _Value_type dot(const _Vector_t& _Vec) const noexcept;
 };
 
 template<typename _Value_type, size_t _Elems>
@@ -498,9 +501,6 @@ public:
 	constexpr vector(const vector<_Value_type, 2>& _XY, _Value_type _Z) noexcept;
 	constexpr vector(_Value_type _X, const vector<_Value_type, 2>& _YZ) noexcept;
 	constexpr explicit vector(_Value_type initVal) noexcept;
-
-	/* returns the dot product with _Vec */
-	_MST_NODISCARD constexpr _Value_type dot(const vector& _Vec) const noexcept;
 
 	/* returns the cross product with _Vec */
 	_MST_NODISCARD constexpr vector cross(const vector& _Vec) const noexcept;

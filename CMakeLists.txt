@@ -181,8 +181,11 @@ add_mst_test(platform memory)
 add_mst_test(platform names_and_versions)
 add_mst_test(platform processor)
 
-# msimd.h/msimdmath.h are x86-only (raw SSE2/AVX2 intrinsic headers, no ARM fallback)
-if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64" AND NOT CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64")
+# msimd.h/msimdmath.h are x86-only (raw SSE2/AVX2 intrinsic headers, no ARM fallback), and their
+# free operators on __m128/__m256 (e.g. operator+, operator&) only compile under MSVC, where those
+# are class types; on GCC/Clang they're vector-extension builtins, which C++ forbids overloading
+# operators on. Restrict these tests to MSVC until msimd.h/msimdmath.h are made portable.
+if(MSVC AND NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64" AND NOT CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64")
 add_mst_test(simd sse2)
 
 # msimdmath.h hard-requires AVX2 (#error otherwise); the shared -mavx test flags don't

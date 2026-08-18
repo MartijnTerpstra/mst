@@ -147,6 +147,7 @@ add_mst_test(containers arraymap)
 add_mst_test(containers colony)
 add_mst_test(containers ranges)
 add_mst_test(containers sparse_set)
+add_mst_test(containers stridemap)
 
 add_mst_test(lock_free queue)
 

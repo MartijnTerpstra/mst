@@ -29,8 +29,12 @@
 #include <mdebug.h>
 #include <mranges.h>
 #include <initializer_list>
+#include <cstdlib>
+#include <cstring>
 
 namespace mst {
+
+class stridemap;
 
 template<typename T>
 class stridemap_iterator
@@ -47,11 +51,13 @@ public:
 	typedef stridemap_iterator& _ThisRef;
 	typedef stridemap_iterator _ThisCpy;
 
+	friend class ::mst::stridemap;
+
 	stridemap_iterator(char* _Ptr, size_t _Stride)
-		: _MyStride(_Stride)
-		, _MyPtr(_Ptr)
+		: _MyPtr(_Ptr)
+		, _MyStride(_Stride)
 	{
-		CHECK_IF(sizeof(T) > _Stride, "invalid size!");
+		MST_ASSERT(sizeof(T) <= _Stride, "invalid size!");
 	}
 
 	inline pointer operator->()
@@ -80,7 +86,7 @@ public:
 	inline _ThisRef operator--()
 	{
 		_MyPtr -= _MyStride;
-		return retval;
+		return *this;
 	}
 
 	inline _ThisCpy operator--(int)
@@ -90,76 +96,59 @@ public:
 		return retval;
 	}
 
-	inline _ThisRef operator+=(int _Count)
+	inline _ThisRef operator+=(difference_type _Count)
 	{
-		_MyPtr += _Count * _MyStride;
+		_MyPtr += _Count * (difference_type)_MyStride;
 		return *this;
 	}
 
-	inline _ThisRef operator-=(int _Count)
+	inline _ThisRef operator-=(difference_type _Count)
 	{
-		_MyPtr -= _Count * _MyStride;
+		_MyPtr -= _Count * (difference_type)_MyStride;
 		return *this;
 	}
 
-	inline _ThisRef operator+=(size_t _Count)
-	{
-		_MyPtr += _Count * _MyStride;
-		return *this;
-	}
-
-	inline _ThisRef operator-=(size_t _Count)
-	{
-		_MyPtr -= _Count * _MyStride;
-		return *this;
-	}
-
-	inline _ThisCpy operator+(int _Count)
+	inline _ThisCpy operator+(difference_type _Count) const
 	{
 		return _ThisCpy(*this) += _Count;
 	}
 
-	inline _ThisCpy operator-(int _Count)
+	inline _ThisCpy operator-(difference_type _Count) const
 	{
 		return _ThisCpy(*this) -= _Count;
 	}
 
-	inline _ThisCpy operator+(size_t _Count)
+	inline difference_type operator-(const stridemap_iterator& _Other) const
 	{
-		return ThisCpy(*this) += _Count;
+		return (_MyPtr - _Other._MyPtr) / (difference_type)_MyStride;
 	}
 
-	inline _ThisCpy operator-(size_t _Count)
-	{
-		return _ThisCpy(*this) -= _Count;
-	}
-
-	inline bool operator==(const stridemap_iterator& _Other)
+	inline bool operator==(const stridemap_iterator& _Other) const
 	{
 		return _MyPtr == _Other._MyPtr;
 	}
 
-	inline bool operator!=(const stridemap_iterator& _Other)
+	inline bool operator!=(const stridemap_iterator& _Other) const
 	{
 		return _MyPtr != _Other._MyPtr;
 	}
 
-	inline bool operator<(const stridemap_iterator& _Other)
+	inline bool operator<(const stridemap_iterator& _Other) const
 	{
 		return _MyPtr < _Other._MyPtr;
 	}
 
-	inline bool operator<=(const stridemap_iterator& _Other)
+	inline bool operator<=(const stridemap_iterator& _Other) const
 	{
 		return _MyPtr <= _Other._MyPtr;
 	}
 
-	inline bool operator>(const stridemap_iterator& _Other)
+	inline bool operator>(const stridemap_iterator& _Other) const
 	{
 		return _MyPtr > _Other._MyPtr;
 	}
 
-	inline bool operator>=(const stridemap_iterator& _Other)
+	inline bool operator>=(const stridemap_iterator& _Other) const
 	{
 		return _MyPtr >= _Other._MyPtr;
 	}
@@ -173,22 +162,22 @@ class stridemap
 {
 public:
 	explicit stridemap(size_t _Stride)
-		: _MyStride(_Stride)
-		, _MyBegin((char*)malloc(_Stride))
+		: _MyBegin((char*)malloc(_Stride))
 		, _MyEnd(_MyBegin)
 		, _MyLast(_MyBegin + _Stride)
+		, _MyStride(_Stride)
 	{ }
 	explicit stridemap(size_t _Stride, size_t _InitSize)
-		: _MyStride(_Stride)
-		, _MyBegin((char*)malloc(_InitSize * _Stride))
+		: _MyBegin((char*)malloc(_InitSize * _Stride))
 		, _MyEnd(_MyBegin + (_InitSize * _Stride))
 		, _MyLast(_MyEnd)
+		, _MyStride(_Stride)
 	{ }
 	stridemap(const stridemap& _OtherMap)
-		: _MyStride(_OtherMap._MyStride)
-		, _MyBegin((char*)malloc(_OtherMap.size() * _OtherMap._MyStride))
+		: _MyBegin((char*)malloc(_OtherMap.size() * _OtherMap._MyStride))
 		, _MyEnd(_MyBegin + (_OtherMap.size() * _OtherMap._MyStride))
 		, _MyLast(_MyBegin + (_OtherMap.size() * _OtherMap._MyStride))
+		, _MyStride(_OtherMap._MyStride)
 	{
 #if MST_STRIDEMAP_COPY_WARNING
 		WARNING_MESG("copying std::stridemap. this is slow, try moving it");
@@ -198,22 +187,22 @@ public:
 
 	template<typename T>
 	stridemap(::std::initializer_list<T> initList)
-		: _MyStride(sizeof(T))
-		, _MyBegin((char*)malloc(initList.size() * sizeof(T)))
+		: _MyBegin((char*)malloc(initList.size() * sizeof(T)))
 		, _MyEnd(_MyBegin + (initList.size() * sizeof(T)))
 		, _MyLast(_MyBegin + (initList.size() * sizeof(T)))
+		, _MyStride(sizeof(T))
 	{
 		_copydata(initList);
 	}
 
 	// rvalue reference constructor
 	stridemap(stridemap&& _OtherMap)
-		: _MyStride(_OtherMap._MyStride)
-		, _MyBegin(_OtherMap._MyBegin)
+		: _MyBegin(_OtherMap._MyBegin)
 		, _MyEnd(_OtherMap._MyEnd)
 		, _MyLast(_OtherMap._MyLast)
+		, _MyStride(_OtherMap._MyStride)
 	{
-		_OtherMap._MyBegin = nullptr;
+		_OtherMap._MyBegin = _OtherMap._MyEnd = _OtherMap._MyLast = nullptr;
 	}
 
 	~stridemap()
@@ -224,10 +213,10 @@ public:
 	template<typename T>
 	inline void erase(stridemap_iterator<T> _It)
 	{
-		CHECK_IF(_It._MyStride != _MyStride, "incompatable strides between iterator and stridemap");
-		CHECK_ITER_RANGE(_It, _MyBegin, _MyEnd, "erase iterator out of range");
+		MST_ASSERT(_It._MyStride == _MyStride, "incompatable strides between iterator and stridemap");
+		MST_ASSERT(_It._MyPtr >= _MyBegin && _It._MyPtr < _MyEnd, "erase iterator out of range");
 
-		memcpy(_It._MyPtr, _It._MyPtr + _MyStride, (_MyEnd - _It._MyPtr) - _MyStride);
+		memmove(_It._MyPtr, _It._MyPtr + _MyStride, (_MyEnd - _It._MyPtr) - _MyStride);
 		_MyEnd -= _MyStride;
 		_checkcollapse();
 	}
@@ -235,12 +224,14 @@ public:
 	template<typename T>
 	inline void erase(stridemap_iterator<T> _ItFirst, stridemap_iterator<T> _ItEnd)
 	{
-		CHECK_IF(_ItFirst._MyStride != _MyStride || _ItEnd._MyStride != _MyStride,
+		MST_ASSERT(_ItFirst._MyStride == _MyStride && _ItEnd._MyStride == _MyStride,
 			"incompatable strides between iterators and stridemap");
-		CHECK_ITER_RANGE(_ItFirst, begin<T>(), end<T>(), "erase iterator out of range");
-		CHECK_ITER_RANGE(_ItEnd, begin<T>(), end<T>(), "erase iterator out of range");
+		MST_ASSERT(
+			_ItFirst._MyPtr >= _MyBegin && _ItFirst._MyPtr <= _MyEnd, "erase iterator out of range");
+		MST_ASSERT(_ItEnd._MyPtr >= _MyBegin && _ItEnd._MyPtr <= _MyEnd, "erase iterator out of range");
+		MST_ASSERT(_ItFirst._MyPtr <= _ItEnd._MyPtr, "erase range is invalid");
 
-		memcpy(_ItFirst._MyPtr, _ItEnd._MyPtr, _MyEnd - _ItEnd._MyPtr);
+		memmove(_ItFirst._MyPtr, _ItEnd._MyPtr, _MyEnd - _ItEnd._MyPtr);
 		_MyEnd -= _ItEnd._MyPtr - _ItFirst._MyPtr;
 		_checkcollapse();
 	}
@@ -248,7 +239,7 @@ public:
 	template<typename T>
 	inline void push_back(const T& _Value)
 	{
-		CHECK_IF(sizeof(T) != _MyStride, "size of T is not the same as the stride");
+		MST_ASSERT(sizeof(T) == _MyStride, "size of T is not the same as the stride");
 		static_assert(::std::is_pod<T>::value, "T is not pod");
 
 		_checkexpansion();
@@ -266,7 +257,7 @@ public:
 
 	inline void push_back_from_index(size_t _Idx)
 	{
-		CHECK_ARR_RANGE(_Idx, size(), "index out of range");
+		MST_ASSERT(_Idx < size(), "index out of range");
 
 		_checkexpansion();
 
@@ -278,10 +269,10 @@ public:
 	template<typename T>
 	inline size_t find(const T& _Value) const
 	{
-		for(auto it = begin(); it != end(); ++it)
+		for(auto it = begin<T>(); it != end<T>(); ++it)
 			if(*it == _Value)
-				return (it - begin());
-		return -1;
+				return (size_t)(it - begin<T>());
+		return (size_t)-1;
 	};
 
 	template<typename T, typename _Func>
@@ -289,22 +280,22 @@ public:
 	{
 		for(auto it = begin<T>(); it != end<T>(); ++it)
 			if(_Pred(*it))
-				return (it - begin<T>()) / _MyStride;
-		return -1;
+				return (size_t)(it - begin<T>());
+		return (size_t)-1;
 	};
 
 	inline void pop_back()
 	{
-		CHECK_IF(empty(), "cannot pop back when arraymap is empty");
+		MST_ASSERT(!empty(), "cannot pop back when stridemap is empty");
 		_MyEnd -= _MyStride;
 		_checkcollapse();
 	}
 
 	inline void pop_front()
 	{
-		CHECK_IF(empty(), "cannot pop front when arraymap is empty");
+		MST_ASSERT(!empty(), "cannot pop front when stridemap is empty");
 
-		memcpy(_MyBegin, _MyBegin + _MyStride, (_MyEnd - _MyBegin) - _MyStride);
+		memmove(_MyBegin, _MyBegin + _MyStride, (_MyEnd - _MyBegin) - _MyStride);
 		_MyEnd -= _MyStride;
 		_checkcollapse();
 	}
@@ -312,28 +303,28 @@ public:
 	template<typename T>
 	inline const T& back() const
 	{
-		CHECK_IF(empty(), "the arraymap is empty");
+		MST_ASSERT(!empty(), "the stridemap is empty");
 		return *(const T*)(_MyEnd - _MyStride);
 	}
 
 	template<typename T>
 	inline const T& front() const
 	{
-		CHECK_IF(empty(), "the arraymap is empty");
+		MST_ASSERT(!empty(), "the stridemap is empty");
 		return *(const T*)_MyBegin;
 	}
 
 	template<typename T>
 	inline T& back()
 	{
-		CHECK_IF(empty(), "the arraymap is empty");
+		MST_ASSERT(!empty(), "the stridemap is empty");
 		return *(T*)(_MyEnd - _MyStride);
 	}
 
 	template<typename T>
 	inline T& front()
 	{
-		CHECK_IF(empty(), "the arraymap is empty");
+		MST_ASSERT(!empty(), "the stridemap is empty");
 		return *(T*)_MyBegin;
 	}
 
@@ -354,7 +345,7 @@ public:
 
 	inline void set_stride(size_t _Stride)
 	{
-		CHECK_IFNOT(empty(), "cannot set stride when not empty");
+		MST_ASSERT(empty(), "cannot set stride when not empty");
 
 		_MyStride = _Stride;
 
@@ -366,14 +357,14 @@ public:
 	template<typename T>
 	inline T& index(size_t _Idx)
 	{
-		CHECK_ARR_RANGE(_Idx, size(), "index out of range");
+		MST_ASSERT(_Idx < size(), "index out of range");
 		return *(T*)(_MyBegin + _Idx * _MyStride);
 	}
 
 	template<typename T>
 	inline const T& index(size_t _Idx) const
 	{
-		CHECK_ARR_RANGE(_Idx, size(), "index out of range");
+		MST_ASSERT(_Idx < size(), "index out of range");
 		return *(const T*)(_MyBegin + _Idx * _MyStride);
 	}
 
@@ -438,12 +429,22 @@ public:
 	inline void shrink_to_fit()
 	{
 		size_t _Oldsize = size();
+		if(_Oldsize == 0)
+		{
+			_tidy();
+			return;
+		}
 		_MyBegin = _realloc(_Oldsize);
 		_MyLast = _MyEnd = _MyBegin + (_Oldsize * _MyStride);
 	}
 
 	inline void resize(size_t _NewSize)
 	{
+		if(_NewSize == 0)
+		{
+			_tidy();
+			return;
+		}
 		_MyBegin = _realloc(_NewSize);
 		_MyLast = _MyEnd = _MyBegin + (_NewSize * _MyStride);
 	}
@@ -460,6 +461,8 @@ public:
 
 	inline stridemap& operator+=(const stridemap& _OtherMap)
 	{
+		MST_ASSERT(_MyStride == _OtherMap._MyStride, "incompatible strides");
+
 		size_t _Size = size();
 		resize(_Size + _OtherMap.size());
 		memcpy(_MyBegin + (_Size * _MyStride), _OtherMap._MyBegin, _OtherMap.size() * _MyStride);
@@ -472,7 +475,7 @@ public:
 #if MST_STRIDEMAP_COPY_WARNING
 		WARNING_MESG("copying std::stridemap. this is slow, try moving it");
 #endif
-		CHECK_IF(_OtherMap._MyStride == _MyStride,
+		MST_ASSERT(_OtherMap._MyStride == _MyStride,
 			"incompatible strides, use set_stride() to make them match");
 
 		_MyBegin = _realloc(_OtherMap._myallocsize());
@@ -486,13 +489,17 @@ public:
 
 	inline stridemap& operator=(stridemap&& _OtherMap)
 	{
-		CHECK_IF(_OtherMap._MyStride == _MyStride, "incompatible strides");
+		MST_ASSERT(_OtherMap._MyStride == _MyStride, "incompatible strides");
+
+		_orphan();
 
 		_MyBegin = _OtherMap._MyBegin;
 		_MyEnd = _OtherMap._MyEnd;
 		_MyLast = _OtherMap._MyLast;
 
 		_OtherMap._MyBegin = _OtherMap._MyEnd = _OtherMap._MyLast = nullptr;
+
+		return *this;
 	}
 
 private:
@@ -517,9 +524,12 @@ private:
 		size_t _Myallocsize = _myallocsize();
 		if(_Mysize >= _Myallocsize)
 		{
-			_MyBegin = _realloc(_Myallocsize * 2);
+			// grow geometrically; when the current capacity is 0 (e.g. right after construction
+			// with an initial size of 0, or after clear()) doubling would stay stuck at 0
+			size_t _Newallocsize = _Myallocsize == 0 ? 1 : _Myallocsize * 2;
+			_MyBegin = _realloc(_Newallocsize);
 			_MyEnd = _MyBegin + (_Mysize * _MyStride);
-			_MyLast = _MyBegin + (_Myallocsize * 2 * _MyStride);
+			_MyLast = _MyBegin + (_Newallocsize * _MyStride);
 		}
 	}
 
@@ -540,15 +550,15 @@ private:
 	inline void _tidy()
 	{
 		_MyLast = _MyEnd = _MyBegin = _realloc(1);
-		_MyLast++;
+		_MyLast += _MyStride;
 	}
 
 	inline void _orphan()
 	{
 		if(_MyBegin)
 		{
-			_tidy();
 			free(_MyBegin);
+			_release();
 		}
 	}
 
@@ -577,11 +587,6 @@ private:
 	size_t _MyStride;
 
 }; // struct stridemap
-
-class stridemap;
-
-template<typename T>
-class stridemap_iterator;
 
 template<typename T>
 iterator_range<stridemap_iterator<T>> range(stridemap& strideMap)

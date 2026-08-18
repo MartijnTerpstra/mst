@@ -31,6 +31,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <functional>
 #include <thread>
 
 using mst::threading::slim::event;
@@ -316,4 +317,177 @@ TEST_CASE("threading::slim::wait_object: wait_any returns as soon as any single 
 
 	REQUIRE(index == 1);
 	REQUIRE(!a.try_wait());
+}
+
+TEST_CASE("threading::slim::wait_object: wait_any(initializer_list) blocks until one object is "
+		  "signaled by another thread",
+	"[thread][slim][wait_object]")
+{
+	event a{ false, true };
+	event b{ false, true };
+
+	std::thread setter([&] {
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		b.set();
+	});
+
+	const size_t index = wait_object::wait_any({ a, b });
+	setter.join();
+
+	REQUIRE(index == 1);
+}
+
+TEST_CASE("threading::slim::wait_object: wait_for on a single object times out and returns "
+		  "false if it never becomes ready",
+	"[thread][slim][wait_object]")
+{
+	event neverSignaled{ false, true };
+	REQUIRE(!neverSignaled.wait_for(std::chrono::milliseconds(30)));
+}
+
+TEST_CASE("threading::slim::wait_object: wait_all/wait_any treat zero wait objects as trivially "
+		  "satisfied",
+	"[thread][slim][wait_object]")
+{
+	wait_object::wait_all(nullptr, 0); // must not block or crash
+
+	REQUIRE(wait_object::wait_any(nullptr, 0) == (size_t)-1);
+
+	std::initializer_list<std::reference_wrapper<wait_object>> empty{};
+	REQUIRE(wait_object::wait_any(empty) == (size_t)-1);
+}
+
+TEST_CASE("threading::slim::wait_object: wait_all_for with a zero duration succeeds when every "
+		  "object is already ready",
+	"[thread][slim][wait_object]")
+{
+	event a{ true, true };
+	event b{ true, true };
+
+	const wait_object* objects[] = { &a, &b };
+	REQUIRE(wait_object::wait_all_for(objects, std::chrono::seconds(0)));
+
+	/* the initializer_list overload takes the same zero-duration fast path */
+	REQUIRE(wait_object::wait_all_for({ a, b }, std::chrono::seconds(0)));
+
+	event c{ false, true };
+	REQUIRE(!wait_object::wait_all_for({ a, c }, std::chrono::seconds(0)));
+}
+
+TEST_CASE("threading::slim::wait_object: wait_all_until(initializer_list) with an already-past "
+		  "deadline still requires every object to be ready",
+	"[thread][slim][wait_object]")
+{
+	event a{ false, true };
+	event b{ true, true };
+	const auto past = std::chrono::high_resolution_clock::now() - std::chrono::milliseconds(50);
+
+	REQUIRE(!wait_object::wait_all_until({ a, b }, past));
+
+	event c{ true, true };
+	REQUIRE(wait_object::wait_all_until({ b, c }, past));
+}
+
+TEST_CASE("threading::slim::wait_object: wait_all_until(initializer_list) blocks until every "
+		  "object is signaled, or times out",
+	"[thread][slim][wait_object]")
+{
+	event a{ false, true };
+	event b{ false, true };
+
+	std::thread setter([&] {
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		a.set();
+		b.set();
+	});
+
+	REQUIRE(wait_object::wait_all_until(
+		{ a, b }, std::chrono::high_resolution_clock::now() + std::chrono::seconds(5)));
+	setter.join();
+
+	event c{ false, true };
+	REQUIRE(!wait_object::wait_all_until(
+		{ b, c }, std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(30)));
+}
+
+TEST_CASE("threading::slim::wait_object: wait_any_for/wait_any_until(initializer_list) with a "
+		  "zero duration or past deadline check once without waiting",
+	"[thread][slim][wait_object]")
+{
+	event a{ false, true };
+	event b{ true, true };
+
+	REQUIRE(wait_object::wait_any_for({ a, b }, std::chrono::seconds(0)) == 1);
+
+	event c{ false, true };
+	REQUIRE(wait_object::wait_any_for({ a, c }, std::chrono::seconds(0)) == (size_t)-1);
+
+	const auto past = std::chrono::high_resolution_clock::now() - std::chrono::milliseconds(50);
+	REQUIRE(wait_object::wait_any_until({ a, b }, past) == 1);
+	REQUIRE(wait_object::wait_any_until({ a, c }, past) == (size_t)-1);
+}
+
+TEST_CASE("threading::slim::wait_object: wait_any_for(initializer_list) spins until one object "
+		  "is signaled by another thread, or times out",
+	"[thread][slim][wait_object]")
+{
+	event a{ false, true };
+	event b{ false, true };
+
+	std::thread setter([&] {
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		b.set();
+	});
+
+	REQUIRE(wait_object::wait_any_for({ a, b }, std::chrono::seconds(5)) == 1);
+	setter.join();
+
+	event c{ false, true };
+	REQUIRE(wait_object::wait_any_for({ a, c }, std::chrono::milliseconds(30)) == (size_t)-1);
+}
+
+TEST_CASE("threading::slim::wait_object: wait_any_until spins until one object is signaled by "
+		  "another thread, or times out",
+	"[thread][slim][wait_object]")
+{
+	event a{ false, true };
+	event b{ false, true };
+
+	const wait_object* objects[] = { &a, &b };
+
+	std::thread setter([&] {
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		b.set();
+	});
+
+	REQUIRE(wait_object::wait_any_until(
+				objects, std::chrono::high_resolution_clock::now() + std::chrono::seconds(5)) == 1);
+	setter.join();
+
+	event c{ false, true };
+	const wait_object* noneReady[] = { &a, &c };
+	REQUIRE(wait_object::wait_any_until(noneReady,
+				std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(30)) ==
+			(size_t)-1);
+}
+
+TEST_CASE("threading::slim::wait_object: wait_any_until(initializer_list) spins until one "
+		  "object is signaled by another thread, or times out",
+	"[thread][slim][wait_object]")
+{
+	event a{ false, true };
+	event b{ false, true };
+
+	std::thread setter([&] {
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		b.set();
+	});
+
+	REQUIRE(wait_object::wait_any_until({ a, b },
+				std::chrono::high_resolution_clock::now() + std::chrono::seconds(5)) == 1);
+	setter.join();
+
+	event c{ false, true };
+	REQUIRE(wait_object::wait_any_until({ a, c }, std::chrono::high_resolution_clock::now() +
+													  std::chrono::milliseconds(30)) == (size_t)-1);
 }

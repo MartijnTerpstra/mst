@@ -71,8 +71,7 @@ inline bool wait_object::wait_for(
 				return true;
 			}
 			if(::std::chrono::duration_cast<DurationType>(
-				   ::std::chrono::high_resolution_clock::now() - start)
-					.count() > duration)
+				   ::std::chrono::high_resolution_clock::now() - start) >= duration)
 			{
 				return false;
 			}
@@ -124,6 +123,15 @@ inline void wait_object::wait_all(
 	}
 }
 
+inline void wait_object::wait_all(
+	::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects) noexcept
+{
+	for(const auto& waitObject : waitObjects)
+	{
+		waitObject.get().wait();
+	}
+}
+
 template<size_t WaitObjectCount>
 inline size_t wait_object::wait_any(const wait_object* (&waitObjects)[WaitObjectCount]) noexcept
 {
@@ -156,6 +164,28 @@ inline size_t wait_object::wait_any(
 	}
 }
 
+inline size_t wait_object::wait_any(
+	::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects) noexcept
+{
+	if(waitObjects.size() == 0)
+		return (size_t)-1;
+
+	for(;;)
+	{
+		size_t i = 0;
+		for(const auto& waitObject : waitObjects)
+		{
+			if(waitObject.get()._Try_wait())
+			{
+				return i;
+			}
+			++i;
+		}
+
+		std::this_thread::yield();
+	}
+}
+
 template<typename RepType, typename PeriodType, size_t WaitObjectCount>
 inline bool wait_object::wait_all_for(const wait_object* (&waitObjects)[WaitObjectCount],
 	const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept
@@ -181,12 +211,12 @@ inline bool wait_object::wait_all_for(const wait_object* const* waitObjects, siz
 	{
 		for(size_t i = 0; i < waitObjectCount; ++i)
 		{
-			if(waitObjects[i]->_Try_wait())
+			if(!waitObjects[i]->_Try_wait())
 			{
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	else
 	{
@@ -197,6 +227,50 @@ inline bool wait_object::wait_all_for(const wait_object* const* waitObjects, siz
 			while(1)
 			{
 				if(waitObjects[i]->_Try_wait())
+				{
+					break;
+				}
+
+				if((::std::chrono::high_resolution_clock::now() - start) > duration)
+				{
+					return false;
+				}
+
+				std::this_thread::yield();
+			}
+		}
+		return true;
+	}
+}
+
+template<typename RepType, typename PeriodType>
+inline bool wait_object::wait_all_for(
+	::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
+	const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept
+{
+	if(waitObjects.size() == 0)
+		return true;
+
+	if(duration.count() == 0)
+	{
+		for(const auto& waitObject : waitObjects)
+		{
+			if(!waitObject.get()._Try_wait())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	else
+	{
+		auto start = ::std::chrono::high_resolution_clock::now();
+
+		for(const auto& waitObject : waitObjects)
+		{
+			while(1)
+			{
+				if(waitObject.get()._Try_wait())
 				{
 					break;
 				}
@@ -239,12 +313,12 @@ inline bool wait_object::wait_all_until(const wait_object* const* waitObjects,
 	{
 		for(size_t i = 0; i < waitObjectCount; ++i)
 		{
-			if(waitObjects[i]->_Try_wait())
+			if(!waitObjects[i]->_Try_wait())
 			{
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	else
 	{
@@ -253,6 +327,48 @@ inline bool wait_object::wait_all_until(const wait_object* const* waitObjects,
 			while(1)
 			{
 				if(waitObjects[i]->_Try_wait())
+				{
+					break;
+				}
+
+				if(ClockType::now() > timePoint)
+				{
+					return false;
+				}
+
+				std::this_thread::yield();
+			}
+		}
+		return true;
+	}
+}
+
+template<typename ClockType, typename DurationType>
+inline bool wait_object::wait_all_until(
+	::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
+	const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept
+{
+	if(waitObjects.size() == 0)
+		return true;
+
+	if(ClockType::now() > timePoint)
+	{
+		for(const auto& waitObject : waitObjects)
+		{
+			if(!waitObject.get()._Try_wait())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	else
+	{
+		for(const auto& waitObject : waitObjects)
+		{
+			while(1)
+			{
+				if(waitObject.get()._Try_wait())
 				{
 					break;
 				}
@@ -325,6 +441,53 @@ inline size_t(wait_object::wait_any_for)(const wait_object* const* waitObjects,
 	}
 }
 
+template<typename RepType, typename PeriodType>
+inline size_t wait_object::wait_any_for(
+	::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
+	const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept
+{
+	if(waitObjects.size() == 0)
+		return (size_t)-1;
+
+	if(duration.count() == 0)
+	{
+		size_t i = 0;
+		for(const auto& waitObject : waitObjects)
+		{
+			if(waitObject.get()._Try_wait())
+			{
+				return i;
+			}
+			++i;
+		}
+		return (size_t)-1;
+	}
+	else
+	{
+		auto start = ::std::chrono::high_resolution_clock::now();
+
+		for(;;)
+		{
+			size_t i = 0;
+			for(const auto& waitObject : waitObjects)
+			{
+				if(waitObject.get()._Try_wait())
+				{
+					return i;
+				}
+				++i;
+			}
+
+			if((::std::chrono::high_resolution_clock::now() - start) > duration)
+			{
+				return (size_t)-1;
+			}
+
+			std::this_thread::yield();
+		}
+	}
+}
+
 template<typename ClockType, typename DurationType, size_t WaitObjectCount>
 inline size_t(wait_object::wait_any_until)(const wait_object* (&waitObjects)[WaitObjectCount],
 	const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept
@@ -373,6 +536,51 @@ inline size_t mst::threading::slim::wait_object::wait_any_until(
 			if(ClockType::now() > timePoint)
 			{
 				return -1;
+			}
+
+			std::this_thread::yield();
+		}
+	}
+}
+
+template<typename ClockType, typename DurationType>
+inline size_t wait_object::wait_any_until(
+	::std::initializer_list<::std::reference_wrapper<wait_object>> waitObjects,
+	const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept
+{
+	if(waitObjects.size() == 0)
+		return (size_t)-1;
+
+	if(ClockType::now() > timePoint)
+	{
+		size_t i = 0;
+		for(const auto& waitObject : waitObjects)
+		{
+			if(waitObject.get()._Try_wait())
+			{
+				return i;
+			}
+			++i;
+		}
+		return (size_t)-1;
+	}
+	else
+	{
+		while(1)
+		{
+			size_t i = 0;
+			for(const auto& waitObject : waitObjects)
+			{
+				if(waitObject.get()._Try_wait())
+				{
+					return i;
+				}
+				++i;
+			}
+
+			if(ClockType::now() > timePoint)
+			{
+				return (size_t)-1;
 			}
 
 			std::this_thread::yield();
@@ -432,7 +640,7 @@ inline void recursive_mutex::signal() const noexcept
 
 inline bool recursive_mutex::_Try_wait() const noexcept
 {
-	const uint32_t tid = ::mst::_Details::get_current_thread_id();
+	const uint64_t tid = ::mst::_Details::get_current_thread_id();
 
 	if(m_tid == tid)
 	{

@@ -185,6 +185,10 @@ add_mst_test(test_util set_assertions)
 add_mst_test(text static_string)
 
 add_mst_test(threading slim_event)
+add_mst_test(threading slim_mutex)
+add_mst_test(threading slim_recursive_mutex)
+add_mst_test(threading slim_semaphore)
+add_mst_test(threading slim_wait_object)
 
 if(WIN32)
 add_mst_test(memory com_ptr)

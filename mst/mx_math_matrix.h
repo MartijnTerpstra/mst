@@ -206,7 +206,8 @@ public:
 	/* translates the position */
 	_MST_CONSTEXPR17 void translate(const vector<_Value_type, 3>& translation) noexcept;
 
-	_MST_CONSTEXPR17 void lookat(
+	/* orients the matrix to look at the given position, from its own position */
+	_MST_CONSTEXPR17 void look_at(
 		const vector<_Value_type, 3>& _Direction, const vector<_Value_type, 3>& _Upvector) noexcept;
 };
 
@@ -393,8 +394,8 @@ public:
 	_MST_CONSTEXPR17 explicit matrix(_Value_type initVal) noexcept;
 
 	/* appends _Column3 as the 4th column of each row of _Columns012 (typically (0,0,0,1)) */
-	_MST_CONSTEXPR17 explicit matrix(
-		const matrix<_Value_type, 3, 4>& _Columns012, const vector<_Value_type, 4>& _Column3) noexcept;
+	_MST_CONSTEXPR17 explicit matrix(const matrix<_Value_type, 3, 4>& _Columns012,
+		const vector<_Value_type, 4>& _Column3) noexcept;
 
 	_MST_CONSTEXPR17 matrix(const vector<_Value_type, 4>& _Row0,
 		const vector<_Value_type, 4>& _Row1, const vector<_Value_type, 4>& _Row2,

@@ -52,13 +52,17 @@ template<typename _Value_type>
 _MST_CONSTEXPR17 quaternion<_Value_type>::quaternion(
 	radians<_Value_type> _Angle, const vector<_Value_type, 3>& _Normalized_axis) noexcept
 	: w(cos(_Angle / (_Value_type)2.0))
-	, x(_Normalized_axis.x)
-	, y(_Normalized_axis.y)
-	, z(_Normalized_axis.z)
+	, x(0)
+	, y(0)
+	, z(0)
 {
 	MST_ASSERT(fabs(_Normalized_axis.length() - 1) <= (_Value_type)_MST_QUATERNION_EPSILON,
 		"quaternion needs to be normalized again: ", _Normalized_axis.length());
-	w *= sin(_Angle / 2);
+
+	const _Value_type halfAngleSin = sin(_Angle / 2);
+	x = _Normalized_axis.x * halfAngleSin;
+	y = _Normalized_axis.y * halfAngleSin;
+	z = _Normalized_axis.z * halfAngleSin;
 }
 
 template<typename _Value_type>
@@ -93,16 +97,16 @@ _MST_CONSTEXPR17 quaternion<_Value_type>::quaternion(
 	{
 		_Value_type s = (_Value_type)0.5 / sqrt(trace + 1);
 		this->w = (_Value_type)0.25 / s;
-		this->x = (_Matrix[1][2] - _Matrix[2][1]) * s;
-		this->y = (_Matrix[2][0] - _Matrix[0][2]) * s;
-		this->z = (_Matrix[0][1] - _Matrix[1][0]) * s;
+		this->x = (_Matrix[2][1] - _Matrix[1][2]) * s;
+		this->y = (_Matrix[0][2] - _Matrix[2][0]) * s;
+		this->z = (_Matrix[1][0] - _Matrix[0][1]) * s;
 	}
 	else
 	{
 		if(_Matrix[0][0] > _Matrix[1][1] && _Matrix[0][0] > _Matrix[2][2])
 		{
 			_Value_type s = 2 * sqrt(1 + _Matrix[0][0] - _Matrix[1][1] - _Matrix[2][2]);
-			this->w = (_Matrix[1][2] - _Matrix[2][1]) / s;
+			this->w = (_Matrix[2][1] - _Matrix[1][2]) / s;
 			this->x = (_Value_type)0.25 * s;
 			this->y = (_Matrix[1][0] + _Matrix[0][1]) / s;
 			this->z = (_Matrix[2][0] + _Matrix[0][2]) / s;
@@ -112,7 +116,7 @@ _MST_CONSTEXPR17 quaternion<_Value_type>::quaternion(
 			if(_Matrix[1][1] > _Matrix[2][2])
 			{
 				_Value_type s = 2 * sqrt(1 + _Matrix[1][1] - _Matrix[0][0] - _Matrix[2][2]);
-				this->w = (_Matrix[2][0] - _Matrix[0][2]) / s;
+				this->w = (_Matrix[0][2] - _Matrix[2][0]) / s;
 				this->x = (_Matrix[1][0] + _Matrix[0][1]) / s;
 				this->y = (_Value_type)0.25 * s;
 				this->z = (_Matrix[2][1] + _Matrix[1][2]) / s;
@@ -120,7 +124,7 @@ _MST_CONSTEXPR17 quaternion<_Value_type>::quaternion(
 			else
 			{
 				_Value_type s = 2 * sqrt(1 + _Matrix[2][2] - _Matrix[0][0] - _Matrix[1][1]);
-				this->w = (_Matrix[0][1] - _Matrix[1][0]) / s;
+				this->w = (_Matrix[1][0] - _Matrix[0][1]) / s;
 				this->x = (_Matrix[2][0] + _Matrix[0][2]) / s;
 				this->y = (_Matrix[2][1] + _Matrix[1][2]) / s;
 				this->z = (_Value_type)0.25 * s;
@@ -142,17 +146,15 @@ template<typename _Value_type>
 /* returns the conjugate */
 _MST_CONSTEXPR17 quaternion<_Value_type> quaternion<_Value_type>::get_conjugate() const noexcept
 {
-	quaternion<_Value_type> retval;
-	retval.xyz.swap_signs();
-	return retval;
+	return quaternion<_Value_type>(w, -x, -y, -z);
 }
 
 template<typename _Value_type>
-/* returns the conjugate */
+/* returns the inverse */
 _MST_CONSTEXPR17 quaternion<_Value_type> quaternion<_Value_type>::get_inverse() const noexcept
 {
-	quaternion<_Value_type> retval;
-	retval.xyz.swap_signs();
+	quaternion<_Value_type> retval = get_conjugate();
+	retval /= squared_length();
 	return retval;
 }
 
@@ -193,7 +195,7 @@ template<typename _Value_type>
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_forward_direction() const noexcept
 {
 	return vector3_type(
-		-2.0f * (x * z + w * y), -2.0f * (y * z - w * x), -1.0f + 2.0f * (x * x + y * y));
+		2.0f * (x * z + w * y), 2.0f * (y * z - w * x), 1.0f - 2.0f * (x * x + y * y));
 }
 
 template<typename _Value_type>
@@ -201,7 +203,7 @@ template<typename _Value_type>
 constexpr vector<_Value_type, 3> quaternion<_Value_type>::get_backward_direction() const noexcept
 {
 	return vector3_type(
-		2.0f * (x * z + w * y), 2.0f * (y * z - w * x), 1.0f - 2.0f * (x * x + y * y));
+		-2.0f * (x * z + w * y), -2.0f * (y * z - w * x), -1.0f + 2.0f * (x * x + y * y));
 }
 
 template<typename _Value_type>
@@ -210,20 +212,23 @@ _MST_CONSTEXPR17 vector<_Value_type, 4> quaternion<_Value_type>::to_axis_angle()
 {
 	vector<_Value_type, 4> axisAngle;
 
-	axisAngle.w = acos(this->w);
+	const radians<_Value_type> halfAngle = acos(this->w);
 
-	if(axisAngle.w < _MST_EPSILON)
+	if(halfAngle.count() < _MST_EPSILON)
 	{
-		axisAngle.xyz = vector<_Value_type, 3>(0, 0, 0);
+		axisAngle.x = 0;
+		axisAngle.y = 0;
+		axisAngle.z = 0;
 		axisAngle.w = 0;
 		return axisAngle;
 	}
 
-	const _Value_type sinf_theta_inv = 1 / sin(axisAngle.w);
+	const _Value_type sinf_theta_inv = 1 / sin(halfAngle);
 
 	axisAngle.x = this->x * sinf_theta_inv;
 	axisAngle.y = this->y * sinf_theta_inv;
 	axisAngle.z = this->z * sinf_theta_inv;
+	axisAngle.w = halfAngle.count() * 2;
 
 	return axisAngle;
 }
@@ -237,6 +242,8 @@ _MST_CONSTEXPR17 quaternion<_Value_type>& quaternion<_Value_type>::normalize() n
 	this->x *= invLength;
 	this->y *= invLength;
 	this->z *= invLength;
+
+	return *this;
 }
 
 template<typename _Value_type>
@@ -257,8 +264,8 @@ template<typename _Value_type>
 /* returns the square length of the quaternion */
 constexpr _Value_type quaternion<_Value_type>::squared_length() const noexcept
 {
-	return (&this->x)[0] * (&this->x)[0] + (&this->x)[1] * (&this->x)[1] +
-		   (&this->x)[2] * (&this->x)[2] + (&this->x)[3] * (&this->x)[3];
+	return (&this->w)[0] * (&this->w)[0] + (&this->w)[1] * (&this->w)[1] +
+		   (&this->w)[2] * (&this->w)[2] + (&this->w)[3] * (&this->w)[3];
 }
 
 template<typename _Value_type>
@@ -266,13 +273,13 @@ template<typename _Value_type>
 _MST_CONSTEXPR17 vector<_Value_type, 3> quaternion<_Value_type>::rotate_point(
 	const vector<_Value_type, 3>& _Vec) const noexcept
 {
-	CHECK_IF_ARG(fabs(length() - 1) > (_Value_type)_MST_QUATERNION_EPSILON,
-		"quaternion is not normalized, length", length());
+	MST_ASSERT(fabs(length() - 1) <= (_Value_type)_MST_QUATERNION_EPSILON,
+		"quaternion is not normalized, length: ", length());
 
-	const _Value_type qw2 = (&this->x)[0] * (&this->x)[0];
-	const _Value_type qx2 = (&this->x)[1] * (&this->x)[1];
-	const _Value_type qy2 = (&this->x)[2] * (&this->x)[2];
-	const _Value_type qz2 = (&this->x)[3] * (&this->x)[3];
+	const _Value_type qw2 = (&this->w)[0] * (&this->w)[0];
+	const _Value_type qx2 = (&this->w)[1] * (&this->w)[1];
+	const _Value_type qy2 = (&this->w)[2] * (&this->w)[2];
+	const _Value_type qz2 = (&this->w)[3] * (&this->w)[3];
 
 	vector<_Value_type, 3> dx = { 1 - 2 * qy2 - 2 * qz2, 2 * x * y - 2 * z * w,
 		2 * x * z + 2 * y * w },
@@ -302,23 +309,59 @@ constexpr quaternion<_Value_type> quaternion<_Value_type>::rotated(
 }
 
 template<typename _Value_type>
-/* makes the quaternion lookat the position */
+/* makes the quaternion look at the position, assuming its own position is the origin */
 _MST_CONSTEXPR17 void quaternion<_Value_type>::look_at(
-	const vector<_Value_type, 3>& _Position, const vector<_Value_type, 3>& _Up) noexcept
+	const vector<_Value_type, 3>& _Direction, const vector<_Value_type, 3>& _Up) noexcept
 {
-	matrix<_Value_type, 3, 3> _Rotation_matrix;
+	vector<_Value_type, 3> forward = _Direction.normalized();
+	vector<_Value_type, 3> right = _Up.cross(forward).normalize();
+	vector<_Value_type, 3> up = forward.cross(right).normalize();
 
-	_Rotation_matrix.look_at(_Position, _Up);
+	/* extracts the quaternion directly from the (right, up, forward) basis, following the same
+		trace-based method as the matrix constructor above -- right/up/forward take the place of
+		the matrix's column 0/1/2 */
+	_Value_type trace = right.x + up.y + forward.z;
 
-	_Init(_Rotation_matrix);
+	if(trace > 0)
+	{
+		_Value_type s = (_Value_type)0.5 / sqrt(trace + 1);
+		this->w = (_Value_type)0.25 / s;
+		this->x = (up.z - forward.y) * s;
+		this->y = (forward.x - right.z) * s;
+		this->z = (right.y - up.x) * s;
+	}
+	else if(right.x > up.y && right.x > forward.z)
+	{
+		_Value_type s = 2 * sqrt(1 + right.x - up.y - forward.z);
+		this->w = (up.z - forward.y) / s;
+		this->x = (_Value_type)0.25 * s;
+		this->y = (right.y + up.x) / s;
+		this->z = (right.z + forward.x) / s;
+	}
+	else if(up.y > forward.z)
+	{
+		_Value_type s = 2 * sqrt(1 + up.y - right.x - forward.z);
+		this->w = (forward.x - right.z) / s;
+		this->x = (right.y + up.x) / s;
+		this->y = (_Value_type)0.25 * s;
+		this->z = (up.z + forward.y) / s;
+	}
+	else
+	{
+		_Value_type s = 2 * sqrt(1 + forward.z - right.x - up.y);
+		this->w = (right.y - up.x) / s;
+		this->x = (right.z + forward.x) / s;
+		this->y = (up.z + forward.y) / s;
+		this->z = (_Value_type)0.25 * s;
+	}
 }
 
 template<typename _Value_type>
 /* returns the dot product of this and quat */
 constexpr _Value_type quaternion<_Value_type>::dot(const quaternion& _Quat) const noexcept
 {
-	return ((&this->x)[0] * _Quat[0] + (&this->x)[1] * _Quat[1] + (&this->x)[2] * _Quat[2] +
-			(&this->x)[3] * _Quat[3]);
+	return ((&this->w)[0] * _Quat[0] + (&this->w)[1] * _Quat[1] + (&this->w)[2] * _Quat[2] +
+			(&this->w)[3] * _Quat[3]);
 }
 
 template<typename _Value_type>
@@ -326,8 +369,8 @@ template<typename _Value_type>
 _MST_CONSTEXPR17 quaternion<_Value_type> quaternion<_Value_type>::slerp(
 	const quaternion<_Value_type>& _To, _Value_type _Interp) const noexcept
 {
-	CHECK_IF_ARG_GPU(fabs(length() - 1.0f) > (_Value_type)_MST_QUATERNION_EPSILON,
-		"quaternion is not normalized, length", length());
+	MST_ASSERT(fabs(length() - 1.0f) <= (_Value_type)_MST_QUATERNION_EPSILON,
+		"quaternion is not normalized, length: ", length());
 
 	quaternion q3;
 	_Value_type dot12 = dot(_To);
@@ -347,12 +390,12 @@ _MST_CONSTEXPR17 quaternion<_Value_type> quaternion<_Value_type>::slerp(
 
 	if(dot12 < (_Value_type)0.95)
 	{
-		const _Value_type angle = acos(dot12);
+		const radians<_Value_type> angle = acos(dot12);
 		return ((*this) * sin(angle * (1 - _Interp)) + q3 * sin(angle * _Interp)) *
 			   (1 / sin(angle));
 	}
 	else // if the angle is small, use linear interpolation
-		return lerp((*this), q3, _Interp);
+		return (*this) * (1 - _Interp) + q3 * _Interp;
 }
 
 // operator overloads
@@ -389,14 +432,14 @@ template<typename _Value_type>
 _MST_CONSTEXPR17 quaternion<_Value_type>& quaternion<_Value_type>::operator*=(
 	const quaternion<_Value_type>& _Quat) noexcept
 {
-	const _Value_type rw = (&this->x)[0] * _Quat[0] - (&this->x)[1] * _Quat[1] -
-						   (&this->x)[2] * _Quat[2] - (&this->x)[3] * _Quat[3];
-	const _Value_type rx = (&this->x)[0] * _Quat[1] + (&this->x)[1] * _Quat[0] +
-						   (&this->x)[2] * _Quat[3] - (&this->x)[3] * _Quat[2];
-	const _Value_type ry = (&this->x)[0] * _Quat[2] - (&this->x)[1] * _Quat[3] +
-						   (&this->x)[2] * _Quat[0] + (&this->x)[3] * _Quat[1];
-	const _Value_type rz = (&this->x)[0] * _Quat[3] + (&this->x)[1] * _Quat[2] -
-						   (&this->x)[2] * _Quat[1] + (&this->x)[3] * _Quat[0];
+	const _Value_type rw = (&this->w)[0] * _Quat[0] - (&this->w)[1] * _Quat[1] -
+						   (&this->w)[2] * _Quat[2] - (&this->w)[3] * _Quat[3];
+	const _Value_type rx = (&this->w)[0] * _Quat[1] + (&this->w)[1] * _Quat[0] +
+						   (&this->w)[2] * _Quat[3] - (&this->w)[3] * _Quat[2];
+	const _Value_type ry = (&this->w)[0] * _Quat[2] - (&this->w)[1] * _Quat[3] +
+						   (&this->w)[2] * _Quat[0] + (&this->w)[3] * _Quat[1];
+	const _Value_type rz = (&this->w)[0] * _Quat[3] + (&this->w)[1] * _Quat[2] -
+						   (&this->w)[2] * _Quat[1] + (&this->w)[3] * _Quat[0];
 
 	this->w = rw;
 	this->x = rx;

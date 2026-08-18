@@ -81,12 +81,12 @@ TEST_CASE("matrix<V,C,R>: rotated_z rotates the right/up basis", "[matrix]")
 
 	auto rotated = matrix<float, 4, 4>::identity.rotated_z(degrees<float>(90));
 
-	REQUIRE_THAT(rotated.get_right_direction(),
-		mst::test_util::approx_equal(float3(0, 1, 0), 0.0001f));
+	REQUIRE_THAT(
+		rotated.get_right_direction(), mst::test_util::approx_equal(float3(0, 1, 0), 0.0001f));
 	REQUIRE_THAT(
 		rotated.get_up_direction(), mst::test_util::approx_equal(float3(-1, 0, 0), 0.0001f));
-	REQUIRE_THAT(rotated.get_forward_direction(),
-		mst::test_util::approx_equal(float3(0, 0, 1), 0.0001f));
+	REQUIRE_THAT(
+		rotated.get_forward_direction(), mst::test_util::approx_equal(float3(0, 0, 1), 0.0001f));
 }
 
 TEST_CASE("matrix<V,C,R>: rotated_x/y/z round-trip with their negative angle", "[matrix]")
@@ -179,26 +179,32 @@ TEST_CASE("matrix<V,C,R>: position + orientation constructor", "[matrix]")
 	REQUIRE(m34.get_position() == position);
 }
 
-TEST_CASE("matrix<V,C,R>: lookat sets forward/right/up towards the target", "[matrix]")
+TEST_CASE("matrix<V,C,R>: look_at sets forward/right/up towards the target", "[matrix]")
 {
 	typedef vector<float, 3> float3;
 
 	matrix<float, 4, 4> m = matrix<float, 4, 4>::identity;
-	m.lookat(float3(0, 0, 5), float3(0, 1, 0));
+	m.look_at(float3(0, 0, 5), float3(0, 1, 0));
 
-	REQUIRE_THAT(
-		m.get_forward_direction(), mst::test_util::approx_equal(float3(0, 0, 1), 0.0001f));
+	REQUIRE_THAT(m.get_forward_direction(), mst::test_util::approx_equal(float3(0, 0, 1), 0.0001f));
 	REQUIRE_THAT(m.get_right_direction(), mst::test_util::approx_equal(float3(1, 0, 0), 0.0001f));
 	REQUIRE_THAT(m.get_up_direction(), mst::test_util::approx_equal(float3(0, 1, 0), 0.0001f));
 
 	matrix<float, 4, 4> m2 = matrix<float, 4, 4>::identity;
-	m2.lookat(float3(5, 0, 0), float3(0, 1, 0));
+	m2.look_at(float3(5, 0, 0), float3(0, 1, 0));
 
 	REQUIRE_THAT(
 		m2.get_forward_direction(), mst::test_util::approx_equal(float3(1, 0, 0), 0.0001f));
-	REQUIRE_THAT(
-		m2.get_right_direction(), mst::test_util::approx_equal(float3(0, 0, -1), 0.0001f));
+	REQUIRE_THAT(m2.get_right_direction(), mst::test_util::approx_equal(float3(0, 0, -1), 0.0001f));
 	REQUIRE_THAT(m2.get_up_direction(), mst::test_util::approx_equal(float3(0, 1, 0), 0.0001f));
+
+	/* a non-origin position is taken into account -- the target is reached relative to it */
+	matrix<float, 4, 4> m3 = matrix<float, 4, 4>::identity;
+	m3.set_position(float3(0, 0, 5));
+	m3.look_at(float3(0, 0, 10), float3(0, 1, 0));
+
+	REQUIRE_THAT(
+		m3.get_forward_direction(), mst::test_util::approx_equal(float3(0, 0, 1), 0.0001f));
 }
 
 TEST_CASE("matrix<V,C,R>: scale pre-multiplies by a diagonal scale matrix", "[matrix]")

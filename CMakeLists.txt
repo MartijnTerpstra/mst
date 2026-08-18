@@ -167,6 +167,7 @@ add_mst_test(math matrix_inverse)
 add_mst_test(math matrix_transform)
 add_mst_test(math matrix_projection)
 add_mst_test(math matrix_set)
+add_mst_test(math quaternion)
 
 add_mst_test(memory aligned_allocator)
 add_mst_test(memory aligned_malloc)

@@ -29,10 +29,6 @@
 #include <mcore.h>
 #include <mx_compiletime.h>
 
-#if _MST_HAS_CONSTEXPR17
-#include <mx_hash.h>
-#endif
-
 namespace mst {
 namespace compiletime {
 
@@ -56,17 +52,9 @@ constexpr uint64_t hash64(const char* cString)
 	return ::mst::_Details::compiletime_hash64(cString, 0, ::mst::compiletime::strlen(cString));
 }
 
-template<typename T>
-constexpr uint32_t hash_of()
-{
-	return ::mst::_Details::compiletime_hash_of32<T>();
-}
-
-template<typename T>
-constexpr uint64_t hash_of64()
-{
-	return ::mst::_Details::compiletime_hash_of64<T>();
-}
+// Note: mst::compiletime::hash_of<T>()/hash_of64<T>() (compile-time type-name hashing) were
+// removed - use ::mst::hash_of<T>()/::mst::hash_of64<T>() (mcommon.h) instead, which are just as
+// usable in a constant-expression context under the C++17 this project requires.
 
 } // namespace compiletime
 } // namespace mst

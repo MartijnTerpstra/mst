@@ -29,6 +29,9 @@
 
 #include <mcommon.h>
 #include <string>
+#include <vector>
+#include <map>
+#include <memory>
 
 TEST_CASE("hash32: literal & std::string are equal", "[common]")
 {
@@ -76,6 +79,9 @@ struct Bar
 template<typename A, typename B>
 struct Pair
 { };
+
+template<typename T>
+using SamePair = Pair<T, T>;
 
 enum class Color
 {
@@ -218,4 +224,94 @@ TEST_CASE("hash_of/hash_of64: pinned values for compiler-independent canonical s
 
 	REQUIRE(mst::hash_of<int[3]>() == 0xe024279bU);
 	REQUIRE(mst::hash_of64<int[3]>() == 0x2681c96febbf9814ULL);
+}
+
+// std::vector/map/shared_ptr are the containers most likely to actually get hashed by consumers,
+// and they exercise real-world signature shapes the fixture types above don't: a default
+// allocator/comparator argument the compiler fills in, and (unlike Pair<Foo, Bar> above) types
+// that live under an std:: inline namespace whose spelling is stdlib-specific. That spelling
+// difference is exactly the documented, deliberately-out-of-scope limitation (see the comment in
+// mx_hash.h) for cross-compiler comparison, so this only asserts the same relational invariants
+// as the fixture-type tests above (typedef transparency, distinctness, stability) rather than any
+// pinned string/hash value - those remain guaranteed within one compiler/stdlib build.
+TEST_CASE("hash_of/hash_of64/typename_of: std:: container templates (vector, map, shared_ptr)",
+	"[common]")
+{
+	// typedefs of a std:: template instantiation collapse, same as for any other type
+	typedef std::vector<int> IntVector;
+	using IntVector2 = std::vector<int>;
+	REQUIRE(mst::hash_of<std::vector<int>>() == mst::hash_of<IntVector>());
+	REQUIRE(mst::hash_of<std::vector<int>>() == mst::hash_of<IntVector2>());
+	REQUIRE(std::string(mst::typename_of<std::vector<int>>()) == mst::typename_of<IntVector>());
+
+	// a typedef used as the template argument itself collapses too, not just at the top level
+	REQUIRE(mst::hash_of<std::vector<Foo>>() == mst::hash_of<std::vector<FooAlias>>());
+	REQUIRE(mst::hash_of64<std::vector<Foo>>() == mst::hash_of64<std::vector<FooAlias>>());
+
+	// distinct element/key/value types never collide, including key/value order in std::map
+	REQUIRE(mst::hash_of<std::vector<int>>() != mst::hash_of<std::vector<float>>());
+	REQUIRE(mst::hash_of<std::map<int, float>>() != mst::hash_of<std::map<int, int>>());
+	REQUIRE(mst::hash_of<std::map<int, float>>() != mst::hash_of<std::map<float, int>>());
+	REQUIRE(mst::hash_of<std::shared_ptr<Foo>>() != mst::hash_of<std::shared_ptr<Bar>>());
+
+	// different container templates around the same element type never collide either
+	REQUIRE(mst::hash_of<std::vector<int>>() != mst::hash_of<std::shared_ptr<int>>());
+	REQUIRE(mst::hash_of<std::vector<int>>() != mst::hash_of<std::map<int, int>>());
+
+	// stable across repeated calls, and hash_of64 agrees with hashing typename_of, same as any
+	// other type - the stdlib-specific spelling of these types only affects cross-compiler
+	// comparison, not self-consistency within one compiler/build
+	REQUIRE(mst::hash_of<std::map<int, Foo>>() == mst::hash_of<std::map<int, Foo>>());
+	REQUIRE(mst::hash_of64<std::shared_ptr<Bar>>()
+			== mst::hash64(mst::typename_of<std::shared_ptr<Bar>>()));
+}
+
+// hash_test_types is a named namespace (see the comment where it's declared above), so unlike
+// the std:: container test above, these spellings involve no compiler-specific decoration and
+// are expected to be identical - pinned values and all - on every supported compiler.
+TEST_CASE("hash_of/hash_of64/typename_of: nested templates and alias templates", "[common]")
+{
+	// a template argument that is itself a template instantiation: position matters...
+	REQUIRE(mst::hash_of<Pair<Pair<Foo, Bar>, Foo>>()
+			!= mst::hash_of<Pair<Foo, Pair<Foo, Bar>>>());
+
+	// ...but is otherwise stable, and hash_of64 still agrees with hashing typename_of two levels
+	// deep
+	REQUIRE(mst::hash_of<Pair<Pair<Foo, Bar>, Foo>>() == mst::hash_of<Pair<Pair<Foo, Bar>, Foo>>());
+	REQUIRE(mst::hash_of64<Pair<Pair<Foo, Bar>, Foo>>()
+			== mst::hash64(mst::typename_of<Pair<Pair<Foo, Bar>, Foo>>()));
+
+	// typedef transparency still holds for a typedef used at the nested position, not just the
+	// outermost or the immediately-nested one
+	REQUIRE(mst::hash_of<Pair<Pair<Foo, Bar>, Foo>>()
+			== mst::hash_of<Pair<Pair<FooAlias, Bar>, FooAlias2>>());
+
+	// alias templates (template<typename T> using SamePair = Pair<T, T>;) resolve to their
+	// underlying instantiation, same as any other alias - std::is_same_v<SamePair<Foo>,
+	// Pair<Foo, Foo>> is true, and so is this
+	REQUIRE(mst::hash_of<SamePair<Foo>>() == mst::hash_of<Pair<Foo, Foo>>());
+	REQUIRE(mst::hash_of64<SamePair<Bar>>() == mst::hash_of64<Pair<Bar, Bar>>());
+	REQUIRE(std::string(mst::typename_of<SamePair<Foo>>()) == mst::typename_of<Pair<Foo, Foo>>());
+
+	// ...and a template argument that is itself an alias-template instantiation collapses too
+	REQUIRE(mst::hash_of<Pair<SamePair<Foo>, Bar>>() == mst::hash_of<Pair<Pair<Foo, Foo>, Bar>>());
+
+	// pinned exact values: these are the ones that should actually confirm cross-compiler
+	// agreement in CI, not just self-consistency
+	REQUIRE(std::string(mst::typename_of<Pair<Pair<Foo, Bar>, Foo>>())
+			== "hash_test_types::Pair<hash_test_types::Pair<hash_test_types::Foo,"
+			   "hash_test_types::Bar>,hash_test_types::Foo>");
+	REQUIRE(mst::hash_of<Pair<Pair<Foo, Bar>, Foo>>() == 0xdd7e107fU);
+	REQUIRE(mst::hash_of64<Pair<Pair<Foo, Bar>, Foo>>() == 0xb09cfd661a34deb9ULL);
+
+	REQUIRE(std::string(mst::typename_of<Pair<Foo, Pair<Foo, Bar>>>())
+			== "hash_test_types::Pair<hash_test_types::Foo,hash_test_types::Pair<"
+			   "hash_test_types::Foo,hash_test_types::Bar>>");
+	REQUIRE(mst::hash_of<Pair<Foo, Pair<Foo, Bar>>>() == 0x0c77f705U);
+	REQUIRE(mst::hash_of64<Pair<Foo, Pair<Foo, Bar>>>() == 0xb93592b1cc5f72b4ULL);
+
+	REQUIRE(std::string(mst::typename_of<SamePair<Foo>>())
+			== "hash_test_types::Pair<hash_test_types::Foo,hash_test_types::Foo>");
+	REQUIRE(mst::hash_of<SamePair<Foo>>() == 0x09511974U);
+	REQUIRE(mst::hash_of64<SamePair<Foo>>() == 0x8f8884b58a203141ULL);
 }

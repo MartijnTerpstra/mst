@@ -93,7 +93,7 @@ function(SETUP_TARGET TARGET_NAME)
         target_compile_options(
             ${TARGET_NAME}
             PRIVATE
-                -pedantic -fvisibility=hidden -Wall -Wshadow -Wno-deprecated-declarations
+                -pedantic-errors -fvisibility=hidden -Wall -Wshadow -Wno-deprecated-declarations
                 $<$<CONFIG:Debug>:-O0 -ggdb3>
                 $<$<CONFIG:Release>:-O2>
         )

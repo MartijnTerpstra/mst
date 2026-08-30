@@ -151,7 +151,7 @@
         {
             "name": "ci-tests",
             "displayName": "CI unit tests",
-            "description": "Matches .github/workflows/UnitTestOnPullRequest.yml (compiler picked up from CC/CXX env). -pedantic-errors is a no-op warning (D9002) under MSVC, so it's safe to set unconditionally here even though this preset also backs the MSVC job.",
+            "description": "Matches .github/workflows/UnitTestOnPullRequest.yml (compiler picked up from CC/CXX env). Pedantic-errors coverage comes from CMakeLists.txt's SETUP_TARGET (per-target, non-MSVC), not from a global CMAKE_CXX_FLAGS override here -- the latter replaces CMake's MSVC default init flags (dropping /EHsc) for targets outside our own, like the FetchContent-built Catch2.",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",

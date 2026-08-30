@@ -155,8 +155,7 @@
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "MST_RUN_TESTS": true,
-                "CMAKE_CXX_FLAGS": "-pedantic-errors"
+                "MST_RUN_TESTS": true
             }
         },
         {

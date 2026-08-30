@@ -276,7 +276,6 @@ _MST_CONSTEXPR17 vector<_Value_type, 3> quaternion<_Value_type>::rotate_point(
 	MST_ASSERT(fabs(length() - 1) <= (_Value_type)_MST_QUATERNION_EPSILON,
 		"quaternion is not normalized, length: ", length());
 
-	const _Value_type qw2 = (&this->w)[0] * (&this->w)[0];
 	const _Value_type qx2 = (&this->w)[1] * (&this->w)[1];
 	const _Value_type qy2 = (&this->w)[2] * (&this->w)[2];
 	const _Value_type qz2 = (&this->w)[3] * (&this->w)[3];

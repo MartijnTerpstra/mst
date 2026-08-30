@@ -273,7 +273,7 @@ public:
 			if(*it == _Value)
 				return (size_t)(it - begin<T>());
 		return (size_t)-1;
-	};
+	}
 
 	template<typename T, typename _Func>
 	inline size_t find_if(_Func _Pred) const
@@ -282,7 +282,7 @@ public:
 			if(_Pred(*it))
 				return (size_t)(it - begin<T>());
 		return (size_t)-1;
-	};
+	}
 
 	inline void pop_back()
 	{

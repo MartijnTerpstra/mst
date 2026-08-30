@@ -219,9 +219,8 @@ _Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::cend() con
 
 /* returns the squared length */
 template<typename _Value_type, size_t _Elems, bool _IsFP, bool _IsUnsigned>
-_MST_CONSTEXPR17 _Value_type(
-	_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::squared_length)()
-	const noexcept
+_MST_CONSTEXPR17 _Value_type
+_Details::_Math_vector_base<_Value_type, _Elems, _IsFP, _IsUnsigned>::squared_length() const noexcept
 {
 	_Value_type retval = 0;
 	for(size_t i = 0; i < _Elems; ++i)

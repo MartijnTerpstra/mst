@@ -69,7 +69,7 @@ public:
 			"exceeds max_size of ", max_size());
 
 		uint32_t index = 0;
-		while((2048 << ((size_t)index * 2)) < initCapacity)
+		while((2048U << ((size_t)index * 2)) < initCapacity)
 		{
 			++index;
 		}
@@ -77,7 +77,7 @@ public:
 		m_pushIndex = index;
 		m_popIndex = index;
 		m_buffers[index].store(new _Details::queue_buffer<T>(2048 << (index * 2)));
-		for(int i = 0; i < c_maxBufferCount; ++i)
+		for(uint32_t i = 0; i < c_maxBufferCount; ++i)
 		{
 			if(i == index)
 				continue;
@@ -85,7 +85,7 @@ public:
 			m_buffers[i].store(nullptr);
 		}
 
-		for(int i = 0; i < c_maxBufferCount; ++i)
+		for(uint32_t i = 0; i < c_maxBufferCount; ++i)
 		{
 			m_readerCounts[i].store(0xC0000000);
 			m_writerCounts[i].store(0);
@@ -104,7 +104,8 @@ public:
 			if(ptr)
 			{
 				while(ptr->try_delete())
-				{ }
+				{
+				}
 				delete ptr;
 			}
 		}

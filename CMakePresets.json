@@ -66,9 +66,9 @@
             }
         },
         {
-            "name": "linux-gcc-base",
-            "displayName": "Linux GCC base",
-            "description": "From CMakeSettings.json's Linux-x64-GCC-Dev/Test (local, not remote)",
+            "name": "linux-base",
+            "displayName": "Linux base",
+            "description": "Shared by the local and VS-remote/WSL Linux configs. condition Linux matches both a native Linux host and a VS remote/WSL target (VS evaluates hostSystemName against the target system there). The vendor exclusionList keeps VS's rsync-based source copy (Tools > Options > Cross Platform > Connection Manager, or a WSL target) from pulling in build output dirs.",
             "hidden": true,
             "condition": {
                 "type": "equals",
@@ -76,6 +76,26 @@
                 "rhs": "Linux"
             },
             "inherits": "dev-base",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-pedantic-errors"
+            },
+            "vendor": {
+                "microsoft.com/VisualStudioRemoteSettings/CMake1": {
+                    "copySourcesOptions": {
+                        "exclusionList": [
+                            ".vs", ".git", ".svn", "out",
+                            "_build", "build", "build-linux-gcc", "build-linux-clang", "build-windows-strict"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "name": "linux-gcc-base",
+            "displayName": "Linux GCC base",
+            "description": "From CMakeSettings.json's Linux-x64-GCC-Dev/Test",
+            "hidden": true,
+            "inherits": "linux-base",
             "binaryDir": "${sourceDir}/build-linux-gcc",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",
@@ -102,14 +122,9 @@
         {
             "name": "linux-clang-base",
             "displayName": "Linux Clang base",
-            "description": "From CMakeSettings.json's Linux-x64-Clang-Dev/Test (local, not remote)",
+            "description": "From CMakeSettings.json's Linux-x64-Clang-Dev/Test",
             "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
-            "inherits": "dev-base",
+            "inherits": "linux-base",
             "binaryDir": "${sourceDir}/build-linux-clang",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "clang++",
@@ -134,82 +149,14 @@
             }
         },
         {
-            "name": "remote-linux-base",
-            "displayName": "Remote Linux base (Visual Studio)",
-            "description": "From CMakeSettings.json's remote (SSH) Linux configurations. Best-effort port of Visual Studio's remote-preset vendor JSON — I could not verify the exact vendor schema outside the IDE, so open this in Visual Studio and confirm it picks up a remote connection (Tools > Options > Cross Platform > Connection Manager) before relying on it.",
-            "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "inherits": "dev-base",
-            "binaryDir": "~/projects/mst/${presetName}/build",
-            "installDir": "~/projects/mst/${presetName}/install",
-            "vendor": {
-                "microsoft.com/VisualStudioRemoteSettings/CMake1": {
-                    "sourceDir": "~/projects/mst/${presetName}",
-                    "copySources": true,
-                    "copySourcesOptions": {
-                        "exclusionList": [ ".vs", ".git", ".svn", "build", "out" ],
-                        "method": "rsync",
-                        "concurrentCopies": 10,
-                        "outputVerbosity": "Normal"
-                    },
-                    "rsyncCommandArgs": "-t --delete --delete-excluded"
-                }
-            }
-        },
-        {
-            "name": "remote-linux-gcc-debug",
-            "displayName": "Remote Linux GCC Debug",
-            "inherits": "remote-linux-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_COMPILER": "g++",
-                "CMAKE_C_COMPILER": "gcc"
-            }
-        },
-        {
-            "name": "remote-linux-gcc-release",
-            "displayName": "Remote Linux GCC Release",
-            "inherits": "remote-linux-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_COMPILER": "g++",
-                "CMAKE_C_COMPILER": "gcc",
-                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG"
-            }
-        },
-        {
-            "name": "remote-linux-clang-debug",
-            "displayName": "Remote Linux Clang Debug",
-            "inherits": "remote-linux-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_C_COMPILER": "clang"
-            }
-        },
-        {
-            "name": "remote-linux-clang-release",
-            "displayName": "Remote Linux Clang Release",
-            "inherits": "remote-linux-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -finline-functions"
-            }
-        },
-        {
             "name": "ci-tests",
             "displayName": "CI unit tests",
-            "description": "Matches .github/workflows/UnitTestOnPullRequest.yml (compiler picked up from CC/CXX env)",
+            "description": "Matches .github/workflows/UnitTestOnPullRequest.yml (compiler picked up from CC/CXX env). -pedantic-errors is a no-op warning (D9002) under MSVC, so it's safe to set unconditionally here even though this preset also backs the MSVC job.",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "MST_RUN_TESTS": true
+                "MST_RUN_TESTS": true,
+                "CMAKE_CXX_FLAGS": "-pedantic-errors"
             }
         },
         {
@@ -219,7 +166,7 @@
             "binaryDir": "${sourceDir}/build",
             "environment": {
                 "CXX": "g++",
-                "CXXFLAGS": "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+                "CXXFLAGS": "-O0 -pedantic-errors --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
             },
             "cacheVariables": {
                 "MST_RUN_TESTS": true,
@@ -275,26 +222,6 @@
         {
             "name": "linux-clang-release",
             "configurePreset": "linux-clang-release",
-            "configuration": "Release"
-        },
-        {
-            "name": "remote-linux-gcc-debug",
-            "configurePreset": "remote-linux-gcc-debug",
-            "configuration": "Debug"
-        },
-        {
-            "name": "remote-linux-gcc-release",
-            "configurePreset": "remote-linux-gcc-release",
-            "configuration": "Release"
-        },
-        {
-            "name": "remote-linux-clang-debug",
-            "configurePreset": "remote-linux-clang-debug",
-            "configuration": "Debug"
-        },
-        {
-            "name": "remote-linux-clang-release",
-            "configurePreset": "remote-linux-clang-release",
             "configuration": "Release"
         },
         {

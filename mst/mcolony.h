@@ -585,7 +585,7 @@ public:
 	colony_iterator& operator=(const colony_iterator&) = default;
 	colony_iterator& operator=(colony_iterator&&) = default;
 
-	_MST_NODISCARD inline colony_iterator& operator++() noexcept
+	inline colony_iterator& operator++() noexcept
 	{
 		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement end iterator");
 
@@ -593,7 +593,7 @@ public:
 		return *this;
 	}
 
-	_MST_NODISCARD inline colony_iterator operator++(int) noexcept
+	inline colony_iterator operator++(int) noexcept
 	{
 		MST_ASSERT(m_index < m_container->m_capacity, "cannot decrement end iterator");
 
@@ -602,7 +602,7 @@ public:
 		return retval;
 	}
 
-	_MST_NODISCARD inline colony_iterator& operator--() noexcept
+	inline colony_iterator& operator--() noexcept
 	{
 		MST_ASSERT(m_index > 0, "cannot decrement begin iterator");
 
@@ -610,7 +610,7 @@ public:
 		return *this;
 	}
 
-	_MST_NODISCARD inline colony_iterator operator--(int) noexcept
+	inline colony_iterator operator--(int) noexcept
 	{
 		MST_ASSERT(m_index > 0, "cannot decrement begin iterator");
 

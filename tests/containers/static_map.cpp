@@ -80,6 +80,7 @@ TEST_CASE("mst::static_map: initializer_list construction copies each element at
 TEST_CASE("mst::static_map: initializer_list construction exceeding capacity", "[!shouldfail][static_map]")
 {
 	mst::static_map<int, 2> sm = { 1, 2, 3 };
+	_MST_UNUSED(sm);
 }
 
 TEST_CASE("mst::static_map: push_back grows the container", "[static_map]")

@@ -19,10 +19,13 @@ turn on `MST_RUN_TESTS` and `MST_UTILS`, output in `./build`); CI uses its own p
 CMake >= 3.21 (only for the presets themselves — the project still builds with plain `-D` flags on older CMake).
 
 The presets file also carries over what used to be Visual Studio's `CMakeSettings.json` (now deleted — VS reads
-`CMakePresets.json` natively): `windows-strict-*` (stricter `/W4` warnings, Windows-only), `linux-gcc-*` /
-`linux-clang-*` (explicit-compiler local Linux builds, each in their own `build-linux-*` dir so they don't clobber
-each other), and `remote-linux-*` (Visual Studio's SSH remote-build presets, Windows-only — these need a remote
-connection picked in VS's Connection Manager and haven't been exercised outside the IDE).
+`CMakePresets.json` natively): `windows-strict-*` (stricter `/W4` warnings, Windows-only), and `linux-gcc-*` /
+`linux-clang-*` (explicit-compiler Linux builds, each in their own `build-linux-*` dir so they don't clobber each
+other). Both inherit `dev-base`; the `linux-gcc-*`/`linux-clang-*` pair also inherit the hidden `linux-base`,
+which carries the `hostSystemName == Linux` condition plus a `vendor` block excluding local build dirs from the
+rsync-based source copy Visual Studio does when the active CMake target is remote/WSL (Tools > Options > Cross
+Platform > Connection Manager, or a WSL target) — that `condition` matches both a native Linux host and a VS
+remote/WSL target, since VS evaluates `hostSystemName` against the target system in that case.
 
 ```bash
 ./scripts/build.sh          # configure+build via the `dev-debug` preset, output in ./build

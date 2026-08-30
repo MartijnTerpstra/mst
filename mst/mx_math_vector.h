@@ -139,6 +139,14 @@ public:
 
 #if _MST_MATH_SIMD_ENABLED
 
+/* the .x/.y/.z/.w-over-SIMD-register aliasing below relies on an anonymous struct nested in an
+   anonymous union, which ISO C++ doesn't sanction (MSVC's equivalent warning is suppressed via
+   /wd4201 in the windows-strict preset) */
+#if _MST_USING_GCC_COMPILER || _MST_USING_CLANG_COMPILER
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif
+
 template<>
 class MST_ALIGN(16) _Math_vector_base_data<double, 2>
 {
@@ -311,6 +319,10 @@ public:
 };
 
 #endif // MST_MATH
+
+#if _MST_USING_GCC_COMPILER || _MST_USING_CLANG_COMPILER
+#pragma GCC diagnostic pop
+#endif
 
 #endif // !MST_MATH_NO_SIMD
 

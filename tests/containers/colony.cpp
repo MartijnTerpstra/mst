@@ -106,7 +106,7 @@ TEST_CASE("colony<T>: expand and clear", "[colony]")
 			{
 				const size_t reserveSize = 8192 * 4 + 1;
 
-				for(int i = 0; i < reserveSize; ++i)
+				for(size_t i = 0; i < reserveSize; ++i)
 				{
 					datas.emplace();
 				}

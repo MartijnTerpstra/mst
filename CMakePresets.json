@@ -76,6 +76,9 @@
                 "rhs": "Linux"
             },
             "inherits": "dev-base",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-pedantic-errors"
+            },
             "vendor": {
                 "microsoft.com/VisualStudioRemoteSettings/CMake1": {
                     "copySourcesOptions": {
@@ -148,7 +151,7 @@
         {
             "name": "ci-tests",
             "displayName": "CI unit tests",
-            "description": "Matches .github/workflows/UnitTestOnPullRequest.yml (compiler picked up from CC/CXX env)",
+            "description": "Matches .github/workflows/UnitTestOnPullRequest.yml (compiler picked up from CC/CXX env). Pedantic-errors coverage comes from CMakeLists.txt's SETUP_TARGET (per-target, non-MSVC), not from a global CMAKE_CXX_FLAGS override here -- the latter replaces CMake's MSVC default init flags (dropping /EHsc) for targets outside our own, like the FetchContent-built Catch2.",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
@@ -162,7 +165,7 @@
             "binaryDir": "${sourceDir}/build",
             "environment": {
                 "CXX": "g++",
-                "CXXFLAGS": "-O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+                "CXXFLAGS": "-O0 -pedantic-errors --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
             },
             "cacheVariables": {
                 "MST_RUN_TESTS": true,

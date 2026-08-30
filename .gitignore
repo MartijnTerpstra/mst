@@ -68,6 +68,7 @@
 # CMake
 build/
 _build/
+build-windows-strict/
 out/
 Testing/
 CMakeUserPresets.json

@@ -54,8 +54,7 @@ public:
 	{
 		for(size_t i = 0; i < _Dimensions; ++i)
 		{
-			if(point[i] < min[i] ||
-				point[i] > max[i])
+			if(point[i] < min[i] || point[i] > max[i])
 			{
 				return false;
 			}
@@ -72,27 +71,23 @@ public:
 
 template<typename _Value_type, size_t _Dimensions>
 class aabb : public ::mst::math::_Details::_Aabb<_Value_type, _Dimensions>
-{
-};
+{ };
 
 template<typename _Value_type>
 class aabb<_Value_type, 2> : public ::mst::math::_Details::_Aabb<_Value_type, 2>
 {
 public:
 	inline aabb()
-	{
-	}
+	{ }
 
-	inline aabb(const vector<_Value_type, 2>& min, const vector<_Value_type, 2>& max)
-		: ::mst::math::_Details::_Aabb<_Value_type, 2>(min, max)
-	{
-	}
+	inline aabb(const vector<_Value_type, 2>& _min, const vector<_Value_type, 2>& _max)
+		: ::mst::math::_Details::_Aabb<_Value_type, 2>(_min, _max)
+	{ }
 
-	inline aabb(_Value_type left, _Value_type right,
-		_Value_type bottom, _Value_type top)
-		: ::mst::math::_Details::_Aabb<_Value_type, 2>(vector<_Value_type, 2>(left, bottom), vector<_Value_type, 2>(right, top))
-	{
-	}
+	inline aabb(_Value_type left, _Value_type right, _Value_type bottom, _Value_type top)
+		: ::mst::math::_Details::_Aabb<_Value_type, 2>(
+			  vector<_Value_type, 2>(left, bottom), vector<_Value_type, 2>(right, top))
+	{ }
 
 }; // class aabb<_Value_type, 2>
 
@@ -101,20 +96,17 @@ class aabb<_Value_type, 3> : public ::mst::math::_Details::_Aabb<_Value_type, 3>
 {
 public:
 	inline aabb()
-	{
-	}
+	{ }
 
-	inline aabb(const vector<_Value_type, 3>& min, const vector<_Value_type, 3>& max)
-		: ::mst::math::_Details::_Aabb<_Value_type, 3>(min, max)
-	{
-	}
+	inline aabb(const vector<_Value_type, 3>& _min, const vector<_Value_type, 3>& _max)
+		: ::mst::math::_Details::_Aabb<_Value_type, 3>(_min, _max)
+	{ }
 
-	inline aabb(_Value_type left, _Value_type right,
-		_Value_type bottom, _Value_type top,
+	inline aabb(_Value_type left, _Value_type right, _Value_type bottom, _Value_type top,
 		_Value_type front, _Value_type back)
-		: ::mst::math::_Details::_Aabb<_Value_type, 3>(vector<_Value_type, 3>(left, bottom, front), vector<_Value_type, 3>(right, top, back))
-	{
-	}
+		: ::mst::math::_Details::_Aabb<_Value_type, 3>(
+			  vector<_Value_type, 3>(left, bottom, front), vector<_Value_type, 3>(right, top, back))
+	{ }
 
 }; // class aabb<_Value_type, 3>
 

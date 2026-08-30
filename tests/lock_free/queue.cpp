@@ -157,12 +157,12 @@ TEST_CASE("lock_free::queue: pushing past capacity should increase capacity", "[
 {
 	queue<int> q;
 
-	const auto initialCapacity = (int)q.capacity_approx() + 1;
+	const auto initialCapacity = q.capacity_approx() + 1;
 
 	int index = 0;
 	for(int i = 0; i < 10; ++i)
 	{
-		for(int j = 0; j < initialCapacity; ++j)
+		for(size_t j = 0; j < initialCapacity; ++j)
 		{
 			q.push(++index);
 		}
@@ -174,7 +174,7 @@ TEST_CASE("lock_free::queue: pushing past capacity should increase capacity", "[
 
 	REQUIRE(q.capacity_approx() > initialCapacity);
 
-	for(size_t i = 0; i < index; ++i)
+	for(int i = 0; i < index; ++i)
 	{
 		int result = -1;
 		REQUIRE(q.try_pop(result));

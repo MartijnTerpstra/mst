@@ -49,7 +49,7 @@ void fatalError(Args&&... args)
 #define MST_FATAL_ERROR(...) ::mst::_Details::fatalError("Fatal error: ", __VA_ARGS__)
 
 #define MST_ASSERT(x, ...)                                                                         \
-	(x || [&] {                                                                                    \
+	((x) || [&] {                                                                                  \
 		::mst::_Details::fatalError("Assertion failed: " #x, __VA_ARGS__);                         \
 		return true;                                                                               \
 	}())

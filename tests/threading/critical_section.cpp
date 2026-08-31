@@ -31,6 +31,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <thread>
 #include <vector>
 
@@ -54,24 +55,21 @@ TEST_CASE(
 	critical_section cs;
 	cs.enter();
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquiredByOtherThread{ false };
 
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		cs.enter();
 		acquiredByOtherThread = true;
 		cs.leave();
 	});
 
-	/* wait for the other thread to actually be running before timing its attempt to enter() --
-		this keeps the window below from having to absorb thread-launch scheduling delay, so it
-		only has to cover the (much smaller, and otherwise unobservable) time between the other
-		thread calling enter() and it actually blocking */
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	/* block until the other thread has actually started running, before timing its attempt to
+		enter() -- this keeps the window below from having to absorb thread-launch scheduling
+		delay, so it only has to cover the (much smaller, and otherwise unobservable) time between
+		the other thread calling enter() and it actually blocking */
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquiredByOtherThread);
 

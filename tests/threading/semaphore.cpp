@@ -31,6 +31,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <thread>
 #include <vector>
 
@@ -90,21 +91,18 @@ TEST_CASE("threading::semaphore: wait() with no arguments blocks until another t
 {
 	semaphore s;
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		/* the default (InfiniteWait) overload */
 		acquired = s.wait();
 	});
 
-	/* wait for the other thread to actually be running so the timed check below only has to
-		cover its own blocking window, not thread-launch scheduling delay */
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	/* block until the other thread has actually started running, so the timed check below only
+		has to cover its own blocking window, not thread-launch scheduling delay */
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 
@@ -126,19 +124,16 @@ TEST_CASE("threading::semaphore: wait(duration) succeeds once another thread sig
 {
 	semaphore s;
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		/* bounded instead of an unbounded wait() so a regression fails the test instead of
 			hanging the suite */
 		acquired = s.wait(std::chrono::seconds(5));
 	});
 
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 
@@ -153,17 +148,14 @@ TEST_CASE("threading::semaphore: wait_until with a future deadline behaves like 
 {
 	semaphore s;
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		acquired = s.wait_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
 	});
 
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 

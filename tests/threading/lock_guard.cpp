@@ -31,6 +31,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -76,7 +77,7 @@ TEST_CASE("threading::lock_guard: construction locks a critical_section, destruc
 {
 	critical_section cs;
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquiredByOtherThread{ false };
 	std::thread other;
 
@@ -84,18 +85,15 @@ TEST_CASE("threading::lock_guard: construction locks a critical_section, destruc
 		lock_guard<critical_section> g(cs);
 
 		other = std::thread([&] {
-			started = true;
+			started.set_value();
 			cs.enter();
 			acquiredByOtherThread = true;
 			cs.leave();
 		});
 
-		/* wait for the other thread to actually be running so the timed check below only has
-			to cover its own blocking window, not thread-launch scheduling delay */
-		while(!started)
-		{
-			std::this_thread::yield();
-		}
+		/* block until the other thread has actually started running, so the timed check below
+			only has to cover its own blocking window, not thread-launch scheduling delay */
+		started.get_future().wait();
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		REQUIRE(!acquiredByOtherThread);
 

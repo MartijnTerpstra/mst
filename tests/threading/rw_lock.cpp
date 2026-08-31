@@ -31,6 +31,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <thread>
 
 using mst::threading::rw_lock;
@@ -102,21 +103,18 @@ TEST_CASE("threading::rw_lock: lock_write() blocks a second thread until unlock_
 	rw_lock rw;
 	rw.lock_write();
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		rw.lock_write();
 		acquired = true;
 		rw.unlock_write();
 	});
 
-	/* wait for the other thread to actually be running so the timed check below only has to
-		cover its own blocking window, not thread-launch scheduling delay */
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	/* block until the other thread has actually started running, so the timed check below only
+		has to cover its own blocking window, not thread-launch scheduling delay */
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 
@@ -131,19 +129,16 @@ TEST_CASE("threading::rw_lock: lock_write() blocks until every reader calls unlo
 	rw_lock rw;
 	rw.lock_read();
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		rw.lock_write();
 		acquired = true;
 		rw.unlock_write();
 	});
 
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 
@@ -158,19 +153,16 @@ TEST_CASE("threading::rw_lock: lock_read() blocks until the writer calls unlock_
 	rw_lock rw;
 	rw.lock_write();
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		rw.lock_read();
 		acquired = true;
 		rw.unlock_read();
 	});
 
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 

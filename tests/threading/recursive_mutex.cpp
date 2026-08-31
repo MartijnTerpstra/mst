@@ -31,6 +31,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <thread>
 
 using mst::threading::recursive_mutex;
@@ -100,21 +101,18 @@ TEST_CASE("threading::recursive_mutex: wait() with no arguments blocks until the
 	recursive_mutex m;
 	REQUIRE(m.wait(0));
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		/* the default (InfiniteWait) overload */
 		acquired = m.wait();
 	});
 
-	/* wait for the other thread to actually be running so the timed check below only has to
-		cover its own blocking window, not thread-launch scheduling delay */
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	/* block until the other thread has actually started running, so the timed check below only
+		has to cover its own blocking window, not thread-launch scheduling delay */
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 
@@ -134,20 +132,17 @@ TEST_CASE(
 	REQUIRE(m.wait(0));
 	REQUIRE(m.wait(0)); // lock it recursively, so a single signal() must not be enough to release it
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquiredByOtherThread{ false };
 
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		/* bounded instead of an unbounded wait() so a regression fails the test instead of
 			hanging the suite */
 		acquiredByOtherThread = m.wait(std::chrono::seconds(5));
 	});
 
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquiredByOtherThread);
 
@@ -187,17 +182,14 @@ TEST_CASE(
 	recursive_mutex m;
 	REQUIRE(m.wait(0));
 
-	std::atomic_bool started{ false };
+	std::promise<void> started;
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
-		started = true;
+		started.set_value();
 		acquired = m.wait_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
 	});
 
-	while(!started)
-	{
-		std::this_thread::yield();
-	}
+	started.get_future().wait();
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	REQUIRE(!acquired);
 

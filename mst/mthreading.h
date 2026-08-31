@@ -34,9 +34,16 @@
 namespace mst {
 namespace threading {
 
+constexpr int64_t InfiniteWait = std::numeric_limits<int64_t>::max();
+
+template<typename LockableType>
+class lock_guard;
 
 class critical_section
 {
+	template<typename LockableType>
+	friend class lock_guard;
+
 public:
 	critical_section()
 	{
@@ -45,7 +52,7 @@ public:
 
 	inline void enter() const
 	{
-		while(_Myatomic.exchange(1) == 0)
+		while(_Myatomic.exchange(1, std::memory_order_acquire) == 1)
 			;
 	}
 
@@ -58,6 +65,18 @@ private:
 	// do not copy
 	critical_section(const critical_section&) = delete;
 	critical_section& operator=(const critical_section&) = delete;
+
+	// For lock_guard
+	inline void wait() const
+	{
+		enter();
+	}
+
+	// For lock_guard
+	inline void signal() const
+	{
+		leave();
+	}
 
 private:
 	mutable ::std::atomic_uint32_t _Myatomic;
@@ -104,7 +123,7 @@ public:
 		return _Wait_until(timePoint.time_since_epoch());
 	}
 
-	bool wait(int64_t milliseconds = -1) const;
+	bool wait(int64_t milliseconds = InfiniteWait) const;
 
 private:
 	// do not copy
@@ -144,7 +163,7 @@ public:
 		return _Wait_until(timePoint.time_since_epoch());
 	}
 
-	bool wait(int64_t milliseconds = -1) const;
+	bool wait(int64_t milliseconds = InfiniteWait) const;
 
 	inline void* handle() const
 	{
@@ -225,40 +244,6 @@ private:
 	const LockableType* _Mylock;
 
 }; // class lock_guard<LockableType>
-
-template<>
-class lock_guard<critical_section>
-{
-	explicit lock_guard(const critical_section& lock)
-		: _Mylock(&lock)
-	{
-		_Mylock->enter();
-	}
-
-	lock_guard(lock_guard&& other) noexcept
-		: _Mylock(other._Mylock)
-	{
-		other._Mylock = nullptr;
-	}
-
-	~lock_guard()
-	{
-		if(_Mylock)
-		{
-			_Mylock->leave();
-		}
-	}
-
-private:
-	// no copy
-	lock_guard(const lock_guard&) = delete;
-	// no copy
-	void operator=(const lock_guard&) = delete;
-
-private:
-	const critical_section* _Mylock;
-
-}; // class lock_guard<critical_section>
 
 } // namespace threading
 } // namespace mst

@@ -90,7 +90,7 @@ public:
 	}
 
 private:
-	typename std::aligned_storage<sizeof(value_type), alignof(value_type)>::type m_data;
+	alignas(alignof(value_type)) unsigned char m_data[sizeof(value_type)];
 };
 
 }

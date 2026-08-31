@@ -110,7 +110,13 @@ public:
 			clock_gettime(CLOCK_REALTIME, &timeoutTime);
 
 			timeoutTime.tv_sec += waittime / 1000;
-			timeoutTime.tv_nsec += (waittime % 1000) * 1000;
+			// tv_nsec is nanoseconds, waittime's remainder is milliseconds
+			timeoutTime.tv_nsec += (waittime % 1000) * 1000000;
+			if(timeoutTime.tv_nsec >= 1000000000)
+			{
+				timeoutTime.tv_nsec -= 1000000000;
+				++timeoutTime.tv_sec;
+			}
 
 			return pthread_mutex_timedlock(&m_mutex, &timeoutTime) == 0;
 #endif
@@ -126,11 +132,15 @@ class WaitObjectSemaphore final : public WaitObjectWrapperBase
 public:
 	WaitObjectSemaphore(uint32_t initialCount)
 	{
-		m_semaphore = dispatch_semaphore_create(initialCount);
+		// created at zero and signaled up to initialCount: libdispatch traps in dispatch_release
+		// when a semaphore's value is below its creation value, so a nonzero creation value would
+		// crash any semaphore destroyed with unreturned permits
+		m_semaphore = dispatch_semaphore_create(0);
 		if(m_semaphore == nullptr)
 		{
 			std::abort();
 		}
+		Signal(initialCount);
 	}
 
 	void Signal(uint32_t count)
@@ -159,8 +169,9 @@ public:
 		}
 		else
 		{
+			// dispatch_time()'s delta is in nanoseconds; waittime is in milliseconds
 			const auto duration =
-				dispatch_time(DISPATCH_TIME_NOW, waittime * static_cast<uint64_t>(1000));
+				dispatch_time(DISPATCH_TIME_NOW, waittime * static_cast<uint64_t>(1000000));
 
 			return dispatch_semaphore_wait(m_semaphore, duration) == 0;
 		}
@@ -210,7 +221,13 @@ public:
 			clock_gettime(CLOCK_REALTIME, &timeoutTime);
 
 			timeoutTime.tv_sec += waittime / 1000;
-			timeoutTime.tv_nsec += (waittime % 1000) * 1000;
+			// tv_nsec is nanoseconds, waittime's remainder is milliseconds
+			timeoutTime.tv_nsec += (waittime % 1000) * 1000000;
+			if(timeoutTime.tv_nsec >= 1000000000)
+			{
+				timeoutTime.tv_nsec -= 1000000000;
+				++timeoutTime.tv_sec;
+			}
 
 			return sem_timedwait(&m_semaphore, &timeoutTime) == 0;
 		}
@@ -279,17 +296,9 @@ bool recursive_mutex::wait(int64_t milliseconds) const
 	}
 
 	// not already holding, wait for the non-recursive mutex
-	uint32_t waitTime;
-	if(milliseconds < 0 || milliseconds > 0xFFFFFFFFll)
-	{
-		waitTime = 0xFFFFFFFF;
-	}
-	else
-	{
-		waitTime = (milliseconds > 0xFFFFFFFF
-						? 0xFFFFFFFF
-						: (milliseconds < 0 ? 0 : static_cast<uint32_t>(milliseconds)));
-	}
+	uint32_t waitTime =
+		(milliseconds > 0xFFFFFFFF ? 0xFFFFFFFF
+								   : (milliseconds < 0 ? 0 : static_cast<uint32_t>(milliseconds)));
 
 	if(((WaitObjectMutex*)_Myhandle)->Wait(waitTime))
 	{
@@ -300,6 +309,15 @@ bool recursive_mutex::wait(int64_t milliseconds) const
 	return false;
 }
 
+bool recursive_mutex::_Wait_until(long long durationFromEpoch) const
+{
+	const auto millisecondsNow = ::std::chrono::duration_cast<::std::chrono::milliseconds>(
+		::std::chrono::steady_clock::now().time_since_epoch())
+									 .count();
+
+	return wait(durationFromEpoch - millisecondsNow);
+}
+
 bool threading_object::wait(int64_t milliseconds) const
 {
 	if(_Myhandle == nullptr)
@@ -307,17 +325,9 @@ bool threading_object::wait(int64_t milliseconds) const
 		return false;
 	}
 
-	uint32_t waitTime;
-	if(milliseconds < 0 || milliseconds > 0xFFFFFFFFll)
-	{
-		waitTime = 0xFFFFFFFF;
-	}
-	else
-	{
-		waitTime = (milliseconds > 0xFFFFFFFF
-						? 0xFFFFFFFF
-						: (milliseconds < 0 ? 0 : static_cast<uint32_t>(milliseconds)));
-	}
+	uint32_t waitTime =
+		(milliseconds > 0xFFFFFFFF ? 0xFFFFFFFF
+								   : (milliseconds < 0 ? 0 : static_cast<uint32_t>(milliseconds)));
 
 	return ((WaitObjectWrapperBase*)_Myhandle)->Wait(waitTime);
 }
@@ -422,7 +432,7 @@ bool recursive_mutex::wait(int64_t milliseconds) const
 
 	// not already holding, wait for the non-recursive mutex
 	DWORD waitTime;
-	if(milliseconds == -1)
+	if(milliseconds == InfiniteWait)
 	{
 		waitTime = INFINITE;
 	}
@@ -450,6 +460,15 @@ bool recursive_mutex::wait(int64_t milliseconds) const
 	}
 }
 
+bool recursive_mutex::_Wait_until(long long durationFromEpoch) const
+{
+	const auto millisecondsNow = ::std::chrono::duration_cast<::std::chrono::milliseconds>(
+		::std::chrono::steady_clock::now().time_since_epoch())
+									 .count();
+
+	return wait(durationFromEpoch - millisecondsNow);
+}
+
 bool threading_object::wait(int64_t milliseconds) const
 {
 	if(_Myhandle == nullptr)
@@ -458,7 +477,7 @@ bool threading_object::wait(int64_t milliseconds) const
 	}
 
 	DWORD waitTime;
-	if(milliseconds == -1)
+	if(milliseconds == InfiniteWait)
 	{
 		waitTime = INFINITE;
 	}

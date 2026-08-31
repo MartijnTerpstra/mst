@@ -66,7 +66,7 @@ class colony
 
 	union ElemType
 	{
-		typename std::aligned_storage<sizeof(T), alignof(T)>::type elem;
+		alignas(alignof(T)) unsigned char elem[sizeof(T)];
 		FreeListNode node;
 	};
 

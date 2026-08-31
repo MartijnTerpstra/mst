@@ -41,7 +41,7 @@ struct queue_elem_type
 	// 2: pushed, can be popped
 	// 3: reserved for pop
 
-	typename std::aligned_storage<sizeof(T), alignof(T)>::type type;
+	alignas(alignof(T)) unsigned char type[sizeof(T)];
 };
 
 template<typename T>

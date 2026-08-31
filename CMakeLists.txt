@@ -208,6 +208,12 @@ add_mst_test(test_util set_assertions)
 
 add_mst_test(text static_string)
 
+add_mst_test(threading critical_section)
+add_mst_test(threading lock_guard)
+add_mst_test(threading mutex)
+add_mst_test(threading recursive_mutex)
+add_mst_test(threading rw_lock)
+add_mst_test(threading semaphore)
 add_mst_test(threading slim_event)
 add_mst_test(threading slim_mutex)
 add_mst_test(threading slim_recursive_mutex)

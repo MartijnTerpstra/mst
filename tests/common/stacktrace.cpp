@@ -27,6 +27,7 @@
 
 #include <mstacktrace.h>
 #include <sstream>
+#include <stdexcept>
 
 TEST_CASE("stacktrace: current captures at least one frame", "[common][stacktrace]")
 {
@@ -129,4 +130,43 @@ TEST_CASE("stacktrace_entry: to_string and operator<< agree", "[common][stacktra
 
 	REQUIRE(text == stream.str());
 	REQUIRE_FALSE(text.empty());
+}
+
+TEST_CASE("stacktrace: at() bounds-checks, cbegin/cend match begin/end", "[common][stacktrace]")
+{
+	auto trace = mst::stacktrace::current();
+	REQUIRE_FALSE(trace.empty());
+
+	REQUIRE(trace.at(0) == trace[0]);
+	REQUIRE_THROWS_AS(trace.at(trace.size()), std::out_of_range);
+
+	REQUIRE(trace.cbegin() == trace.begin());
+	REQUIRE(trace.cend() == trace.end());
+}
+
+TEST_CASE("stacktrace: swap exchanges contents", "[common][stacktrace]")
+{
+	auto full = mst::stacktrace::current();
+	mst::stacktrace empty;
+
+	REQUIRE_FALSE(full.empty());
+	REQUIRE(empty.empty());
+
+	full.swap(empty);
+
+	REQUIRE(full.empty());
+	REQUIRE_FALSE(empty.empty());
+}
+
+TEST_CASE("stacktrace / stacktrace_entry: operator!= is the negation of ==", "[common][stacktrace]")
+{
+	auto trace = mst::stacktrace::current();
+	mst::stacktrace empty;
+
+	REQUIRE(trace != empty);
+	REQUIRE_FALSE(trace != trace);
+
+	mst::stacktrace_entry entry;
+	REQUIRE(trace[0] != entry);
+	REQUIRE_FALSE(trace[0] != trace[0]);
 }

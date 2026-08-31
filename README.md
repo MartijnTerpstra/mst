@@ -11,5 +11,5 @@ This library is just a hobby project with some crazy classes and solutions, incl
 - Multithreading: lock-free queue, low-overhead threading primitives
 - Math types: vector, matrix, quaternion, SIMD support
 - Math algos: clamp/saturate, curves/interpolation, reflect
-- Utility: uuid, compiletime, hashing
+- Utility: uuid, compiletime, hashing, stacktrace
 - Platform/compiler/cpu detection: windows/mac/linux, clang/gcc/msvc, intel/AMD

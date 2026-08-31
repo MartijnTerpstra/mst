@@ -34,11 +34,21 @@ add_library(mst STATIC
     "src/mthreading.cpp"
     "src/mthreading_rw_lock.cpp"
     "src/muuid.cpp"
-    "src/mcommon.cpp")
+    "src/mcommon.cpp"
+    "src/mstacktrace.cpp")
 
 if(APPLE OR UNIX)
 target_link_libraries(mst
     PUBLIC pthread)
+
+# lets dladdr() (used by mstacktrace.h) resolve local/static symbols too, not just exported ones
+target_link_options(mst
+    PUBLIC -rdynamic)
+endif()
+
+if(WIN32)
+target_link_libraries(mst
+    PUBLIC Dbghelp)
 endif()
 
 add_library(mst::mst ALIAS mst)
@@ -143,6 +153,7 @@ add_mst_test(common flag)
 add_mst_test(common hash)
 add_mst_test(common printf)
 add_mst_test(common scope_guard)
+add_mst_test(common stacktrace)
 add_mst_test(common uuid)
 
 add_mst_test(containers array_map)

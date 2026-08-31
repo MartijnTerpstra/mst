@@ -165,7 +165,7 @@
             "binaryDir": "${sourceDir}/build",
             "environment": {
                 "CXX": "g++",
-                "CXXFLAGS": "-O0 -pedantic-errors --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+                "CXXFLAGS": "-O0 -g -pedantic-errors --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
             },
             "cacheVariables": {
                 "MST_RUN_TESTS": true,

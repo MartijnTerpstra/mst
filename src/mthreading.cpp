@@ -132,11 +132,15 @@ class WaitObjectSemaphore final : public WaitObjectWrapperBase
 public:
 	WaitObjectSemaphore(uint32_t initialCount)
 	{
-		m_semaphore = dispatch_semaphore_create(initialCount);
+		// created at zero and signaled up to initialCount: libdispatch traps in dispatch_release
+		// when a semaphore's value is below its creation value, so a nonzero creation value would
+		// crash any semaphore destroyed with unreturned permits
+		m_semaphore = dispatch_semaphore_create(0);
 		if(m_semaphore == nullptr)
 		{
 			std::abort();
 		}
+		Signal(initialCount);
 	}
 
 	void Signal(uint32_t count)

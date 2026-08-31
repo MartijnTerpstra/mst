@@ -213,7 +213,8 @@ public:
 	template<typename T>
 	inline void erase(stride_map_iterator<T> _It)
 	{
-		MST_ASSERT(_It._MyStride == _MyStride, "incompatable strides between iterator and stride_map");
+		MST_ASSERT(
+			_It._MyStride == _MyStride, "incompatable strides between iterator and stride_map");
 		MST_ASSERT(_It._MyPtr >= _MyBegin && _It._MyPtr < _MyEnd, "erase iterator out of range");
 
 		memmove(_It._MyPtr, _It._MyPtr + _MyStride, (_MyEnd - _It._MyPtr) - _MyStride);
@@ -226,9 +227,10 @@ public:
 	{
 		MST_ASSERT(_ItFirst._MyStride == _MyStride && _ItEnd._MyStride == _MyStride,
 			"incompatable strides between iterators and stride_map");
+		MST_ASSERT(_ItFirst._MyPtr >= _MyBegin && _ItFirst._MyPtr <= _MyEnd,
+			"erase iterator out of range");
 		MST_ASSERT(
-			_ItFirst._MyPtr >= _MyBegin && _ItFirst._MyPtr <= _MyEnd, "erase iterator out of range");
-		MST_ASSERT(_ItEnd._MyPtr >= _MyBegin && _ItEnd._MyPtr <= _MyEnd, "erase iterator out of range");
+			_ItEnd._MyPtr >= _MyBegin && _ItEnd._MyPtr <= _MyEnd, "erase iterator out of range");
 		MST_ASSERT(_ItFirst._MyPtr <= _ItEnd._MyPtr, "erase range is invalid");
 
 		memmove(_ItFirst._MyPtr, _ItEnd._MyPtr, _MyEnd - _ItEnd._MyPtr);
@@ -240,7 +242,7 @@ public:
 	inline void push_back(const T& _Value)
 	{
 		MST_ASSERT(sizeof(T) == _MyStride, "size of T is not the same as the stride");
-		static_assert(::std::is_pod<T>::value, "T is not pod");
+		static_assert(::std::is_trivially_destructible_v<T>, "T is not trivially destructible");
 
 		_checkexpansion();
 		new(_MyEnd) T(_Value);

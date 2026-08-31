@@ -386,21 +386,21 @@ inline bool wait_object::wait_all_until(
 }
 
 template<typename RepType, typename PeriodType, size_t WaitObjectCount>
-inline size_t(wait_object::wait_any_for)(const wait_object* (&waitObjects)[WaitObjectCount],
+inline size_t wait_object::wait_any_for(const wait_object* (&waitObjects)[WaitObjectCount],
 	const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept
 {
 	return wait_object::wait_any_for(waitObjects, WaitObjectCount, duration);
 }
 
 template<typename RepType, typename PeriodType, size_t WaitObjectCount>
-inline size_t(wait_object::wait_any_for)(wait_object* (&waitObjects)[WaitObjectCount],
+inline size_t wait_object::wait_any_for(wait_object* (&waitObjects)[WaitObjectCount],
 	const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept
 {
 	return wait_object::wait_any_for(waitObjects, WaitObjectCount, duration);
 }
 
 template<typename RepType, typename PeriodType>
-inline size_t(wait_object::wait_any_for)(const wait_object* const* waitObjects,
+inline size_t wait_object::wait_any_for(const wait_object* const* waitObjects,
 	size_t waitObjectCount, const ::std::chrono::duration<RepType, PeriodType>& duration) noexcept
 {
 	if(waitObjectCount == 0)
@@ -489,14 +489,14 @@ inline size_t wait_object::wait_any_for(
 }
 
 template<typename ClockType, typename DurationType, size_t WaitObjectCount>
-inline size_t(wait_object::wait_any_until)(const wait_object* (&waitObjects)[WaitObjectCount],
+inline size_t wait_object::wait_any_until(const wait_object* (&waitObjects)[WaitObjectCount],
 	const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept
 {
 	return wait_object::wait_any_until(waitObjects, WaitObjectCount, timePoint);
 }
 
 template<typename ClockType, typename DurationType, size_t WaitObjectCount>
-inline size_t(wait_object::wait_any_until)(wait_object* (&waitObjects)[WaitObjectCount],
+inline size_t wait_object::wait_any_until(wait_object* (&waitObjects)[WaitObjectCount],
 	const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept
 {
 	return wait_object::wait_any_until(waitObjects, WaitObjectCount, timePoint);
@@ -594,19 +594,20 @@ inline semaphore::semaphore(uint32_t initialCount) noexcept
 
 inline void semaphore::signal() const noexcept
 {
-	++m_counter;
+	signal(1);
 }
 
 inline void semaphore::signal(uint32_t count) const noexcept
 {
-	m_counter += count;
+	m_counter.fetch_add(count, std::memory_order_release);
 }
 
 inline bool semaphore::_Try_wait() const noexcept
 {
-	uint32_t currentValue = m_counter.load();
+	uint32_t currentValue = m_counter.load(std::memory_order_relaxed);
 
-	return (currentValue != 0) && m_counter.compare_exchange_strong(currentValue, currentValue - 1);
+	return (currentValue != 0) && m_counter.compare_exchange_strong(
+									  currentValue, currentValue - 1, std::memory_order_acquire);
 }
 
 inline mutex::mutex(bool owned) noexcept
@@ -615,12 +616,12 @@ inline mutex::mutex(bool owned) noexcept
 
 inline void mutex::signal() const noexcept
 {
-	m_counter.store(0);
+	m_counter.store(0, std::memory_order_release);
 }
 
 inline bool mutex::_Try_wait() const noexcept
 {
-	return m_counter.exchange(1U) == 0;
+	return m_counter.exchange(1U, std::memory_order_acquire) == 0;
 }
 
 inline recursive_mutex::recursive_mutex(bool owned) noexcept
@@ -633,8 +634,8 @@ inline void recursive_mutex::signal() const noexcept
 {
 	if((--m_recursiveCounter) == 0)
 	{
-		m_tid = UINT64_MAX;
-		m_counter.store(0);
+		m_tid.store(UINT64_MAX, std::memory_order_relaxed);
+		m_counter.store(0, std::memory_order_release);
 	}
 }
 
@@ -642,17 +643,17 @@ inline bool recursive_mutex::_Try_wait() const noexcept
 {
 	const uint64_t tid = ::mst::_Details::get_current_thread_id();
 
-	if(m_tid == tid)
+	if(m_tid.load(std::memory_order_relaxed) == tid)
 	{
 		++m_recursiveCounter;
 		return true;
 	}
 
-	const bool success = m_counter.exchange(1U) == 0;
+	const bool success = m_counter.exchange(1U, std::memory_order_acquire) == 0;
 
 	if(success)
 	{
-		m_tid = tid;
+		m_tid.store(tid, std::memory_order_relaxed);
 		++m_recursiveCounter;
 	}
 
@@ -666,23 +667,23 @@ inline event::event(bool set, bool manual) noexcept
 
 inline void event::set() const noexcept
 {
-	m_counter.store(0);
+	m_counter.store(0, std::memory_order_release);
 }
 
 inline void event::reset() const noexcept
 {
-	m_counter.store(1U);
+	m_counter.store(1U, std::memory_order_release);
 }
 
 inline bool event::_Try_wait() const noexcept
 {
 	if(m_manualReset)
 	{
-		return m_counter.load() == 0;
+		return m_counter.load(std::memory_order_acquire) == 0;
 	}
 	else
 	{
-		return m_counter.exchange(1U) == 0;
+		return m_counter.exchange(1U, std::memory_order_acquire) == 0;
 	}
 }
 

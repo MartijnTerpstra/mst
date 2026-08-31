@@ -228,8 +228,8 @@ protected:
 
 private:
 	mutable ::std::atomic_uint32_t m_counter;
-	mutable volatile uint64_t m_tid;
-	mutable volatile uint32_t m_recursiveCounter;
+	mutable std::atomic_uint64_t m_tid;
+	mutable uint32_t m_recursiveCounter;
 };
 
 class event final : public wait_object

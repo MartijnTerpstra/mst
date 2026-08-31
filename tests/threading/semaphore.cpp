@@ -130,7 +130,7 @@ TEST_CASE("threading::semaphore: wait(duration) succeeds once another thread sig
 		started.set_value();
 		/* bounded instead of an unbounded wait() so a regression fails the test instead of
 			hanging the suite */
-		acquired = s.wait(std::chrono::seconds(5));
+		acquired = s.wait(std::chrono::milliseconds(5500));
 	});
 
 	started.get_future().wait();
@@ -152,7 +152,7 @@ TEST_CASE("threading::semaphore: wait_until with a future deadline behaves like 
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
 		started.set_value();
-		acquired = s.wait_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
+		acquired = s.wait_until(std::chrono::steady_clock::now() + std::chrono::milliseconds(5500));
 	});
 
 	started.get_future().wait();

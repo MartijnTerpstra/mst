@@ -110,7 +110,13 @@ public:
 			clock_gettime(CLOCK_REALTIME, &timeoutTime);
 
 			timeoutTime.tv_sec += waittime / 1000;
-			timeoutTime.tv_nsec += (waittime % 1000) * 1000;
+			// tv_nsec is nanoseconds, waittime's remainder is milliseconds
+			timeoutTime.tv_nsec += (waittime % 1000) * 1000000;
+			if(timeoutTime.tv_nsec >= 1000000000)
+			{
+				timeoutTime.tv_nsec -= 1000000000;
+				++timeoutTime.tv_sec;
+			}
 
 			return pthread_mutex_timedlock(&m_mutex, &timeoutTime) == 0;
 #endif
@@ -159,8 +165,9 @@ public:
 		}
 		else
 		{
+			// dispatch_time()'s delta is in nanoseconds; waittime is in milliseconds
 			const auto duration =
-				dispatch_time(DISPATCH_TIME_NOW, waittime * static_cast<uint64_t>(1000));
+				dispatch_time(DISPATCH_TIME_NOW, waittime * static_cast<uint64_t>(1000000));
 
 			return dispatch_semaphore_wait(m_semaphore, duration) == 0;
 		}
@@ -210,7 +217,13 @@ public:
 			clock_gettime(CLOCK_REALTIME, &timeoutTime);
 
 			timeoutTime.tv_sec += waittime / 1000;
-			timeoutTime.tv_nsec += (waittime % 1000) * 1000;
+			// tv_nsec is nanoseconds, waittime's remainder is milliseconds
+			timeoutTime.tv_nsec += (waittime % 1000) * 1000000;
+			if(timeoutTime.tv_nsec >= 1000000000)
+			{
+				timeoutTime.tv_nsec -= 1000000000;
+				++timeoutTime.tv_sec;
+			}
 
 			return sem_timedwait(&m_semaphore, &timeoutTime) == 0;
 		}

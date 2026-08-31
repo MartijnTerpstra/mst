@@ -146,7 +146,7 @@ TEST_CASE("threading::mutex: wait(duration) succeeds once another thread signals
 		started.set_value();
 		/* bounded instead of an unbounded wait() so a regression fails the test instead of
 			hanging the suite */
-		acquired = m.wait(std::chrono::seconds(5));
+		acquired = m.wait(std::chrono::milliseconds(5500));
 	});
 
 	started.get_future().wait();
@@ -170,7 +170,7 @@ TEST_CASE("threading::mutex: wait_until with a future deadline behaves like wait
 	std::atomic_bool acquired{ false };
 	std::thread other([&] {
 		started.set_value();
-		acquired = m.wait_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
+		acquired = m.wait_until(std::chrono::steady_clock::now() + std::chrono::milliseconds(5500));
 	});
 
 	started.get_future().wait();

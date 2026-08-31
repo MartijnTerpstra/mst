@@ -45,6 +45,10 @@ add_library(mst::mst ALIAS mst)
 
 target_include_directories(mst PUBLIC "${PROJECT_SOURCE_DIR}/mst")
 
+if(WIN32)
+target_compile_definitions(mst PUBLIC NOMINMAX)
+endif()
+
 target_compile_features(mst PUBLIC cxx_std_17)
 set_target_properties(mst PROPERTIES CXX_EXTENSIONS OFF)
 

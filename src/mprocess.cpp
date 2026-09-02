@@ -230,9 +230,11 @@ void mst::_Details::close_process_impl(uint32_t pid, void* handle) noexcept
 
 #elif MST_PLATFORM_LINUX || MST_PLATFORM_MAC
 
+#include <cerrno>
 #include <chrono>
 #include <thread>
 
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -256,24 +258,61 @@ bool mst::_Details::create_process_impl(const ::std::string& executablePath,
 	}
 	argv.push_back(nullptr);
 
+	// fork()/execvp() can't report a failing exec (bad path, non-executable, ...) through a
+	// return value - the failure happens in the child, after fork() has already returned
+	// successfully in the parent. Use the classic self-pipe trick: the write end is marked
+	// FD_CLOEXEC, so it closes on its own the moment execvp() succeeds; if execvp() instead
+	// fails, the child writes its errno through the pipe before exiting, which the parent
+	// reads (getting either an errno, meaning failure, or EOF, meaning the exec went through).
+	int pipeFds[2];
+	if(::pipe(pipeFds) != 0)
+		return false;
+
+	::fcntl(pipeFds[0], F_SETFD, FD_CLOEXEC);
+	::fcntl(pipeFds[1], F_SETFD, FD_CLOEXEC);
+
 	const pid_t pid = ::fork();
 
 	if(pid < 0)
+	{
+		::close(pipeFds[0]);
+		::close(pipeFds[1]);
 		return false;
+	}
 
 	if(pid == 0)
 	{
 		// child: on any failure below, bail out without running any C++ destructors/atexit
 		// handlers meant for the parent
+		::close(pipeFds[0]);
+
 		if(!workingDirectory.empty() && ::chdir(workingDirectory.c_str()) != 0)
 		{
+			const int error = errno;
+			(void)::write(pipeFds[1], &error, sizeof(error));
 			::_exit(127);
 		}
 
 		::execvp(executablePath.c_str(), argv.data());
 
 		// execvp() only returns on failure
+		const int error = errno;
+		(void)::write(pipeFds[1], &error, sizeof(error));
 		::_exit(127);
+	}
+
+	::close(pipeFds[1]);
+
+	int childError = 0;
+	const bool execFailed = ::read(pipeFds[0], &childError, sizeof(childError)) > 0;
+	::close(pipeFds[0]);
+
+	if(execFailed)
+	{
+		// reap the child now so it doesn't linger as a zombie; nothing else will ever wait() it
+		int status = 0;
+		::waitpid(pid, &status, 0);
+		return false;
 	}
 
 	outPid = static_cast<uint32_t>(pid);

@@ -13,3 +13,4 @@ This library is just a hobby project with some crazy classes and solutions, incl
 - Math algos: clamp/saturate, curves/interpolation, reflect
 - Utility: uuid, compiletime, hashing, stacktrace
 - Platform/compiler/cpu detection: windows/mac/linux, clang/gcc/msvc, intel/AMD
+- Process: current/by-pid info lookup, find pid(s) by process name, spawn a child and wait on it

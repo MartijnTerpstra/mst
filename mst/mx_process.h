@@ -25,20 +25,43 @@
 
 #pragma once
 
-/* the current version of the MST */
-#define MST_VER 5100
+#include <mcore.h>
+#include <cstdint>
+#include <string>
+#include <vector>
 
-/* the current version of the MST in string format */
-#define MST_VER_STR "5.1.00"
+namespace mst ::_Details {
 
-/**/
-/* when this version is changed, functionality is changed or deprecated */
-/* this will possibly break your code, so check every new big version for an upgrade */
-/**/
-#define MST_BIG_VER (MST_VER / 100)
+struct process_info_impl
+{
+	uint32_t pid = 0;
+	uint32_t parentProcessId = 0;
+	::std::string name;
+	::std::string path;
+};
 
-/**/
-/* this version is increased when bus are fixed and other small things are done. */
-/* will never break your code unless you worked with a bug in the first place. */
-/**/
-#define MST_SMALL_VER (MST_VER - (MST_BIG_VER * 100))
+uint32_t get_current_process_id_impl() noexcept;
+
+bool get_process_info_impl(uint32_t pid, process_info_impl& outInfo) noexcept;
+
+::std::vector<uint32_t> find_process_ids_by_name_impl(const ::std::string& name) noexcept;
+
+// spawns `executablePath` (searched via the usual OS rules if not an absolute path) as a child
+// process with the given command-line arguments (not including argv[0]) and, if non-empty,
+// `workingDirectory` as its initial directory; fills outPid/outHandle and returns true on
+// success. outHandle is a native waitable handle on Windows and unused (left null) elsewhere.
+bool create_process_impl(const ::std::string& executablePath,
+	const ::std::vector<::std::string>& arguments, const ::std::string& workingDirectory,
+	uint32_t& outPid, void*& outHandle) noexcept;
+
+// blocks until the process identified by pid/handle exits or timeoutMilliseconds elapses
+// (a negative value waits indefinitely); on success, fills outExitCode and returns true.
+bool wait_process_impl(
+	uint32_t pid, void* handle, int64_t timeoutMilliseconds, int& outExitCode) noexcept;
+
+// releases any OS resources tied to a process created via create_process_impl. Best-effort: on
+// platforms where an un-waited child leaves a zombie entry behind (POSIX), this performs a
+// non-blocking reap, which only succeeds once the child has actually exited.
+void close_process_impl(uint32_t pid, void* handle) noexcept;
+
+} // namespace mst::_Details

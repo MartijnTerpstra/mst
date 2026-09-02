@@ -23,22 +23,38 @@
 //                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+// Force-included (via /FI, see SETUP_TARGET in the top-level CMakeLists.txt) into every MSVC
+// Debug test translation unit. Without this, a checked-iterator violation, heap corruption, or
+// similar Debug-CRT check pops a modal "Debug Assertion Failed!" dialog that hangs the process
+// until someone dismisses it - fatal for an unattended/CI run. This redirects that reporting to
+// stderr instead: the check still runs and the process still aborts, only how the failure is
+// reported changes, so a broken test fails loudly in the log rather than hanging on a dialog.
+
 #pragma once
 
-/* the current version of the MST */
-#define MST_VER 5100
+#include <mcore.h>
 
-/* the current version of the MST in string format */
-#define MST_VER_STR "5.1.00"
+#if defined(_WIN32) && defined(MST_DEBUGMODE)
 
-/**/
-/* when this version is changed, functionality is changed or deprecated */
-/* this will possibly break your code, so check every new big version for an upgrade */
-/**/
-#define MST_BIG_VER (MST_VER / 100)
+#include <crtdbg.h>
 
-/**/
-/* this version is increased when bus are fixed and other small things are done. */
-/* will never break your code unless you worked with a bug in the first place. */
-/**/
-#define MST_SMALL_VER (MST_VER - (MST_BIG_VER * 100))
+namespace mst {
+namespace _Details {
+
+struct crt_report_redirect
+{
+	crt_report_redirect() noexcept
+	{
+		::_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+		::_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+		::_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+		::_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+	}
+};
+
+static const crt_report_redirect _CrtReportRedirectInstance;
+
+} // namespace _Details
+} // namespace mst
+
+#endif // defined(_WIN32) && defined(MST_DEBUGMODE)

@@ -35,7 +35,8 @@ add_library(mst STATIC
     "src/mthreading_rw_lock.cpp"
     "src/muuid.cpp"
     "src/mcommon.cpp"
-    "src/mstacktrace.cpp")
+    "src/mstacktrace.cpp"
+    "src/mprocess.cpp")
 
 if(APPLE OR UNIX)
 target_link_libraries(mst
@@ -100,6 +101,9 @@ function(SETUP_TARGET TARGET_NAME)
             ${TARGET_NAME}
             PRIVATE
                 /EHsc /W1 /wd4996 /w14800
+                # force-include: redirects Debug-CRT assertion/error reporting away from its
+                # default modal dialog (which would hang an unattended/CI run) to stderr
+                /FI"${PROJECT_SOURCE_DIR}/tests/test_util/crt_report_redirect.h"
                 $<$<CONFIG:Debug>:/Od>
                 $<$<CONFIG:Release>:/O2>
         )
@@ -194,6 +198,7 @@ add_mst_test(memory memory_view)
 add_mst_test(platform directory_and_paths)
 add_mst_test(platform memory)
 add_mst_test(platform names_and_versions)
+add_mst_test(platform process)
 add_mst_test(platform processor)
 
 # msimd.h/msimdmath.h are x86-only (raw SSE2/AVX2 intrinsic headers, no ARM fallback), and their

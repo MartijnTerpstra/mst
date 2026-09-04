@@ -112,8 +112,16 @@ std::optional<std::vector<std::string>> g_failOnMissmatch;
 
 std::string GetCurrentYear()
 {
-	time_t now = time(0);
-	struct tm tstruct = *localtime(&now);
+	const time_t now = time(nullptr);
+	struct tm tstruct
+	{
+	};
+
+#if MST_PLATFORM_WINDOWS
+	localtime_s(&tstruct, &now);
+#else
+	localtime_r(&now, &tstruct);
+#endif
 
 	return std::to_string(tstruct.tm_year + 1900);
 }

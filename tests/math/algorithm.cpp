@@ -247,7 +247,8 @@ TEST_CASE("math::average: vector of 3D vectors", "[math][algorithm]")
 
 	for(int i = 0; i < 5; ++i)
 	{
-		vecs.emplace_back(i - 19, i, i + 20);
+		vecs.emplace_back(
+			static_cast<float>(i - 19), static_cast<float>(i), static_cast<float>(i + 20));
 	}
 
 	const auto& cvecs = vecs;

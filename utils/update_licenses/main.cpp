@@ -42,6 +42,10 @@
 #include <iostream>
 #include <optional>
 
+#if defined(_WIN32) && defined(MST_DEBUGMODE)
+#include <crtdbg.h>
+#endif
+
 const std::regex g_oldHeader{
 	R"(\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tMST Utility Library\t\t\t\t\t\t\t \t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tCopyright \(c\)\d\d\d\d Martinus Terpstra\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tPermission is hereby granted, free of charge, to any person obtaining a copy\t\t\/\/\n\/\/\t\tof this software and associated documentation files \(the "Software"\), to deal\t\t\/\/\n\/\/\t\tin the Software without restriction, including without limitation the rights\t\t\/\/\n\/\/\t\tto use, copy, modify, merge, publish, distribute, sublicense, and\/or sell\t\t\t\/\/\n\/\/\t\tcopies of the Software, and to permit persons to whom the Software is\t\t\t\t\/\/\n\/\/\t\tfurnished to do so, subject to the following conditions:\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tThe above copyright notice and this permission notice shall be included in\t\t\t\/\/\n\/\/\t\tall copies or substantial portions of the Software\.\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\tTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\t\t\t\/\/\n\/\/\t\tIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\t\t\t\/\/\n\/\/\t\tFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\. IN NO EVENT SHALL THE\t\t\t\/\/\n\/\/\t\tAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\t\t\t\t\/\/\n\/\/\t\tLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\t\t\/\/\n\/\/\t\tOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\t\t\t\/\/\n\/\/\t\tTHE SOFTWARE\.\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\/\/\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/)"
 };
@@ -215,6 +219,15 @@ std::vector<FileType> g_matchingFileTypes;
 
 int main(int argc, const char* const* argv)
 {
+	// redirects Debug-CRT assertion/error reporting away from its default modal dialog (which
+	// would hang an unattended/CI run) to stderr, same as tests/test_util/crt_report_redirect.h
+#if defined(_WIN32) && defined(MST_DEBUGMODE)
+	::_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	::_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+	::_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	::_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+#endif
+
 	if(argc < 2)
 	{
 		printf("Please pass the project folder");

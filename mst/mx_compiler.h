@@ -162,6 +162,10 @@
 #endif
 #endif
 
+#if __cpp_lib_bitops >= 201907L
+#define _MST_HAS_BITOPS 1
+#endif
+
 // Attibutes
 #ifdef __has_cpp_attribute
 

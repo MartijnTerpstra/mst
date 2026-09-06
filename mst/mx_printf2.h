@@ -500,9 +500,8 @@ inline void _Append_floating_point_argument(::std::basic_string<_Elem, _Traits, 
 
 template<typename _Elem, typename _Traits, typename _Alloc, typename Arg>
 inline void _Append_pointer_argument(::std::basic_string<_Elem, _Traits, _Alloc>& buffer,
-	const _Elem* formatString, size_t stringLength, Arg&& arg)
+	Arg&& arg)
 {
-	_MST_UNUSED(stringLength);
 	_Elem fmt[32] = {};
 	_To_ptr_str(fmt, reinterpret_cast<size_t>(arg));
 	buffer.append(fmt);
@@ -812,7 +811,7 @@ inline void _Append_argument_impl(::std::basic_string<_Elem, _Traits, _Alloc>& b
 	case L'p':
 		if constexpr(std::is_pointer_v<std::decay_t<Arg>>)
 		{
-			_Append_pointer_argument(buffer, formatString, stringLength, ::std::forward<Arg>(arg));
+			_Append_pointer_argument(buffer, ::std::forward<Arg>(arg));
 		}
 		else
 		{

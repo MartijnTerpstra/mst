@@ -106,7 +106,7 @@ public:
 
 			while(index != m_capacity)
 			{
-				get_impl(index).~T();
+				destroy_elem(index);
 				new(&get_free_impl(index)) FreeListNode{};
 
 				m_skips[index] = 1;
@@ -174,7 +174,6 @@ public:
 		else
 		{
 			newIndex = get_from_free_list();
-			get_free_impl(newIndex).~FreeListNode();
 		}
 
 		new(&get_impl(newIndex)) T(std::forward<Args>(args)...);
@@ -189,7 +188,7 @@ public:
 		MST_ASSERT(it.m_index < m_capacity, "iterator out of range");
 		MST_ASSERT(m_skips[it.m_index] == 0, "iterator invalid");
 
-		get_impl(it.m_index).~T();
+		destroy_elem(it.m_index);
 		new(&get_free_impl(it.m_index)) FreeListNode{};
 
 		const auto nextIndex = add_to_free_list(it.m_index);
@@ -527,6 +526,17 @@ private:
 		const auto elemIndex = index & (ElementsPerPage - 1);
 
 		return m_pages[pageIndex][elemIndex].node;
+	}
+
+	inline void destroy_elem(int32_t index) noexcept
+	{
+		if constexpr(!std::is_trivially_destructible_v<T>)
+		{
+			const auto pageIndex = index >> _MST_GET_SHIFT(ElementsPerPage);
+			const auto elemIndex = index & (ElementsPerPage - 1);
+
+		reinterpret_cast<T*>(&m_pages[pageIndex][elemIndex].elem)->~T();
+		}
 	}
 
 	inline void destroy_all()

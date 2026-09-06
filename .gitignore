@@ -66,9 +66,8 @@
 .cache/clangd
 
 # CMake
-build/
 _build/
-build-windows-strict/
+build*/
 out/
 Testing/
 CMakeUserPresets.json

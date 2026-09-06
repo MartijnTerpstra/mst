@@ -627,7 +627,7 @@ uint64_t mst::_Details::get_current_thread_id() noexcept
 #include <cpuid.h>
 #endif
 
-static void get_cpuid(std::array<int, 4>& info, int id)
+static void get_cpuid(std::array<int, 4>& info, [[maybe_unused]] int id)
 {
 #if MST_PLATFORM_WINDOWS
 	__cpuid(info.data(), 0);

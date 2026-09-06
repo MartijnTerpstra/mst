@@ -100,10 +100,15 @@ function(SETUP_TARGET TARGET_NAME)
         target_compile_options(
             ${TARGET_NAME}
             PRIVATE
-                /EHsc /W1 /wd4996 /w14800
+                /EHsc /wd4996 /w14800
                 # force-include: redirects Debug-CRT assertion/error reporting away from its
                 # default modal dialog (which would hang an unattended/CI run) to stderr
-                /FI"${PROJECT_SOURCE_DIR}/tests/test_util/crt_report_redirect.h"
+                #
+                # quoted as a single CMake argument (rather than /FI"...") so CMake applies its
+                # own generator-appropriate escaping - the Ninja generator routes this through a
+                # response file, and manually-embedded quotes around just the path get re-escaped
+                # into doubled quotes there, producing a "cannot open include file" error
+                "/FI${PROJECT_SOURCE_DIR}/tests/test_util/crt_report_redirect.h"
                 $<$<CONFIG:Debug>:/Od>
                 $<$<CONFIG:Release>:/O2>
         )

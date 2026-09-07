@@ -29,8 +29,7 @@
 #define _MST_MDET ::mst::math::_Details::
 #endif
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type, size_t _Elems>
 class vector_iterator;
@@ -303,5 +302,4 @@ inline std::decay_t<T> ConvertTo(V scalar)
 }
 
 } // namespace _Details
-} // namespace math
-} // namespace mst
+} // namespace mst::math

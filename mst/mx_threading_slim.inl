@@ -28,9 +28,7 @@
 #include "mx_platform.h"
 #include <mthreading_slim.h>
 
-namespace mst {
-namespace threading {
-namespace slim {
+namespace mst::threading::slim {
 
 inline bool wait_object::try_wait() const noexcept
 {
@@ -673,6 +671,4 @@ inline bool event::_Try_wait() const noexcept
 	}
 }
 
-} // slim
-} // namespace threading
-} // namespace mst
+} // namespace mst::threading::slim

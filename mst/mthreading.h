@@ -31,8 +31,7 @@
 #include <atomic>
 #include <mx_threading.h>
 
-namespace mst {
-namespace threading {
+namespace mst::threading {
 
 constexpr int64_t InfiniteWait = std::numeric_limits<int64_t>::max();
 
@@ -245,5 +244,4 @@ private:
 
 }; // class lock_guard<LockableType>
 
-} // namespace threading
-} // namespace mst
+} // namespace mst::threading

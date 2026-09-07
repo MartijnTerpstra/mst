@@ -28,8 +28,7 @@
 #include <mmath2.h>
 #include <catch2/matchers/catch_matchers.hpp>
 
-namespace mst {
-namespace test_util {
+namespace mst::test_util {
 
 
 template<typename MathType>
@@ -168,5 +167,4 @@ math_approx<MathType> approx_equal(
 	return math_approx<MathType>(std::move(right), epsilon, percentage);
 }
 
-}
-}
+} // namespace mst::test_util

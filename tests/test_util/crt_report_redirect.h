@@ -38,8 +38,7 @@
 
 #include <crtdbg.h>
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 struct crt_report_redirect
 {
@@ -54,7 +53,6 @@ struct crt_report_redirect
 
 static const crt_report_redirect _CrtReportRedirectInstance;
 
-} // namespace _Details
-} // namespace mst
+} // namespace mst::_Details
 
 #endif // defined(_WIN32) && defined(MST_DEBUGMODE)

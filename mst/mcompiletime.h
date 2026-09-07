@@ -29,8 +29,7 @@
 #include <mcore.h>
 #include <mx_compiletime.h>
 
-namespace mst {
-namespace compiletime {
+namespace mst::compiletime {
 
 constexpr size_t strlen(const char* cString)
 {
@@ -56,5 +55,4 @@ constexpr uint64_t hash64(const char* cString)
 // removed - use ::mst::hash_of<T>()/::mst::hash_of64<T>() (mcommon.h) instead, which are just as
 // usable in a constant-expression context under the C++17 this project requires.
 
-} // namespace compiletime
-} // namespace mst
+} // namespace mst::compiletime

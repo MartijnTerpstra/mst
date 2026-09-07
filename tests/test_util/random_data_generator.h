@@ -28,8 +28,7 @@
 #include <random>
 #include <vector>
 
-namespace mst {
-namespace test_util {
+namespace mst::test_util {
 
 class random_data_generator
 {
@@ -143,5 +142,4 @@ private:
 	const std::mt19937_64::result_type m_seed;
 };
 
-}
-}
+} // namespace mst::test_util

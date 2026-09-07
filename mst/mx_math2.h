@@ -41,8 +41,7 @@
 #error "Compiler not supported"
 #endif
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type, size_t _Elems>
 class vector;
@@ -105,5 +104,4 @@ struct _Get_value_type<_Ty, true>
 
 } // namespace _Details
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

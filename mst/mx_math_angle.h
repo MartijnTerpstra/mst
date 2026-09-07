@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type>
 class degrees;
@@ -373,5 +372,4 @@ const degrees<_Value_type> degrees<_Value_type>::zero = _Details::_Make_zero_deg
 template<typename _Value_type>
 const radians<_Value_type> radians<_Value_type>::zero = _Details::_Make_zero_radians<_Value_type>();
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

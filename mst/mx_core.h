@@ -102,8 +102,7 @@ private:                                           \
 
 #include <mtype_traits.h>
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 template<typename _Ty>
 void _Destroy_object(_Ty*, ::std::true_type)
@@ -146,5 +145,4 @@ void _Destroy_object_range(_Ty* _Begin_ptr, _Ty* _Endptr)
 	_Destroy_object_range(_Begin_ptr, _Endptr, typename ::std::is_trivially_destructible<_Ty>::type());
 }
 
-} // namespace _Details
-} // namespace mst
+} // namespace mst::_Details

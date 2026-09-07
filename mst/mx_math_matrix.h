@@ -27,8 +27,7 @@
 
 #include <cstdint>
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 enum class euler_rotation_order : uint8_t;
 
@@ -431,5 +430,4 @@ public:
 	_MST_CONSTEXPR17 void scale(const vector<_Value_type, 3>& _Scale) noexcept;
 };
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

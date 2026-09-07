@@ -31,8 +31,7 @@
 
 #else
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 //////////////////////////////////
 // vector<double, 2>            //
@@ -684,7 +683,6 @@ inline vector<int64_t, 4> operator/(const vector<int64_t, 4>& _Left, int64_t _Ri
 
 #endif
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math
 
 #endif

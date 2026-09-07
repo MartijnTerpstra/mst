@@ -27,8 +27,7 @@
 
 #include <atomic>
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 template<typename T>
 struct queue_elem_type
@@ -343,5 +342,4 @@ private:
 	queue_elem_type<T>* const m_buffer;
 };
 
-}
-}
+} // namespace mst::_Details

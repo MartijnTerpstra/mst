@@ -35,8 +35,7 @@
 #include <smmintrin.h>
 #include <immintrin.h>
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 inline void make_zero_impl(__m128& value)
 {
@@ -163,5 +162,4 @@ private:
 	__m256d m_data;
 };
 
-}
-}
+} // namespace mst::_Details

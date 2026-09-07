@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 namespace _Details {
 
@@ -61,5 +60,4 @@ public:
 	}
 };
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

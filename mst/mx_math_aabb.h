@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 namespace _Details {
 
@@ -113,5 +112,4 @@ public:
 #undef _mst_declare_value
 #undef _mst_declare_value2
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

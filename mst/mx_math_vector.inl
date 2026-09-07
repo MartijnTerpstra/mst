@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type>
 template<typename _xValue_type>
@@ -513,5 +512,4 @@ constexpr const vector<_Value_type, _Elems> _Make_zero_vector() noexcept
 
 } // namespace _Details
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

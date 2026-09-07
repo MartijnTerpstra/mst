@@ -29,8 +29,7 @@
 #include <iterator>
 #include <mx_math_algorithm.h>
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 // math functions
 template<typename T>
@@ -107,7 +106,6 @@ using ::mst::math::greatest_common_devisor;
 
 } // namespace math_functions
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math
 
 #include <mx_math_algorithm.inl>

@@ -67,8 +67,7 @@
 #undef max
 #endif
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type, size_t _Elems>
 class vector;
@@ -100,13 +99,11 @@ template<class T>
 using get_value_type_t = typename get_value_type<T>::type;
 #endif
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math
 
 #include <mmath_algorithm.h>
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 /* Depricated, use constexpr versions
 #ifndef PI
@@ -143,8 +140,7 @@ T epsilon()
 	return (T)_MST_EPSILON;
 }
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math
 
 #include <mx_math_angle.h>
 #include <mx_math_vector.h>

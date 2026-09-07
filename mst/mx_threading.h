@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace threading {
+namespace mst::threading {
 
 class threading_object;
 
@@ -92,5 +91,4 @@ public:
 };
 
 } // namespace _Details
-} // namespace threading
-} // namespace mst
+} // namespace mst::threading

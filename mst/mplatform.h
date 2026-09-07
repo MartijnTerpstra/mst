@@ -30,8 +30,7 @@
 #include <mflag.h>
 #include <mx_platform.h>
 
-namespace mst {
-namespace platform {
+namespace mst::platform {
 
 inline ::std::string name() noexcept
 {
@@ -219,5 +218,4 @@ inline mst::flag<processor_feature_flags> processor_features() noexcept
 
 
 
-} // namespace platform
-} // namespace mst
+} // namespace mst::platform

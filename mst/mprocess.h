@@ -33,8 +33,7 @@
 #include <string>
 #include <vector>
 
-namespace mst {
-namespace platform {
+namespace mst::platform {
 
 using process_id_t = uint32_t;
 
@@ -257,5 +256,4 @@ private:
 	mutable ::std::optional<int> _ExitCode;
 };
 
-} // namespace platform
-} // namespace mst
+} // namespace mst::platform

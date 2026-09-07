@@ -27,8 +27,7 @@
 
 #include <utility>
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type, size_t _Columns>
 template<typename _xValue_type>
@@ -1069,5 +1068,4 @@ _MST_CONSTEXPR17 void matrix<_Value_type, 4, 4>::scale(
 			*this;
 }
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

@@ -27,9 +27,7 @@
 
 #include <mmath_algorithm.h>
 
-namespace mst {
-namespace math {
-namespace _Details {
+namespace mst::math::_Details {
 
 template<typename T>
 constexpr T lerp_impl(
@@ -191,9 +189,7 @@ _MST_CONSTEXPR17 T _Clamp(
 	return retval;
 }
 
-} // namespace _Details
-} // namespace math
-} // namespace mst
+} // namespace mst::math::_Details
 
 template<typename T>
 constexpr T mst::math::lerp(

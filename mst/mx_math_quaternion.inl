@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 #define _MST_QUATERNION_EPSILON 1e-4
 
@@ -500,5 +499,4 @@ constexpr const _Value_type& quaternion<_Value_type>::operator[](size_t _Index) 
 	return (&w)[_Index];
 }
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

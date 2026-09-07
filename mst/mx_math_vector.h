@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type, size_t _Elems>
 class vector_iterator;
@@ -1334,5 +1333,4 @@ template<typename _Value_type, size_t _Elems>
 }
 
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

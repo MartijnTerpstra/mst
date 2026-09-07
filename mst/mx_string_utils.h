@@ -30,24 +30,20 @@
 
 #include <string_view>
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 typedef ::std::string_view string_view_type;
 
-} // namespace _Details
-} // namespace mst
+} // namespace mst::_Details
 
 #else //!__cpp_lib_string_view
 
 #include <string>
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 typedef const ::std::string& string_view_type;
 
-} // namespace _Details
-} // namespace mst
+} // namespace mst::_Details
 
 #endif // __cpp_lib_string_view

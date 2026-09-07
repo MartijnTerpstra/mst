@@ -27,8 +27,7 @@
 #include <mcore.h>
 #include <mx_simdmath.h>
 
-namespace mst {
-namespace simd {
+namespace mst::simd {
 
 class float4 : private _Details::vectorf
 {
@@ -171,5 +170,4 @@ public:
 	{ }
 };
 
-} // namespace simd
-} // namespace mst
+} // namespace mst::simd

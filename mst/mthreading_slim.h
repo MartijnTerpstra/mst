@@ -33,9 +33,7 @@
 #include <functional>
 #include <initializer_list>
 
-namespace mst {
-namespace threading {
-namespace slim {
+namespace mst::threading::slim {
 
 #if _MST_HAS_CONSTEXPR17
 constexpr size_t WaitAnyTimedOut = std::numeric_limits<size_t>::max();
@@ -257,8 +255,6 @@ private:
 	const bool m_manualReset;
 };
 
-} // slim
-} // namespace threading
-} // namespace mst
+} // namespace mst::threading::slim
 
 #include <mx_threading_slim.inl>

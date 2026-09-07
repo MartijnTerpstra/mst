@@ -31,8 +31,7 @@
 
 #else
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 namespace _Details {
 
@@ -595,7 +594,6 @@ inline matrix<double, 4, 4> operator*(
 
 #endif
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math
 
 #endif

@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace math {
+namespace mst::math {
 
 template<typename _Value_type>
 class quaternion : private ::mst::math::_Details::_Math_base<_Value_type>
@@ -147,5 +146,4 @@ private:
 template<typename _Value_type>
 const quaternion<_Value_type> quaternion<_Value_type>::identity{ 1, 0, 0, 0 };
 
-} // namespace math
-} // namespace mst
+} // namespace mst::math

@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 constexpr size_t compiletime_strlen_iterator(const char* cString, size_t index)
 {
@@ -118,5 +117,4 @@ struct compiletime_enforcer
 	}
 };
 
-} // namespace _Details
-} // namespace mst
+} // namespace mst::_Details

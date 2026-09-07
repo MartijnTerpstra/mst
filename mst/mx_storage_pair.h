@@ -25,8 +25,7 @@
 
 #pragma once
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 template<typename KeyType, typename Value_type>
 class storage_pair
@@ -93,5 +92,4 @@ private:
 	alignas(alignof(value_type)) unsigned char m_data[sizeof(value_type)];
 };
 
-}
-}
+} // namespace mst::_Details

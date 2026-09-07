@@ -26,8 +26,7 @@
 #pragma once
 
 #include <type_traits>
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 template<typename T>
 _MST_CONSTEXPR17 int32_t _Get_shift_value_cepr(T value)
@@ -188,5 +187,4 @@ struct _Get_shift_value_unsigned
 		::mst::_Details::_Get_shift_value_signed<(int64_t)x>,                                      \
 		::mst::_Details::_Get_shift_value_unsigned<(uint64_t)x>>::value)
 
-} // namespace _Details
-} // namespace mst
+} // namespace mst::_Details

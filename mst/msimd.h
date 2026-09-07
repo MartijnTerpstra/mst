@@ -30,8 +30,7 @@
 
 // SSE insintrics wrapper
 
-namespace mst {
-namespace SSE2 {
+namespace mst::SSE2 {
 
 // arithmetics
 inline __m128 operator+(const __m128 _A, const __m128 _B)
@@ -510,5 +509,4 @@ struct MST_ALIGN(16) SSEcolor
 
 }; // struct SSEcolor
 
-} // namespace SSE2
-} // namespace mst
+} // namespace mst::SSE2

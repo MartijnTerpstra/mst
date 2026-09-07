@@ -27,8 +27,7 @@
 
 #include <mcore.h>
 
-namespace mst {
-namespace _Details {
+namespace mst::_Details {
 
 template<typename T1, typename T2>
 struct _Packed_pair : T1
@@ -92,5 +91,4 @@ private:
 	T2 _Mysecond;
 };
 
-} // namespace _Details
-} // namespace mst
+} // namespace mst::_Details

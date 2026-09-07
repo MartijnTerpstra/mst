@@ -29,8 +29,7 @@
 #include <mutex>
 #include <mx_lock_free_queue.h>
 
-namespace mst {
-namespace lock_free {
+namespace mst::lock_free {
 
 template<typename T>
 class queue
@@ -357,5 +356,4 @@ private:
 
 }; // class queue
 
-} // namespace lock_free
-} // namespace mst
+} // namespace mst::lock_free

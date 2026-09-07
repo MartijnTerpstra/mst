@@ -105,7 +105,7 @@ TEST_CASE("printf: wide char", "[common]")
 {
 	for(wchar_t c = 32; c <= 126; ++c)
 	{
-		REQUIRE(mst::to_printf_string("%lc", c) == std::string(1, c));
+		REQUIRE(mst::to_printf_string("%lc", c) == std::string(1, static_cast<char>(c)));
 	}
 }
 

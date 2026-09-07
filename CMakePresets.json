@@ -11,7 +11,7 @@
             "displayName": "Local dev base",
             "description": "Shared settings for local Debug/Release dev builds (mirrors scripts/build.sh)",
             "hidden": true,
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build-dev",
             "cacheVariables": {
                 "MST_RUN_TESTS": true,
                 "MST_UTILS": true
@@ -170,6 +170,11 @@
             "cacheVariables": {
                 "MST_RUN_TESTS": true,
                 "MST_TEST_ARGS": "~[not_deterministic]"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
             }
         },
         {

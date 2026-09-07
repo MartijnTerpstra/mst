@@ -508,9 +508,9 @@ inline size_t mst::threading::slim::wait_object::wait_any_until(
 	const ::std::chrono::time_point<ClockType, DurationType>& timePoint) noexcept
 {
 	if(waitObjectCount == 0)
-		return -1;
+		return WaitAnyTimedOut;
 
-	if(ClockType::now() > timePoint)
+	while(1)
 	{
 		for(size_t i = 0; i < waitObjectCount; ++i)
 		{
@@ -519,27 +519,13 @@ inline size_t mst::threading::slim::wait_object::wait_any_until(
 				return i;
 			}
 		}
-		return -1;
-	}
-	else
-	{
-		while(1)
+
+		if(ClockType::now() > timePoint)
 		{
-			for(size_t i = 0; i < waitObjectCount; ++i)
-			{
-				if(waitObjects[i]->_Try_wait())
-				{
-					return i;
-				}
-			}
-
-			if(ClockType::now() > timePoint)
-			{
-				return -1;
-			}
-
-			std::this_thread::yield();
+			return WaitAnyTimedOut;
 		}
+
+		std::this_thread::yield();
 	}
 }
 

@@ -142,7 +142,10 @@ private:
 		{
 			return t;
 		}
-		return std::abs(t);
+		else
+		{
+			return std::abs(t);
+		}
 	}
 
 private:

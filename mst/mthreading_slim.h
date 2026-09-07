@@ -37,6 +37,12 @@ namespace mst {
 namespace threading {
 namespace slim {
 
+#if _MST_HAS_CONSTEXPR17
+constexpr size_t WaitAnyTimedOut = std::numeric_limits<size_t>::max();
+#else
+static const size_t WaitAnyTimedOut = std::numeric_limits<size_t>::max();
+#endif
+
 class wait_object;
 
 class wait_object

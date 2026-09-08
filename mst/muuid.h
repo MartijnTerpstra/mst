@@ -190,7 +190,8 @@ public:
 
 		for(auto index : indices)
 		{
-			if(_Str[index] < '0' && _Str[index] > '9' && _Str[index] < 'A' && _Str[index] > 'Z')
+			const auto _c = _Str[index];
+			if(!((_c >= '0' && _c <= '9') || (_c >= 'A' && _c <= 'F')))
 				return std::nullopt;
 		}
 

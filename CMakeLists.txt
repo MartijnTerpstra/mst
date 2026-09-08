@@ -142,14 +142,24 @@ function(SETUP_BASIC_TEST TEST_NAME TEST_SOURCES)
     add_executable(${TEST_NAME} ${TEST_SOURCES})
     target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2WithMain)
     SETUP_TARGET(${TEST_NAME} ${ARGN})
-    catch_discover_tests(${TEST_NAME}
-        TEST_SPEC ${MST_TEST_ARGS})
+
+    if(ARGN)
+        # variants with extra compile definitions (e.g. a *_no_simd test recompiling the same
+        # source) would otherwise register CTest tests with names identical to the base
+        # variant's - disambiguate by prefixing with the target name.
+        catch_discover_tests(${TEST_NAME}
+            TEST_SPEC ${MST_TEST_ARGS}
+            TEST_PREFIX "${TEST_NAME}/")
+    else()
+        catch_discover_tests(${TEST_NAME}
+            TEST_SPEC ${MST_TEST_ARGS})
+    endif()
 
 endfunction()
 
 macro(add_mst_test CATEGORY TEST_NAME)
 
-SETUP_BASIC_TEST("test_${CATEGORY}_${TEST_NAME}" "tests/${CATEGORY}/${TEST_NAME}.cpp")
+SETUP_BASIC_TEST("test_${CATEGORY}_${TEST_NAME}" "tests/${CATEGORY}/${TEST_NAME}.cpp" ${ARGN})
 
 endmacro(add_mst_test)
 
@@ -164,6 +174,11 @@ add_mst_test(common printf)
 add_mst_test(common scope_guard)
 add_mst_test(common stacktrace)
 add_mst_test(common uuid)
+
+# The scalar uuid fallback (MST_UUID_NO_SIMD) otherwise only runs on ARM CI, since -mavx is
+# assumed everywhere else; recompile+run the same tests with it forced on so the fallback
+# gets coverage on x86 too.
+add_mst_test(common uuid_no_simd MST_UUID_NO_SIMD=1)
 
 add_mst_test(containers array_map)
 add_mst_test(containers array_view)

@@ -193,6 +193,7 @@ add_mst_test(lock_free queue)
 
 add_mst_test(math aabb)
 add_mst_test(math algorithm)
+add_mst_test(math intersect)
 add_mst_test(math vector_simd)
 add_mst_test(math vector_functionality)
 add_mst_test(math vector_comparison)
